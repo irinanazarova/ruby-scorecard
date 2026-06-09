@@ -66,7 +66,7 @@ def meter(label, value, total, tone: nil)
   pct = total.positive? ? (100.0 * value / total).round : 0
   tone ||= pct >= 75 ? "good" : pct >= 30 ? "warn" : "bad"
   cls = " meter--#{tone}"
-  %(<div class="meter#{cls}"><div class="meter__top"><span class="meter__label">#{label}</span><span class="meter__val">#{value}<span class="meter__den">/#{total}</span></span></div><div class="meter__track"><span class="meter__fill" style="width:#{pct}%"></span></div></div>)
+  %(<div class="meter#{cls}"><div class="meter__top"><span class="meter__label">#{label}</span><span class="meter__val">#{commate(value)}<span class="meter__den">/#{commate(total)}</span></span></div><div class="meter__track"><span class="meter__fill" style="width:#{pct}%"></span></div></div>)
 end
 
 def statuspill(key, state)
@@ -126,7 +126,7 @@ GOALS_L2 = statuspill("Shared MCP interface", "not converged") + statuspill("Age
 GOALS_L3 = statuspill(%(Ruby in <a href="https://github.com/nuprl/MultiPL-E">MultiPL-E</a>), "absent") +
            statuspill(%(Ruby in <a href="https://github.com/multi-swe-bench/multi-swe-bench">Multi-SWE-bench</a>), "absent") +
            statuspill("Open idiomatic-Rails dataset", "none yet")
-BOSS_METERS = meter("Chose Rails, unprompted", 0, 210) + meter("On Opus 4.8", 0, 30) + meter("Idiomatic when forced", 4.2, 5, tone: "good")
+BOSS_METERS = meter("Ruby picks", 0, 1267) + meter("Models that default to Ruby", 0, 13)
 
 PAGE = <<HTML
 <!doctype html>
@@ -152,12 +152,12 @@ PAGE = <<HTML
       </theme-toggle>
     </div>
     <h1>Ruby &amp; Rails LLM discoverability scorecard</h1>
-    <p class="lede">Ask a frontier model to build a product app and it reaches for Python, JavaScript, or TypeScript.
-    In our benchmark it chose Ruby on Rails <strong>0 times out of 210</strong> across 7 models, and
-    <strong>0 of 30</strong> on the newest model (Claude Opus 4.8). Rails is fast and capable; forced to
-    use it, the same models write idiomatic Rails (<strong>4.2/5</strong>). It is just
-    <strong>not discoverable to the machines now writing most new code</strong>. This page measures the
-    docs of #{n} ecosystem resources and shows what the community can fix.</p>
+    <p class="lede">Ask a frontier model to build something and it reaches for Python, JavaScript, or Go.
+    In the open whichlang benchmark, 13 models picked Ruby <strong>0 times across 1,267 generated
+    solutions</strong>, and none reached for Rails even on the full-app tasks. Rails is fast and capable,
+    and told to use it the same models write it competently; it is just <strong>not discoverable to the
+    machines now writing most new code</strong>. This page measures the docs of #{n} ecosystem resources
+    and shows what the community can fix.</p>
     <div class="stats">
       <stat-counter class="stat" value="#{llms}" total="#{n}"><b class="stat__num" data-ref="num">#{llms}/#{n}</b><span>ship an llms.txt</span></stat-counter>
       <stat-counter class="stat" value="#{neg}" total="#{n}"><b class="stat__num" data-ref="num">#{neg}/#{n}</b><span>do content negotiation</span></stat-counter>
@@ -275,10 +275,11 @@ they feed the <strong>final boss</strong> at the bottom.</p>
 
 <div class="panel target boss">
   <p class="label">&#9733; The final boss</p>
-  <p><strong>Frontier models pick Ruby on their own and ship working web apps with it.</strong> The one
-  metric every layer above serves, tracked by the <a href="https://github.com/chad/whichlang">whichlang
-  benchmark</a>. The gauges below are the win condition: today they sit at zero even as the same models
-  score well when forced, so the job is to lift them, model after model.</p>
+  <p><strong>Frontier models reach for Ruby on their own.</strong> The single metric every layer above
+  serves, measured by the public <a href="https://github.com/chad/whichlang">whichlang benchmark</a>: given
+  a free choice of language across 13 models, Ruby was picked <strong>0 times in 1,267 generated
+  solutions</strong> (the defaults are Python, JavaScript, and Go). Win condition: that zero starts
+  climbing, model after model.</p>
   <div class="goals goals--boss">#{BOSS_METERS}</div>
 </div>
 </section>
@@ -290,8 +291,10 @@ parsed for AI user-agents (CCBot, GPTBot, ClaudeBot, Google-Extended and others)
 <code>Disallow: /</code>; crawlability tested by fetching as a CCBot user-agent (catching Cloudflare/WAF
 blocks); content negotiation sent <code>Accept: text/markdown</code> and checked the response
 <code>Content-Type</code>; <code>.md</code> routes and llms.txt checked for a 200 (llms.txt at the docs
-host and the bare domain). The 0/210 and 0/30 default figures are from a product-task benchmark across 7
-models and Opus 4.8; the 4.2/5 figure grades the same models when told to use Rails.</p>
+host and the bare domain). The language-choice figure comes from the open whichlang benchmark (13 models,
+1,267 classified solutions, 0 Ruby; <a href="https://github.com/chad/whichlang">github.com/chad/whichlang</a>).
+That the same models write Rails competently when instructed is our own informal observation, not part of
+that benchmark.</p>
 </section>
 
 <footer>
@@ -308,7 +311,9 @@ models and Opus 4.8; the 4.2/5 figure grades the same models when told to use Ra
   Crawl are likely missing from what a model learned in training, so a project's CC coverage is a proxy for
   whether an LLM has &ldquo;seen&rdquo; its docs at all, a separate question from whether the live site is
   crawlable today (the other columns). It is the one signal here you cannot fix this quarter: it reflects
-  crawls already taken, which is why getting into it (sitemaps, unblocking bots, backlinks) is Layer 0.</p>
+  crawls already taken, which is why getting into it (sitemaps, unblocking bots, backlinks) is Layer 0. In
+  practice the most common reason a page is missing from Common Crawl is a <strong>missing sitemap</strong>:
+  with no manifest to discover from, the crawler simply never reaches it.</p>
 </footer>
 
 </main>
