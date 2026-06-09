@@ -140,8 +140,7 @@ unblocked = n - blocked.size
 GOALS_L0 = meter("Crawlable, unblocked", unblocked, n) + meter("Sitemaps", sm, n)
 GOALS_L1 = meter("Content negotiation", neg, n) + meter(".md routes", md, n) + meter("llms.txt", llms, n)
 GOALS_L2 = statuspill("Shared gem/agent convention", "none yet") + statuspill("Agent Skills convention", "fragmented")
-GOALS_L3 = statuspill(%(Ruby in <a href="https://github.com/nuprl/MultiPL-E">MultiPL-E</a>), "absent") +
-           statuspill(%(Ruby in <a href="https://github.com/multi-swe-bench/multi-swe-bench">Multi-SWE-bench</a>), "absent") +
+GOALS_L3 = statuspill(%(Ruby in <a href="https://github.com/multi-swe-bench/multi-swe-bench">Multi-SWE-bench</a>), "absent") +
            statuspill("Open idiomatic-Rails dataset", "none yet")
 BOSS_METERS = meter("Ruby picks", 0, 1267) + meter("Models that default to Ruby", 0, 13)
 
