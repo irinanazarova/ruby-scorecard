@@ -298,21 +298,21 @@ shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; 
 <div class="layer">
   <h3><span class="lname">Layer 2: make agents fluent in the gems (tools)</span> <span class="tag now">ship now</span></h3>
   <div class="goals">#{GOALS_L2}</div>
-  <p class="note">Why: an ecosystem that agents can actually operate is one they keep choosing and recommending.</p>
   <ul>
-    <li>The gap is the long tail. Standard Rails is in the training set (the Guides are broadly crawled),
-      so the gems, and anything past the training cutoff, are where agents guess at APIs.</li>
-    <li>MCP and skills are the runtime channel for that missing knowledge: the agent introspects the app
-      (installed gems and versions, schema, routes) and pulls current per-gem docs on demand.</li>
-    <li>The unlock is a convention, a shared way for any gem maintainer to ship agent-discoverable
-      tooling (an MCP endpoint or a skill) the way they already ship a README, so the long tail scales.</li>
-    <li>The proof is next door: Laravel shipped <a href="https://github.com/laravel/boost">Boost</a> in 2025,
-      an official MCP server with version-pinned guidelines, on-demand skills, and a docs API over its whole
-      ecosystem. Rails has the parts (<a href="https://github.com/yjacquin/fast-mcp">fast-mcp</a>,
+    <li>Agree a convention so any gem maintainer ships agent-discoverable tooling, an MCP endpoint or a
+      skill, the way they already ship a README.</li>
+    <li>Converge a Rails MCP server: let agents introspect the app (gems, versions, schema, routes) and
+      pull current per-gem docs on demand.</li>
+    <li>Agree a shared Agent Skills convention so skill packs interoperate.</li>
+    <li>Copy <a href="https://github.com/laravel/boost">Laravel Boost</a> (official MCP, version-pinned
+      guidelines, on-demand skills, tools). Rails has the parts
+      (<a href="https://github.com/yjacquin/fast-mcp">fast-mcp</a>,
       <a href="https://tidewave.ai/">Tidewave</a>,
-      <a href="https://github.com/maquina-app/rails-mcp-server">rails-mcp-server</a>, all on the official
-      Ruby <a href="https://github.com/modelcontextprotocol/ruby-sdk">MCP SDK</a>) and needs the convention.</li>
+      <a href="https://github.com/maquina-app/rails-mcp-server">rails-mcp-server</a>) on the official Ruby
+      <a href="https://github.com/modelcontextprotocol/ruby-sdk">MCP SDK</a>.</li>
   </ul>
+  <p class="note">Why: standard Rails is in the training set; the gems, and anything past the cutoff, are
+    where agents guess. A maintainer convention is what scales the fix across that long tail.</p>
 </div>
 <div class="layer">
   <h3><span class="lname">Layer 3: change the training default</span> <span class="tag slow">long game</span></h3>
