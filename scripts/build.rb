@@ -8,6 +8,7 @@
 
 require "json"
 require "cgi"
+require "uri"
 
 ROOT = File.expand_path("..", __dir__)
 rows = JSON.parse(File.read(File.join(ROOT, "data", "scorecard.json")))["rows"]
@@ -78,11 +79,15 @@ def statuspill(key, state)
 end
 
 # Content-gap matrix cell (solid = current + task-specific + numbers; generic = framework-level only; missing = none).
-def cg_cell(state)
+# A found source (any cell with a url) gets a small superscript link, numbered via src_num.
+def cg_cell(cell, src_num)
+  state = cell["state"]
   tip = { "solid" => "current, task-specific, with real numbers",
           "generic" => "only framework-level pros/cons or boilerplate roundups",
           "missing" => "no credible comparison found" }[state]
-  %(<td class="cg-#{state}"><span title="#{tip}">#{state}</span></td>)
+  url = cell["url"]
+  sup = url ? %(<sup class="cg-ref"><a href="#{esc(url)}" title="#{esc(url)}">#{src_num[url]}</a></sup>) : ""
+  %(<td class="cg-#{state}"><span title="#{tip}">#{state}</span>#{sup}</td>)
 end
 
 CAT_ORDER = ["core", "frontend & view", "web frameworks", "data", "ai",
@@ -143,10 +148,16 @@ BOSS_METERS = meter("Ruby picks", 0, 1267) + meter("Models that default to Ruby"
 # ---- content-gap matrix (the "Rails vs the field" comparison content that does/doesn't exist) ----
 CONTENT_GAP = if content_gap
   cells = content_gap["tasks"].flat_map { |t| [t["js"], t["py"]] }
-  solid = cells.count { |s| s == "solid" }
+  solid = cells.count { |c| c["state"] == "solid" }
+  # number the found sources in order of appearance
+  src_urls = []
+  cells.each { |c| u = c["url"]; src_urls << u if u && !src_urls.include?(u) }
+  src_num = src_urls.each_with_index.to_h { |u, i| [u, i + 1] }
+  sources = src_urls.empty? ? "" : %(<p class="note cg-srclist">Sources: ) +
+    src_urls.map { |u| host = (URI.parse(u).host&.sub(/\Awww\./, "") || u); %(<sup>#{src_num[u]}</sup>&nbsp;<a href="#{esc(u)}">#{esc(host)}</a>) }.join(" &middot; ") + "</p>"
   heads = content_gap["stacks"].map { |s| %(<th>#{esc(s["label"])} <span class="cg-sub">#{esc(s["sub"])}</span></th>) }.join
   rows = content_gap["tasks"].map do |t|
-    %(<tr><th scope="row">#{esc(t["task"])} <span class="cg-detail">#{esc(t["detail"])}</span></th>#{cg_cell(t["js"])}#{cg_cell(t["py"])}</tr>)
+    %(<tr><th scope="row">#{esc(t["task"])} <span class="cg-detail">#{esc(t["detail"])}</span></th>#{cg_cell(t["js"], src_num)}#{cg_cell(t["py"], src_num)}</tr>)
   end.join("\n      ")
   <<CG
 <h4 class="cg-title">Publish the missing comparisons</h4>
@@ -162,6 +173,7 @@ takes or absent.</p>
   </tbody>
 </table>
 </div>
+#{sources}
 <p class="note">Snapshot #{esc(content_gap["updated"])}, by web search per task &times; stack, then judged.
 <span class="cg-k cg-solid">solid</span> current + task-specific + numbers &middot;
 <span class="cg-k cg-generic">generic</span> framework pros/cons or boilerplates &middot;
@@ -251,7 +263,7 @@ sampled). Click any heading to sort.</p>
 <section>
 <h2><span class="num">02</span>What will move the needle</h2>
 <p>Four levers, ordered by depth, each acting on the same number. Rails is plural by design (omakase
-defaults, swappable adapters, competing frameworks), so the job is to strengthen the default and agree on
+defaults and swappable adapters), so the job is to strengthen the default and agree on
 shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; together they feed the
 <strong>final boss</strong> below.</p>
 
@@ -298,19 +310,20 @@ shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; 
       an official MCP server with version-pinned guidelines, on-demand skills, and a docs API over its whole
       ecosystem. Rails has the parts (<a href="https://github.com/yjacquin/fast-mcp">fast-mcp</a>,
       <a href="https://tidewave.ai/">Tidewave</a>,
-      <a href="https://github.com/maquina-app/rails-mcp-server">rails-mcp-server</a>, the official
-      <a href="https://github.com/modelcontextprotocol/ruby-sdk"><code>mcp</code> gem</a>) and needs the convention.</li>
+      <a href="https://github.com/maquina-app/rails-mcp-server">rails-mcp-server</a>, all on the official
+      Ruby <a href="https://github.com/modelcontextprotocol/ruby-sdk">MCP SDK</a>) and needs the convention.</li>
   </ul>
 </div>
 <div class="layer">
   <h3><span class="lname">Layer 3: change the training default</span> <span class="tag slow">long game</span></h3>
   <div class="goals">#{GOALS_L3}</div>
   <ul>
-    <li>Get Ruby into the upstream evals labs train on. It is absent from
-      <a href="https://github.com/nuprl/MultiPL-E">MultiPL-E</a> and
-      <a href="https://github.com/multi-swe-bench/multi-swe-bench">Multi-SWE-bench</a> (both take open
-      contributions); adding a low-resource language to an eval measurably improves models on it
-      (<a href="https://github.com/nuprl/MultiPL-T">MultiPL-T</a>,
+    <li>Get Ruby into the evals labs optimize against. It is in
+      <a href="https://github.com/nuprl/MultiPL-E">MultiPL-E</a>'s HumanEval/MBPP translations, but absent
+      from the repo-level agentic benchmarks like
+      <a href="https://github.com/multi-swe-bench/multi-swe-bench">Multi-SWE-bench</a> (which takes open
+      contributions), where modern coding ability is measured. Adding a language to an eval measurably
+      improves models on it (<a href="https://github.com/nuprl/MultiPL-T">MultiPL-T</a>,
       <a href="https://arxiv.org/abs/2410.18957">Bridge-Coder</a>).</li>
     <li>Publish an open, idiomatic-Rails instruction dataset; contribute permissively-licensed Ruby
       content to open corpora like <a href="https://huggingface.co/datasets/PleIAs/common_corpus">Common
@@ -341,7 +354,7 @@ The language-choice figure is from the open whichlang benchmark (13 models, 1,26
 Ruby; <a href="https://github.com/chad/whichlang">github.com/chad/whichlang</a>). That the same models write
 Rails competently when instructed is our own informal observation.</p>
 <p class="note"><strong>Why Common Crawl?</strong> It's the open web crawl that seeds most LLM pretraining
-corpora (C4, The Pile, RefinedWeb, FineWeb, behind GPT, Llama, and others) and feeds many retrieval indexes.
+corpora (C4, RefinedWeb, FineWeb, behind GPT, Llama, and others) and feeds many retrieval indexes.
 A project's CC coverage is a proxy for whether a model has seen its docs at all, a separate question from
 whether the live site is crawlable today. It's the one column you cannot fix this quarter, since it reflects
 crawls already taken, which is why getting in (sitemaps, unblocking bots, backlinks) is Layer 0. The usual

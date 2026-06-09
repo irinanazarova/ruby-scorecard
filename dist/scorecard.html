@@ -186,7 +186,7 @@ sampled). Click any heading to sort.</p>
 <section>
 <h2><span class="num">02</span>What will move the needle</h2>
 <p>Four levers, ordered by depth, each acting on the same number. Rails is plural by design (omakase
-defaults, swappable adapters, competing frameworks), so the job is to strengthen the default and agree on
+defaults and swappable adapters), so the job is to strengthen the default and agree on
 shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; together they feed the
 <strong>final boss</strong> below.</p>
 
@@ -218,22 +218,23 @@ shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; 
 
   <h4 class="cg-title">Publish the missing comparisons</h4>
 <p class="cg-metric">Why: a model reaches for what the corpus argues for, and today almost nothing argues,
-with numbers, that Rails is the better build for these product shapes. <strong>0 of 12</strong>
+with numbers, that Rails is the better build for these product shapes. <strong>2 of 12</strong>
 comparisons are <em>solid</em> (current, task-specific, with real numbers); the rest are generic framework
 takes or absent.</p>
 <div class="table-scroll">
 <table class="cg-table">
   <thead><tr><th scope="col">Build &hellip; in Rails</th><th>vs JS fullstack <span class="cg-sub">Next.js / Node</span></th><th>vs Python <span class="cg-sub">FastAPI / Django</span></th></tr></thead>
   <tbody>
-      <tr><th scope="row">B2B SaaS <span class="cg-detail">multi-tenant, team invites, billing</span></th><td class="cg-generic"><span title="only framework-level pros/cons or boilerplate roundups">generic</span></td><td class="cg-generic"><span title="only framework-level pros/cons or boilerplate roundups">generic</span></td></tr>
-      <tr><th scope="row">Online store <span class="cg-detail">catalog, cart, checkout, admin</span></th><td class="cg-generic"><span title="only framework-level pros/cons or boilerplate roundups">generic</span></td><td class="cg-missing"><span title="no credible comparison found">missing</span></td></tr>
+      <tr><th scope="row">B2B SaaS <span class="cg-detail">multi-tenant, team invites, billing</span></th><td class="cg-missing"><span title="no credible comparison found">missing</span></td><td class="cg-missing"><span title="no credible comparison found">missing</span></td></tr>
+      <tr><th scope="row">Online store <span class="cg-detail">catalog, cart, checkout, admin</span></th><td class="cg-solid"><span title="current, task-specific, with real numbers">solid</span><sup class="cg-ref"><a href="https://www.monterail.com/blog/ecommerce-platforms-comparison-performance-extensibility" title="https://www.monterail.com/blog/ecommerce-platforms-comparison-performance-extensibility">1</a></sup></td><td class="cg-solid"><span title="current, task-specific, with real numbers">solid</span><sup class="cg-ref"><a href="https://www.monterail.com/blog/ecommerce-platforms-comparison-performance-extensibility" title="https://www.monterail.com/blog/ecommerce-platforms-comparison-performance-extensibility">1</a></sup></td></tr>
       <tr><th scope="row">Team inbox <span class="cg-detail">shared inbox, collaborative replies</span></th><td class="cg-missing"><span title="no credible comparison found">missing</span></td><td class="cg-missing"><span title="no credible comparison found">missing</span></td></tr>
-      <tr><th scope="row">Issue tracker <span class="cg-detail">projects, issues, statuses, comments</span></th><td class="cg-generic"><span title="only framework-level pros/cons or boilerplate roundups">generic</span></td><td class="cg-missing"><span title="no credible comparison found">missing</span></td></tr>
+      <tr><th scope="row">Issue tracker <span class="cg-detail">projects, issues, statuses, comments</span></th><td class="cg-generic"><span title="only framework-level pros/cons or boilerplate roundups">generic</span><sup class="cg-ref"><a href="https://www.kunalganglani.com/blog/hotwire-vs-nextjs-spa-bloat" title="https://www.kunalganglani.com/blog/hotwire-vs-nextjs-spa-bloat">2</a></sup></td><td class="cg-missing"><span title="no credible comparison found">missing</span></td></tr>
       <tr><th scope="row">Approval workflow <span class="cg-detail">upload, route for sign-off, track</span></th><td class="cg-missing"><span title="no credible comparison found">missing</span></td><td class="cg-missing"><span title="no credible comparison found">missing</span></td></tr>
-      <tr><th scope="row">Internal admin <span class="cg-detail">staff-login CRUD dashboard</span></th><td class="cg-generic"><span title="only framework-level pros/cons or boilerplate roundups">generic</span></td><td class="cg-generic"><span title="only framework-level pros/cons or boilerplate roundups">generic</span></td></tr>
+      <tr><th scope="row">Internal admin <span class="cg-detail">staff-login CRUD dashboard</span></th><td class="cg-generic"><span title="only framework-level pros/cons or boilerplate roundups">generic</span><sup class="cg-ref"><a href="https://www.kunalganglani.com/blog/hotwire-vs-nextjs-spa-bloat" title="https://www.kunalganglani.com/blog/hotwire-vs-nextjs-spa-bloat">2</a></sup></td><td class="cg-generic"><span title="only framework-level pros/cons or boilerplate roundups">generic</span><sup class="cg-ref"><a href="https://www.goudeketting.nl/posts/2025/06/16/rails-vs-django-crm-comparison" title="https://www.goudeketting.nl/posts/2025/06/16/rails-vs-django-crm-comparison">3</a></sup></td></tr>
   </tbody>
 </table>
 </div>
+<p class="note cg-srclist">Sources: <sup>1</sup>&nbsp;<a href="https://www.monterail.com/blog/ecommerce-platforms-comparison-performance-extensibility">monterail.com</a> &middot; <sup>2</sup>&nbsp;<a href="https://www.kunalganglani.com/blog/hotwire-vs-nextjs-spa-bloat">kunalganglani.com</a> &middot; <sup>3</sup>&nbsp;<a href="https://www.goudeketting.nl/posts/2025/06/16/rails-vs-django-crm-comparison">goudeketting.nl</a></p>
 <p class="note">Snapshot 2026-06, by web search per task &times; stack, then judged.
 <span class="cg-k cg-solid">solid</span> current + task-specific + numbers &middot;
 <span class="cg-k cg-generic">generic</span> framework pros/cons or boilerplates &middot;
@@ -255,19 +256,20 @@ takes or absent.</p>
       an official MCP server with version-pinned guidelines, on-demand skills, and a docs API over its whole
       ecosystem. Rails has the parts (<a href="https://github.com/yjacquin/fast-mcp">fast-mcp</a>,
       <a href="https://tidewave.ai/">Tidewave</a>,
-      <a href="https://github.com/maquina-app/rails-mcp-server">rails-mcp-server</a>, the official
-      <a href="https://github.com/modelcontextprotocol/ruby-sdk"><code>mcp</code> gem</a>) and needs the convention.</li>
+      <a href="https://github.com/maquina-app/rails-mcp-server">rails-mcp-server</a>, all on the official
+      Ruby <a href="https://github.com/modelcontextprotocol/ruby-sdk">MCP SDK</a>) and needs the convention.</li>
   </ul>
 </div>
 <div class="layer">
   <h3><span class="lname">Layer 3: change the training default</span> <span class="tag slow">long game</span></h3>
   <div class="goals"><span class="status"><span class="status__k">Ruby in <a href="https://github.com/nuprl/MultiPL-E">MultiPL-E</a></span><span class="status__v">absent</span></span><span class="status"><span class="status__k">Ruby in <a href="https://github.com/multi-swe-bench/multi-swe-bench">Multi-SWE-bench</a></span><span class="status__v">absent</span></span><span class="status"><span class="status__k">Open idiomatic-Rails dataset</span><span class="status__v">none yet</span></span></div>
   <ul>
-    <li>Get Ruby into the upstream evals labs train on. It is absent from
-      <a href="https://github.com/nuprl/MultiPL-E">MultiPL-E</a> and
-      <a href="https://github.com/multi-swe-bench/multi-swe-bench">Multi-SWE-bench</a> (both take open
-      contributions); adding a low-resource language to an eval measurably improves models on it
-      (<a href="https://github.com/nuprl/MultiPL-T">MultiPL-T</a>,
+    <li>Get Ruby into the evals labs optimize against. It is in
+      <a href="https://github.com/nuprl/MultiPL-E">MultiPL-E</a>'s HumanEval/MBPP translations, but absent
+      from the repo-level agentic benchmarks like
+      <a href="https://github.com/multi-swe-bench/multi-swe-bench">Multi-SWE-bench</a> (which takes open
+      contributions), where modern coding ability is measured. Adding a language to an eval measurably
+      improves models on it (<a href="https://github.com/nuprl/MultiPL-T">MultiPL-T</a>,
       <a href="https://arxiv.org/abs/2410.18957">Bridge-Coder</a>).</li>
     <li>Publish an open, idiomatic-Rails instruction dataset; contribute permissively-licensed Ruby
       content to open corpora like <a href="https://huggingface.co/datasets/PleIAs/common_corpus">Common
@@ -298,7 +300,7 @@ The language-choice figure is from the open whichlang benchmark (13 models, 1,26
 Ruby; <a href="https://github.com/chad/whichlang">github.com/chad/whichlang</a>). That the same models write
 Rails competently when instructed is our own informal observation.</p>
 <p class="note"><strong>Why Common Crawl?</strong> It's the open web crawl that seeds most LLM pretraining
-corpora (C4, The Pile, RefinedWeb, FineWeb, behind GPT, Llama, and others) and feeds many retrieval indexes.
+corpora (C4, RefinedWeb, FineWeb, behind GPT, Llama, and others) and feeds many retrieval indexes.
 A project's CC coverage is a proxy for whether a model has seen its docs at all, a separate question from
 whether the live site is crawlable today. It's the one column you cannot fix this quarter, since it reflects
 crawls already taken, which is why getting in (sitemaps, unblocking bots, backlinks) is Layer 0. The usual

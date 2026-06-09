@@ -1,16 +1,25 @@
 {
   "updated": "2026-06",
-  "method": "web search per task x stack, then judged: solid = current (2025-26), task-specific, with real numbers/citations; generic = only framework-level pros/cons or boilerplate roundups; missing = nothing credible.",
+  "method": "web search per task x stack, then judged: solid = current (2024-26), task-specific, with real numbers/citations; generic = only framework-level pros/cons or boilerplate roundups; missing = nothing credible.",
   "stacks": [
     { "key": "js", "label": "vs JS fullstack", "sub": "Next.js / Node" },
     { "key": "py", "label": "vs Python", "sub": "FastAPI / Django" }
   ],
   "tasks": [
-    { "task": "B2B SaaS", "detail": "multi-tenant, team invites, billing", "js": "generic", "py": "generic" },
-    { "task": "Online store", "detail": "catalog, cart, checkout, admin", "js": "generic", "py": "missing" },
-    { "task": "Team inbox", "detail": "shared inbox, collaborative replies", "js": "missing", "py": "missing" },
-    { "task": "Issue tracker", "detail": "projects, issues, statuses, comments", "js": "generic", "py": "missing" },
-    { "task": "Approval workflow", "detail": "upload, route for sign-off, track", "js": "missing", "py": "missing" },
-    { "task": "Internal admin", "detail": "staff-login CRUD dashboard", "js": "generic", "py": "generic" }
+    { "task": "B2B SaaS", "detail": "multi-tenant, team invites, billing",
+      "js": { "state": "missing" }, "py": { "state": "missing" } },
+    { "task": "Online store", "detail": "catalog, cart, checkout, admin",
+      "js": { "state": "solid", "url": "https://www.monterail.com/blog/ecommerce-platforms-comparison-performance-extensibility" },
+      "py": { "state": "solid", "url": "https://www.monterail.com/blog/ecommerce-platforms-comparison-performance-extensibility" } },
+    { "task": "Team inbox", "detail": "shared inbox, collaborative replies",
+      "js": { "state": "missing" }, "py": { "state": "missing" } },
+    { "task": "Issue tracker", "detail": "projects, issues, statuses, comments",
+      "js": { "state": "generic", "url": "https://www.kunalganglani.com/blog/hotwire-vs-nextjs-spa-bloat" },
+      "py": { "state": "missing" } },
+    { "task": "Approval workflow", "detail": "upload, route for sign-off, track",
+      "js": { "state": "missing" }, "py": { "state": "missing" } },
+    { "task": "Internal admin", "detail": "staff-login CRUD dashboard",
+      "js": { "state": "generic", "url": "https://www.kunalganglani.com/blog/hotwire-vs-nextjs-spa-bloat" },
+      "py": { "state": "generic", "url": "https://www.goudeketting.nl/posts/2025/06/16/rails-vs-django-crm-comparison" } }
   ]
 }

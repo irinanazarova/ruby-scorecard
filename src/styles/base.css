@@ -385,6 +385,10 @@ li { margin: .45rem 0; }
 .cg-solid span, .cg-k.cg-solid { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); }
 .cg-generic span, .cg-k.cg-generic { background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--warn); }
 .cg-missing span, .cg-k.cg-missing { background: color-mix(in srgb, var(--bad) 13%, transparent); color: var(--bad); }
+.cg-ref { font-size: .62em; margin-left: .25em; vertical-align: super; line-height: 0; }
+.cg-ref a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.cg-srclist { margin: .4rem 0 0; font-size: .8rem; }
+.cg-srclist sup { color: var(--accent); font-weight: 600; }
 
 /* Common Crawl table cell */
 td.cc { white-space: nowrap; }
