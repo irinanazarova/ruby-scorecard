@@ -313,6 +313,10 @@ li { margin: .4rem 0; }
 .meter__fill { position: absolute; inset: 0 auto 0 0; min-width: 2px; background: var(--accent); border-radius: 100px; }
 .meter--good .meter__val { color: var(--ok); }
 .meter--good .meter__fill { background: var(--ok); }
+.meter--warn .meter__val { color: var(--warn); }
+.meter--warn .meter__fill { background: var(--warn); }
+.meter--bad .meter__val { color: var(--bad); }
+.meter--bad .meter__fill { background: var(--bad); }
 .goals--boss .meter__val { font-size: 1.7rem; }
 
 .status {

@@ -5,6 +5,7 @@ FROM ruby:3.4-alpine
 RUN apk add --no-cache curl
 WORKDIR /app
 COPY scripts/coverage.rb scripts/coverage.rb
+COPY scripts/coverage_details.rb scripts/coverage_details.rb
 COPY data/scorecard.json data/scorecard.json
 # Stay alive so the probe can be exec'd over `fly ssh console -C` and its stdout captured.
 CMD ["sleep", "infinity"]

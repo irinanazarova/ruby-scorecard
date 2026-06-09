@@ -61,9 +61,11 @@ def cov_cell(c)
 end
 
 # ---- goal graphics (progress meters + status pills) ----
+# Colour by progress toward the goal: green when nearly there, amber partway, red barely started.
 def meter(label, value, total, tone: nil)
   pct = total.positive? ? (100.0 * value / total).round : 0
-  cls = tone ? " meter--#{tone}" : ""
+  tone ||= pct >= 75 ? "good" : pct >= 30 ? "warn" : "bad"
+  cls = " meter--#{tone}"
   %(<div class="meter#{cls}"><div class="meter__top"><span class="meter__label">#{label}</span><span class="meter__val">#{value}<span class="meter__den">/#{total}</span></span></div><div class="meter__track"><span class="meter__fill" style="width:#{pct}%"></span></div></div>)
 end
 

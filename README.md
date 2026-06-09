@@ -120,6 +120,18 @@ capturing clean JSON, rebuilds `dist/`, then tears the app down. If a run is eve
 again, it gets a fresh IP. (`--print` emits JSON to stdout and progress to stderr, so it also works locally:
 `ruby scripts/coverage.rb --print > data/coverage.json`.)
 
+### Per-page detail (which exact pages are / are not in CC)
+
+For a specific resource, list the exact documentation pages present in Common Crawl vs missing. Projects
+without a sitemap are enumerated by crawling the live docs site, then diffed against CC:
+
+```bash
+./fetch/details-on-fly.sh "Inertia Rails" "AnyCable"   # default targets if none given
+```
+
+Writes `data/coverage_details.json` and renders shareable `data/coverage_details/<slug>.md` (an "In Common
+Crawl" list and a "NOT in Common Crawl" list) via `scripts/coverage_details.rb` + `scripts/coverage_details_report.rb`.
+
 ## Deploy
 
 `dist/` is self-contained. Copy the whole folder to the ruby.evilmartians.com host, e.g.
