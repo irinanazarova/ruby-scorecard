@@ -236,12 +236,19 @@ models and Opus 4.8; the 4.2/5 figure grades the same models when told to use Ra
 
 <footer>
   <span class="label">Evil Martians</span>
-  Built by Evil Martians. A living scorecard, re-run the probes to update it. Background reading:
+  <p>Built by Evil Martians. A living scorecard, re-run the probes to update it. Background reading:
   <a href="https://evilmartians.com/chronicles/how-to-make-your-website-visible-to-llms">&ldquo;How to make
   your website visible to LLMs&rdquo;</a> and
   <a href="https://evilmartians.com/chronicles/3-rules-for-getting-ai-agents-to-find-use-and-not-exploit-your-devtool">&ldquo;3
   rules for getting AI agents to find, use, and not exploit your devtool&rdquo;</a> on the Evil Martians
-  Chronicles.
+  Chronicles.</p>
+  <p class="fn"><strong>Why Common Crawl?</strong> It is the open, permissively-licensed web crawl that
+  seeds most LLM pretraining corpora (the backbone of datasets like C4, The Pile, RefinedWeb and FineWeb,
+  used to train GPT, Llama, and others) and feeds many retrieval/search indexes. Pages missing from Common
+  Crawl are likely missing from what a model learned in training, so a project's CC coverage is a proxy for
+  whether an LLM has &ldquo;seen&rdquo; its docs at all, a separate question from whether the live site is
+  crawlable today (the other columns). It is the one signal here you cannot fix this quarter: it reflects
+  crawls already taken, which is why getting into it (sitemaps, unblocking bots, backlinks) is Layer 0.</p>
 </footer>
 
 </main>

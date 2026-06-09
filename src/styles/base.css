@@ -46,24 +46,24 @@ strong { font-weight: 650; }
 .hero {
   background: var(--hero-bg);
   color: var(--hero-text);
-  padding-block: clamp(2.5rem, 7vw, 4.5rem) clamp(2rem, 5vw, 3.2rem);
+  padding-block: clamp(3rem, 8vw, 5.5rem) clamp(2.75rem, 5vw, 4rem);
   border-bottom: 3px solid var(--red);
   position: relative;
 }
-.hero__top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+.hero__top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: clamp(2.25rem, 5vw, 3.5rem); }
 .hero .kicker { color: var(--red); margin: 0; }
 .hero .kicker::before { content: "▸ "; }
 .hero h1 {
   font-family: var(--font-grotesk);
   font-weight: 720;
   font-stretch: 110%;
-  font-size: clamp(2rem, 5.5vw, 3.4rem);
+  font-size: clamp(2.1rem, 5.5vw, 3.5rem);
   line-height: 1.04;
   letter-spacing: -.02em;
-  margin: 0 0 1rem;
-  max-width: 18ch;
+  margin: 0 0 1.4rem;
+  max-width: 17ch;
 }
-.hero p.lede { font-size: clamp(1rem, 1.6vw, 1.15rem); color: var(--hero-soft); max-width: 66ch; margin: .6rem 0; }
+.hero p.lede { font-size: clamp(1.02rem, 1.6vw, 1.18rem); line-height: 1.62; color: var(--hero-soft); max-width: 58ch; margin: .7rem 0; }
 .hero p.lede strong { color: var(--hero-text); }
 
 /* ---------- Stats ---------- */
@@ -71,13 +71,13 @@ strong { font-weight: 650; }
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 1px;
-  margin-top: 2.2rem;
-  background: color-mix(in srgb, var(--hero-text) 14%, transparent);
-  border: 1px solid color-mix(in srgb, var(--hero-text) 14%, transparent);
+  margin-top: clamp(2.4rem, 5vw, 3.5rem);
+  background: color-mix(in srgb, var(--hero-text) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--hero-text) 12%, transparent);
   border-radius: var(--radius);
   overflow: hidden;
 }
-.stat { background: var(--hero-bg); padding: 1rem 1.1rem; }
+.stat { background: var(--hero-bg); padding: 1.3rem 1.4rem; }
 .stat b {
   display: block;
   font-family: var(--font-grotesk);
@@ -87,7 +87,7 @@ strong { font-weight: 650; }
   letter-spacing: -.02em;
   color: var(--red);
 }
-.stat span { display: block; margin-top: .4rem; font-family: var(--font-mono); font-size: .66rem; letter-spacing: .04em; text-transform: uppercase; color: var(--hero-soft); }
+.stat span { display: block; margin-top: .55rem; font-family: var(--font-mono); font-size: .64rem; line-height: 1.4; letter-spacing: .05em; text-transform: uppercase; color: var(--hero-soft); }
 
 /* ---------- Theme toggle ---------- */
 theme-toggle { display: inline-flex; }
@@ -111,27 +111,30 @@ theme-toggle { display: inline-flex; }
 .theme-toggle__dot { width: .6em; height: .6em; border-radius: 50%; background: var(--red); }
 
 /* ---------- Sections ---------- */
-main { padding-bottom: 5rem; }
-section { margin-top: clamp(2.5rem, 6vw, 4rem); }
+main { padding-bottom: clamp(4rem, 10vw, 7rem); }
+main > section { padding-top: clamp(3rem, 7vw, 5rem); }
+main > section + section { border-top: 1px solid var(--line); }
 h2 {
   font-family: var(--font-grotesk);
   font-weight: 700;
   font-stretch: 105%;
-  font-size: clamp(1.4rem, 3vw, 1.9rem);
-  letter-spacing: -.01em;
-  margin: 0 0 .3rem;
+  font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+  line-height: 1.08;
+  letter-spacing: -.015em;
+  margin: 0 0 1rem;
 }
 h2 .num {
+  display: block;
   font-family: var(--font-mono);
-  font-size: .7rem;
+  font-size: .72rem;
   font-weight: 600;
-  letter-spacing: .12em;
+  letter-spacing: .2em;
   color: var(--accent);
-  vertical-align: middle;
-  margin-right: .6em;
+  margin: 0 0 .8rem;
 }
-h3 { font-family: var(--font-grotesk); font-weight: 650; font-size: 1.05rem; margin: 1.4rem 0 .3rem; }
-.note { font-size: .9rem; color: var(--text-soft); }
+h3 { font-family: var(--font-grotesk); font-weight: 650; font-size: 1.08rem; margin: 1.7rem 0 .4rem; }
+section > p { max-width: var(--measure); }
+.note { font-size: .9rem; line-height: 1.7; color: var(--text-soft); max-width: var(--measure); }
 .note code { font-size: .78em; }
 
 /* ---------- Table controls (rendered server-side, wired by <scorecard-table>) ---------- */
@@ -139,8 +142,8 @@ h3 { font-family: var(--font-grotesk); font-weight: 650; font-size: 1.05rem; mar
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: .7rem;
-  margin: 1.2rem 0 .6rem;
+  gap: .8rem;
+  margin: 1.6rem 0 .9rem;
 }
 .controls__search {
   flex: 1 1 220px;
@@ -178,13 +181,15 @@ h3 { font-family: var(--font-grotesk); font-weight: 650; font-size: 1.05rem; mar
 
 /* ---------- Table ---------- */
 .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
-table { border-collapse: collapse; width: 100%; font-size: .88rem; background: var(--surface); }
-th, td { padding: .5rem .6rem; border-bottom: 1px solid var(--line); text-align: center; vertical-align: middle; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; background: var(--surface); }
+th, td { padding: .64rem .75rem; border-bottom: 1px solid var(--line); text-align: center; vertical-align: middle; }
 thead th {
   position: sticky; top: 0;
   background: var(--surface);
+  padding-block: .85rem;
   font-family: var(--font-mono);
   font-size: .6rem;
+  line-height: 1.35;
   text-transform: uppercase;
   letter-spacing: .04em;
   font-weight: 600;
@@ -206,13 +211,16 @@ td.res a:hover { color: var(--link); text-decoration: underline; }
 tr.grp td {
   background: var(--bg-warm);
   text-align: left;
+  padding-block: .72rem;
   font-family: var(--font-mono);
   font-size: .64rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: .06em;
+  letter-spacing: .07em;
   color: var(--text-soft);
+  border-top: 1px solid var(--line);
 }
+tbody tr.grp:first-child td { border-top: 0; }
 tbody tr:not(.grp):hover { background: var(--bg-warm); }
 tr[hidden] { display: none; }
 
@@ -258,21 +266,22 @@ tr[hidden] { display: none; }
   background: var(--bg-warm);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  padding: 1.2rem 1.4rem;
-  margin: 1.3rem 0;
+  padding: clamp(1.3rem, 3vw, 1.9rem);
+  margin: 1.6rem 0;
 }
 .panel ul { margin: 0; padding-left: 1.1rem; }
-li { margin: .4rem 0; }
+li { margin: .45rem 0; }
+.panel li, .layer li { max-width: var(--measure); }
 
 .layer {
   background: var(--surface);
   border: 1px solid var(--line);
   border-left: 4px solid var(--accent);
   border-radius: 0 var(--radius) var(--radius) 0;
-  padding: .9rem 1.3rem 1rem;
-  margin: 1rem 0;
+  padding: 1.2rem clamp(1.3rem, 3vw, 1.7rem) 1.4rem;
+  margin: 1.1rem 0;
 }
-.layer h3 { margin: .1rem 0 .5rem; display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; }
+.layer h3 { margin: .1rem 0 .9rem; display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; }
 .layer h3 .lname { font-stretch: 105%; }
 
 /* Per-layer goal line + the "final boss" target callout */
@@ -302,8 +311,8 @@ li { margin: .4rem 0; }
 .panel.boss { margin-top: 1.6rem; }
 
 /* Goal graphics: progress meters + status pills */
-.goals { display: flex; flex-wrap: wrap; gap: .7rem 1.1rem; margin: .2rem 0 .9rem; }
-.goals--boss { margin-top: 1rem; gap: 1rem 1.4rem; }
+.goals { display: flex; flex-wrap: wrap; gap: 1rem 1.6rem; margin: 0 0 1.2rem; }
+.goals--boss { margin-top: 1.2rem; gap: 1.2rem 1.8rem; }
 .meter { flex: 1 1 150px; min-width: 130px; }
 .meter__top { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; margin-bottom: .3rem; }
 .meter__label { font-family: var(--font-mono); font-size: .6rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-soft); }
@@ -361,13 +370,21 @@ td.cc { white-space: nowrap; }
 
 /* ---------- Footer ---------- */
 footer {
-  margin-top: 4rem;
-  padding-top: 1.4rem;
+  margin-top: clamp(3rem, 7vw, 5rem);
+  padding-top: clamp(2rem, 5vw, 3rem);
   border-top: 1px solid var(--line);
   font-size: .85rem;
   color: var(--text-soft);
 }
-footer .label { color: var(--accent); display: block; margin-bottom: .5rem; }
+footer .label { color: var(--accent); display: block; margin-bottom: .8rem; }
+footer p { max-width: var(--measure); line-height: 1.65; margin: .6rem 0; }
+footer .fn {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  font-size: .8rem;
+}
+footer .fn strong { color: var(--text); }
 
 @media (max-width: 560px) {
   .hero__top { flex-direction: row; }

@@ -99,3 +99,17 @@ e.g. redirects, old paths, or orphan pages.)
 - https://docs.anycable.io/upgrade-notes/1_0_0_to_1_1_0
 - https://docs.anycable.io/upgrade-notes/1_3_0_to_1_4_0
 - https://docs.anycable.io/upgrade-notes/1_4_0_to_1_5_0
+## Why the gap, and what to do
+
+**Cause: a docs URL restructure with no redirects.** Many pages moved from flat paths into
+`/anycable-go/*` (and other reshuffles) **without 301s**. The old URLs Common Crawl indexed now
+return **404** (e.g. `/signed_streams`, `/rpc`, `/sse`, `/apollo`, `/broadcasting`), while the new
+URLs (`/anycable-go/signed_streams`, …) are live but **absent from CC**. So CC's coverage is partly
+dead links and the current layout is undiscovered. No `sitemap.xml` compounds it.
+
+**TODO**
+- [ ] Add **301 redirects** from the old flat paths to the new `/anycable-go/*` URLs (revives the links CC/Google/LLMs already know).
+- [ ] Publish a `sitemap.xml` (VitePress: set `sitemap: { hostname }`) listing the current pages.
+- [ ] Keep the `llms-full.txt` (already linked) in sync with the new structure.
+- [ ] Re-check coverage after the next monthly Common Crawl.
+
