@@ -317,12 +317,12 @@ shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; 
   <h3><span class="lname">Layer 3: change the training default</span> <span class="tag slow">long game</span></h3>
   <div class="goals">#{GOALS_L3}</div>
   <ul>
-    <li>Get Ruby into the evals labs optimize against. It is in
-      <a href="https://github.com/nuprl/MultiPL-E">MultiPL-E</a>'s HumanEval/MBPP translations, but absent
-      from the repo-level agentic benchmarks like
-      <a href="https://github.com/multi-swe-bench/multi-swe-bench">Multi-SWE-bench</a> (which takes open
-      contributions), where modern coding ability is measured. Adding a language to an eval measurably
-      improves models on it (<a href="https://github.com/nuprl/MultiPL-T">MultiPL-T</a>,
+    <li>Contribute real Rails repos to
+      <a href="https://github.com/multi-swe-bench/multi-swe-bench">Multi-SWE-bench</a> (the repo-level
+      agentic benchmark, which takes open contributions) and publish an open idiomatic-Rails eval. Ruby is
+      in <a href="https://github.com/nuprl/MultiPL-E">MultiPL-E</a>'s HumanEval/MBPP puzzles but absent from
+      the agentic benchmarks, where modern coding ability is measured; adding a language to an eval
+      measurably improves models on it (<a href="https://github.com/nuprl/MultiPL-T">MultiPL-T</a>,
       <a href="https://arxiv.org/abs/2410.18957">Bridge-Coder</a>).</li>
     <li>Publish an open, idiomatic-Rails instruction dataset; contribute permissively-licensed Ruby
       content to open corpora like <a href="https://huggingface.co/datasets/PleIAs/common_corpus">Common
