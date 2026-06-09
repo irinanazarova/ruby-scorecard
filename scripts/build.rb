@@ -13,6 +13,8 @@ ROOT = File.expand_path("..", __dir__)
 rows = JSON.parse(File.read(File.join(ROOT, "data", "scorecard.json")))["rows"]
 cov_path = File.join(ROOT, "data", "coverage.json")
 coverage = File.exist?(cov_path) ? JSON.parse(File.read(cov_path)) : {}
+cg_path = File.join(ROOT, "data", "content_gap.json")
+content_gap = File.exist?(cg_path) ? JSON.parse(File.read(cg_path)) : nil
 
 OK  = '<span class="ok" title="yes">&#10003;</span>'
 BAD = '<span class="bad" title="no">&#10007;</span>'
@@ -73,6 +75,14 @@ def statuspill(key, state)
   %(<span class="status"><span class="status__k">#{key}</span><span class="status__v">#{state}</span></span>)
 end
 
+# Content-gap matrix cell (solid = current + task-specific + numbers; generic = framework-level only; missing = none).
+def cg_cell(state)
+  tip = { "solid" => "current, task-specific, with real numbers",
+          "generic" => "only framework-level pros/cons or boilerplate roundups",
+          "missing" => "no credible comparison found" }[state]
+  %(<td class="cg-#{state}"><span title="#{tip}">#{state}</span></td>)
+end
+
 CAT_ORDER = ["core", "frontend & view", "web frameworks", "data", "ai",
              "background, realtime & deploy", "tooling & types", "libraries",
              "community & resources"].freeze
@@ -128,6 +138,37 @@ GOALS_L3 = statuspill(%(Ruby in <a href="https://github.com/nuprl/MultiPL-E">Mul
            statuspill("Open idiomatic-Rails dataset", "none yet")
 BOSS_METERS = meter("Ruby picks", 0, 1267) + meter("Models that default to Ruby", 0, 13)
 
+# ---- content-gap matrix (the "Rails vs the field" comparison content that does/doesn't exist) ----
+CONTENT_GAP = if content_gap
+  cells = content_gap["tasks"].flat_map { |t| [t["js"], t["py"]] }
+  solid = cells.count { |s| s == "solid" }
+  heads = content_gap["stacks"].map { |s| %(<th>#{esc(s["label"])}<span class="cg-sub">#{esc(s["sub"])}</span></th>) }.join
+  rows = content_gap["tasks"].map do |t|
+    %(<tr><th scope="row">#{esc(t["task"])}<span class="cg-detail">#{esc(t["detail"])}</span></th>#{cg_cell(t["js"])}#{cg_cell(t["py"])}</tr>)
+  end.join("\n      ")
+  <<CG
+<h4 class="cg-title">The comparison content to write &mdash; what exists, what's missing</h4>
+<p class="cg-metric"><strong>#{solid} of #{cells.size}</strong> are <em>solid</em> (current, task-specific,
+with real numbers); the rest are generic framework takes or absent. That is the lever: a model reaches for
+what the corpus argues for, and today almost nothing argues, with numbers, that Rails is the better build
+for these product shapes.</p>
+<div class="table-scroll">
+<table class="cg-table">
+  <thead><tr><th scope="col">Build &hellip; in Rails</th>#{heads}</tr></thead>
+  <tbody>
+      #{rows}
+  </tbody>
+</table>
+</div>
+<p class="note">Snapshot #{esc(content_gap["updated"])}, by web search per task &times; stack, then judged.
+<span class="cg-k cg-solid">solid</span> current + task-specific + numbers &middot;
+<span class="cg-k cg-generic">generic</span> framework pros/cons or boilerplates &middot;
+<span class="cg-k cg-missing">missing</span> nothing credible. Re-runnable: it is a search, not a manual audit.</p>
+CG
+else
+  ""
+end
+
 PAGE = <<HTML
 <!doctype html>
 <html lang="en">
@@ -152,12 +193,11 @@ PAGE = <<HTML
       </theme-toggle>
     </div>
     <h1>Ruby &amp; Rails LLM discoverability scorecard</h1>
-    <p class="lede">Ask a frontier model to build something and it reaches for Python, JavaScript, or Go.
-    In the open whichlang benchmark, 13 models picked Ruby <strong>0 times across 1,267 generated
-    solutions</strong>, and none reached for Rails even on the full-app tasks. Rails is fast and capable,
-    and told to use it the same models write it competently; it is just <strong>not discoverable to the
-    machines now writing most new code</strong>. This page measures the docs of #{n} ecosystem resources
-    and shows what the community can fix.</p>
+    <p class="lede"><strong>Ruby and Rails deliver superior productivity, for humans and AI agents
+    alike.</strong> Yet the models rarely choose them on their own: in the open whichlang benchmark, 13
+    models picked Ruby <strong>0 times across 1,267 generated solutions</strong>. It is a discoverability
+    problem, not a capability one. This page measures the docs of #{n} ecosystem resources and shows what
+    the community can fix.</p>
     <div class="stats">
       <stat-counter class="stat" value="#{llms}" total="#{n}"><b class="stat__num" data-ref="num">#{llms}/#{n}</b><span>ship an llms.txt</span></stat-counter>
       <stat-counter class="stat" value="#{neg}" total="#{n}"><b class="stat__num" data-ref="num">#{neg}/#{n}</b><span>do content negotiation</span></stat-counter>
@@ -238,6 +278,7 @@ they feed the <strong>final boss</strong> at the bottom.</p>
     <li>Publish current, specific &ldquo;Rails vs X&rdquo; and &ldquo;build X in Rails&rdquo; content with
       real numbers; quotations, statistics, and citations measurably raise LLM visibility.</li>
   </ul>
+  #{CONTENT_GAP}
 </div>
 <div class="layer">
   <h3><span class="lname">Layer 2 &mdash; make Rails agent-operable (tools)</span> <span class="tag now">ship now</span></h3>
@@ -295,6 +336,15 @@ host and the bare domain). The language-choice figure comes from the open whichl
 1,267 classified solutions, 0 Ruby; <a href="https://github.com/chad/whichlang">github.com/chad/whichlang</a>).
 That the same models write Rails competently when instructed is our own informal observation, not part of
 that benchmark.</p>
+<p class="note"><strong>Why Common Crawl?</strong> It is the open, permissively-licensed web crawl that
+seeds most LLM pretraining corpora (the backbone of datasets like C4, The Pile, RefinedWeb and FineWeb,
+used to train GPT, Llama, and others) and feeds many retrieval/search indexes. Pages missing from Common
+Crawl are likely missing from what a model learned in training, so a project's CC coverage is a proxy for
+whether an LLM has &ldquo;seen&rdquo; its docs at all, a separate question from whether the live site is
+crawlable today (the other columns). It is the one signal here you cannot fix this quarter: it reflects
+crawls already taken, which is why getting into it (sitemaps, unblocking bots, backlinks) is Layer 0. In
+practice the most common reason a page is missing from Common Crawl is a <strong>missing sitemap</strong>:
+with no manifest to discover from, the crawler simply never reaches it.</p>
 </section>
 
 <footer>
@@ -305,15 +355,6 @@ that benchmark.</p>
   <a href="https://evilmartians.com/chronicles/3-rules-for-getting-ai-agents-to-find-use-and-not-exploit-your-devtool">&ldquo;3
   rules for getting AI agents to find, use, and not exploit your devtool&rdquo;</a> on the Evil Martians
   Chronicles.</p>
-  <p class="fn"><strong>Why Common Crawl?</strong> It is the open, permissively-licensed web crawl that
-  seeds most LLM pretraining corpora (the backbone of datasets like C4, The Pile, RefinedWeb and FineWeb,
-  used to train GPT, Llama, and others) and feeds many retrieval/search indexes. Pages missing from Common
-  Crawl are likely missing from what a model learned in training, so a project's CC coverage is a proxy for
-  whether an LLM has &ldquo;seen&rdquo; its docs at all, a separate question from whether the live site is
-  crawlable today (the other columns). It is the one signal here you cannot fix this quarter: it reflects
-  crawls already taken, which is why getting into it (sitemaps, unblocking bots, backlinks) is Layer 0. In
-  practice the most common reason a page is missing from Common Crawl is a <strong>missing sitemap</strong>:
-  with no manifest to discover from, the crawler simply never reaches it.</p>
 </footer>
 
 </main>

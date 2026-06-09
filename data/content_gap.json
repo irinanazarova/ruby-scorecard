@@ -1,0 +1,16 @@
+{
+  "updated": "2026-06",
+  "method": "web search per task x stack, then judged: solid = current (2025-26), task-specific, with real numbers/citations; generic = only framework-level pros/cons or boilerplate roundups; missing = nothing credible.",
+  "stacks": [
+    { "key": "js", "label": "vs JS fullstack", "sub": "Next.js / Node" },
+    { "key": "py", "label": "vs Python", "sub": "FastAPI / Django" }
+  ],
+  "tasks": [
+    { "task": "B2B SaaS", "detail": "multi-tenant, team invites, billing", "js": "generic", "py": "generic" },
+    { "task": "Online store", "detail": "catalog, cart, checkout, admin", "js": "generic", "py": "missing" },
+    { "task": "Team inbox", "detail": "shared inbox, collaborative replies", "js": "missing", "py": "missing" },
+    { "task": "Issue tracker", "detail": "projects, issues, statuses, comments", "js": "generic", "py": "missing" },
+    { "task": "Approval workflow", "detail": "upload, route for sign-off, track", "js": "missing", "py": "missing" },
+    { "task": "Internal admin", "detail": "staff-login CRUD dashboard", "js": "generic", "py": "generic" }
+  ]
+}

@@ -30,6 +30,7 @@ Plus a sampled Common Crawl page count (the corpus most models train on).
 ```
 data/scorecard.json        # probe output (the data the page is built from)
 data/coverage.json         # per-resource Common Crawl pages vs sitemap totals (optional)
+data/content_gap.json      # "Rails vs the field" comparison-content matrix (search-refreshed, see below)
 scripts/probe.rb           # gather indicators over HTTP -> data/scorecard.json
 scripts/coverage.rb        # CC page counts + sitemap totals -> data/coverage.json
 scripts/build.rb           # render dist/scorecard.html (+ benchmark constants)
@@ -131,6 +132,16 @@ without a sitemap are enumerated by crawling the live docs site, then diffed aga
 
 Writes `data/coverage_details.json` and renders shareable `data/coverage_details/<slug>.md` (an "In Common
 Crawl" list and a "NOT in Common Crawl" list) via `scripts/coverage_details.rb` + `scripts/coverage_details_report.rb`.
+
+## Content-gap matrix
+
+The Layer 1 sub-block "the comparison content to write" tracks, per product-shaped task (from whichlang's
+`fullstack` tier) × competing stack (JS fullstack, Python), whether a **current, task-specific,
+numbers-backed** Rails comparison exists (`solid`), only generic framework takes exist (`generic`), or
+nothing (`missing`). It lives in `data/content_gap.json` and is **search-refreshed, not hand-audited**:
+existence is found by web search per task × stack, then judged for recency/specificity/numbers. A keyless
+Ruby script can't web-search, so refresh it from an agent run (this is what the `update-scorecard` skill
+does) or wire a search API. Then rebuild.
 
 ## Deploy
 

@@ -350,6 +350,28 @@ li { margin: .45rem 0; }
   padding: .25em .7em;
 }
 
+/* Content-gap matrix (Rails vs the field: what's written / missing) */
+.cg-title { font-family: var(--font-grotesk); font-weight: 650; font-size: 1rem; margin: 1.6rem 0 .3rem; }
+.cg-metric { font-size: .92rem; line-height: 1.55; max-width: var(--measure); margin: .2rem 0 .7rem; }
+.cg-table { border-collapse: collapse; width: 100%; font-size: .86rem; background: var(--surface); }
+.cg-table thead th {
+  font-family: var(--font-mono); font-size: .58rem; text-transform: uppercase; letter-spacing: .05em;
+  font-weight: 600; color: var(--text-soft); padding: .55rem .7rem; border-bottom: 2px solid var(--line-strong);
+  text-align: center; vertical-align: bottom;
+}
+.cg-table thead th:first-child { text-align: left; }
+.cg-table th[scope="row"] { text-align: left; font-weight: 600; padding: .55rem .7rem; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.cg-table td { text-align: center; padding: .55rem .7rem; border-bottom: 1px solid var(--line); }
+.cg-detail { display: block; font-family: var(--font-mono); font-size: .56rem; font-weight: 400; letter-spacing: 0; color: var(--text-soft); margin-top: .15rem; }
+.cg-sub { display: block; font-weight: 400; letter-spacing: .03em; color: var(--text-soft); margin-top: .15rem; }
+.cg-table td span, .cg-k {
+  font-family: var(--font-mono); font-size: .6rem; text-transform: uppercase; letter-spacing: .05em;
+  font-weight: 600; padding: .25em .65em; border-radius: 100px; display: inline-block;
+}
+.cg-solid span, .cg-k.cg-solid { background: color-mix(in srgb, var(--ok) 16%, transparent); color: var(--ok); }
+.cg-generic span, .cg-k.cg-generic { background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--warn); }
+.cg-missing span, .cg-k.cg-missing { background: color-mix(in srgb, var(--bad) 13%, transparent); color: var(--bad); }
+
 /* Common Crawl table cell */
 td.cc { white-space: nowrap; }
 .cc-val { font-family: var(--font-mono); font-size: .8em; font-weight: 600; color: var(--accent); white-space: nowrap; }
