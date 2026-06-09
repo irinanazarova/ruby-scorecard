@@ -186,7 +186,7 @@ sampled). Click any heading to sort.</p>
 <section>
 <h2><span class="num">02</span>What will move the needle</h2>
 <p>Four levers, ordered by depth, each acting on the same number. Rails is plural by design (omakase
-defaults, swappable adapters, competing flavors), so the job is to strengthen the default and agree on
+defaults, swappable adapters, competing frameworks), so the job is to strengthen the default and agree on
 shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; together they feed the
 <strong>final boss</strong> below.</p>
 
@@ -223,7 +223,7 @@ comparisons are <em>solid</em> (current, task-specific, with real numbers); the 
 takes or absent.</p>
 <div class="table-scroll">
 <table class="cg-table">
-  <thead><tr><th scope="col">Build &hellip; in Rails</th><th>vs JS fullstack<span class="cg-sub">Next.js / Node</span></th><th>vs Python<span class="cg-sub">FastAPI / Django</span></th></tr></thead>
+  <thead><tr><th scope="col">Build &hellip; in Rails</th><th>vs JS fullstack <span class="cg-sub">Next.js / Node</span></th><th>vs Python <span class="cg-sub">FastAPI / Django</span></th></tr></thead>
   <tbody>
       <tr><th scope="row">B2B SaaS <span class="cg-detail">multi-tenant, team invites, billing</span></th><td class="cg-generic"><span title="only framework-level pros/cons or boilerplate roundups">generic</span></td><td class="cg-generic"><span title="only framework-level pros/cons or boilerplate roundups">generic</span></td></tr>
       <tr><th scope="row">Online store <span class="cg-detail">catalog, cart, checkout, admin</span></th><td class="cg-generic"><span title="only framework-level pros/cons or boilerplate roundups">generic</span></td><td class="cg-missing"><span title="no credible comparison found">missing</span></td></tr>
@@ -241,16 +241,15 @@ takes or absent.</p>
 
 </div>
 <div class="layer">
-  <h3><span class="lname">Layer 2: make agents fluent in the gems and flavors (tools)</span> <span class="tag now">ship now</span></h3>
+  <h3><span class="lname">Layer 2: make agents fluent in the gems (tools)</span> <span class="tag now">ship now</span></h3>
   <div class="goals"><span class="status"><span class="status__k">Shared gem/agent convention</span><span class="status__v">none yet</span></span><span class="status"><span class="status__k">Agent Skills convention</span><span class="status__v">fragmented</span></span></div>
   <p class="note">Why: an ecosystem that agents can actually operate is one they keep choosing and recommending.</p>
   <ul>
     <li>The gap is the long tail. Standard Rails is in the training set (the Guides are broadly crawled),
-      so the gems, the alternative flavors (Hanami, Roda, dry-rb, Phlex), and anything past the cutoff are
-      where agents guess at APIs.</li>
+      so the gems, and anything past the training cutoff, are where agents guess at APIs.</li>
     <li>MCP and skills are the runtime channel for that missing knowledge: the agent introspects the app
       (installed gems and versions, schema, routes) and pulls current per-gem docs on demand.</li>
-    <li>The unlock is a convention, a shared way for any gem or flavor maintainer to ship agent-discoverable
+    <li>The unlock is a convention, a shared way for any gem maintainer to ship agent-discoverable
       tooling (an MCP endpoint or a skill) the way they already ship a README, so the long tail scales.</li>
     <li>The proof is next door: Laravel shipped <a href="https://github.com/laravel/boost">Boost</a> in 2025,
       an official MCP server with version-pinned guidelines, on-demand skills, and a docs API over its whole

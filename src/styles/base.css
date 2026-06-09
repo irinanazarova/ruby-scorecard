@@ -180,11 +180,17 @@ section > p { max-width: var(--measure); }
 .js-ready .controls { display: flex; }
 
 /* ---------- Table ---------- */
-.table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); }
+.table-scroll {
+  overflow: auto;          /* both axes: vertical scroll makes the sticky <thead> pin to the top */
+  max-height: 78vh;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
 table { border-collapse: collapse; width: 100%; font-size: .9rem; background: var(--surface); }
 th, td { padding: .64rem .75rem; border-bottom: 1px solid var(--line); text-align: center; vertical-align: middle; }
 thead th {
   position: sticky; top: 0;
+  z-index: 2;
   background: var(--surface);
   padding-block: .85rem;
   font-family: var(--font-mono);
@@ -205,6 +211,11 @@ thead th[aria-sort="descending"] .arrow { opacity: 1; color: var(--accent); }
 thead th[aria-sort="descending"] .arrow { display: inline-block; transform: rotate(180deg); }
 
 td.res, th.res { text-align: left; white-space: nowrap; }
+/* Pin the resource column when the table scrolls horizontally (mobile / wide table). */
+td.res, th.res { position: sticky; left: 0; background: var(--surface); border-right: 1px solid var(--line); }
+td.res { z-index: 1; }
+thead th.res { z-index: 3; }   /* top-left corner stays above both sticky axes */
+tbody tr:not(.grp):hover td.res { background: var(--bg-warm); }
 td.res a { font-weight: 600; text-decoration: none; color: var(--text); }
 td.res a:hover { color: var(--link); text-decoration: underline; }
 
@@ -221,6 +232,9 @@ tr.grp td {
   border-top: 1px solid var(--line);
 }
 tbody tr.grp:first-child td { border-top: 0; }
+/* The category label lives in a full-width colspan cell; sticky-left on it is unreliable, so it
+   scrolls with the row. The header row and the resource column stay pinned. */
+tr.grp td { left: 0; }
 tbody tr:not(.grp):hover { background: var(--bg-warm); }
 tr[hidden] { display: none; }
 

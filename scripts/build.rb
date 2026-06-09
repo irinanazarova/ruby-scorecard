@@ -144,7 +144,7 @@ BOSS_METERS = meter("Ruby picks", 0, 1267) + meter("Models that default to Ruby"
 CONTENT_GAP = if content_gap
   cells = content_gap["tasks"].flat_map { |t| [t["js"], t["py"]] }
   solid = cells.count { |s| s == "solid" }
-  heads = content_gap["stacks"].map { |s| %(<th>#{esc(s["label"])}<span class="cg-sub">#{esc(s["sub"])}</span></th>) }.join
+  heads = content_gap["stacks"].map { |s| %(<th>#{esc(s["label"])} <span class="cg-sub">#{esc(s["sub"])}</span></th>) }.join
   rows = content_gap["tasks"].map do |t|
     %(<tr><th scope="row">#{esc(t["task"])} <span class="cg-detail">#{esc(t["detail"])}</span></th>#{cg_cell(t["js"])}#{cg_cell(t["py"])}</tr>)
   end.join("\n      ")
@@ -251,7 +251,7 @@ sampled). Click any heading to sort.</p>
 <section>
 <h2><span class="num">02</span>What will move the needle</h2>
 <p>Four levers, ordered by depth, each acting on the same number. Rails is plural by design (omakase
-defaults, swappable adapters, competing flavors), so the job is to strengthen the default and agree on
+defaults, swappable adapters, competing frameworks), so the job is to strengthen the default and agree on
 shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; together they feed the
 <strong>final boss</strong> below.</p>
 
@@ -284,16 +284,15 @@ shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; 
   #{CONTENT_GAP}
 </div>
 <div class="layer">
-  <h3><span class="lname">Layer 2: make agents fluent in the gems and flavors (tools)</span> <span class="tag now">ship now</span></h3>
+  <h3><span class="lname">Layer 2: make agents fluent in the gems (tools)</span> <span class="tag now">ship now</span></h3>
   <div class="goals">#{GOALS_L2}</div>
   <p class="note">Why: an ecosystem that agents can actually operate is one they keep choosing and recommending.</p>
   <ul>
     <li>The gap is the long tail. Standard Rails is in the training set (the Guides are broadly crawled),
-      so the gems, the alternative flavors (Hanami, Roda, dry-rb, Phlex), and anything past the cutoff are
-      where agents guess at APIs.</li>
+      so the gems, and anything past the training cutoff, are where agents guess at APIs.</li>
     <li>MCP and skills are the runtime channel for that missing knowledge: the agent introspects the app
       (installed gems and versions, schema, routes) and pulls current per-gem docs on demand.</li>
-    <li>The unlock is a convention, a shared way for any gem or flavor maintainer to ship agent-discoverable
+    <li>The unlock is a convention, a shared way for any gem maintainer to ship agent-discoverable
       tooling (an MCP endpoint or a skill) the way they already ship a README, so the long tail scales.</li>
     <li>The proof is next door: Laravel shipped <a href="https://github.com/laravel/boost">Boost</a> in 2025,
       an official MCP server with version-pinned guidelines, on-demand skills, and a docs API over its whole
