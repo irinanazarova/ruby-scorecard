@@ -105,11 +105,15 @@ end
 rows = JSON.parse(File.read(File.join(ROOT, "data", "scorecard.json")))["rows"]
 existing = File.exist?(COVERAGE_PATH) ? JSON.parse(File.read(COVERAGE_PATH)) : {}
 
+# --print emits the coverage JSON to STDOUT (progress goes to STDERR) so the run can be
+# captured cleanly off a disposable Fly machine: `ruby scripts/coverage.rb --print > data/coverage.json`.
+PRINT_ONLY = ARGV.include?("--print")
+
 index_id = latest_index
 if index_id
-  puts "CC index up: #{index_id}"
+  warn "CC index up: #{index_id}"
 else
-  puts "CC index unreachable (outage or block) - keeping known cc_pages, filling sitemap totals only"
+  warn "CC index unreachable (outage or block) - keeping known cc_pages, filling sitemap totals only"
 end
 
 coverage = {}
@@ -149,9 +153,13 @@ rows.each do |r|
 
   coverage[name] = entry
   pct = entry["cc_pages"] && entry["total_pages"] ? " (#{(100.0 * entry["cc_pages"] / entry["total_pages"]).round}%)" : ""
-  printf("%-24s cc=%-8s total=%-8s%s\n", name, entry["cc_pages"].inspect, entry["total_pages"].inspect, pct)
+  warn format("%-24s cc=%-8s total=%-8s%s", name, entry["cc_pages"].inspect, entry["total_pages"].inspect, pct)
 end
 
-File.write(COVERAGE_PATH, JSON.pretty_generate(coverage))
 sampled = coverage.count { |_, e| e["cc_pages"] }
-puts "DONE -> data/coverage.json | cc sampled #{sampled}/#{rows.size}"
+if PRINT_ONLY
+  puts JSON.pretty_generate(coverage)
+else
+  File.write(COVERAGE_PATH, JSON.pretty_generate(coverage))
+end
+warn "DONE#{PRINT_ONLY ? " (stdout)" : " -> data/coverage.json"} | cc sampled #{sampled}/#{rows.size}"

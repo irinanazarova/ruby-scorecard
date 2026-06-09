@@ -1,4 +1,8 @@
-# Only the built static output is needed in the image.
+# nginx image needs only dist/ + deploy/; the Fly fetch image (fetch/Dockerfile) also
+# needs scripts/ + data/. node_modules, src/, etc. stay excluded.
 *
 !dist
 !deploy
+!scripts
+!data
+!fetch

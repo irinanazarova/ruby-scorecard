@@ -1,0 +1,10 @@
+# Throwaway worker app (no HTTP service) that just runs the coverage probe once.
+app = "ruby-scorecard-fetch"
+primary_region = "ams"
+
+[build]
+  dockerfile = "fetch/Dockerfile"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

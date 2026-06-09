@@ -105,6 +105,21 @@ This fills the per-resource **pages-in-Common-Crawl vs sitemap-total** chart. No
 - For all 54 at once (instead of serial CDX), CC recommends the columnar URL index via **Amazon Athena**;
   that path needs an AWS account and is not wired up here.
 
+### Run the fetch from a disposable IP (Fly)
+
+CC's index is IP rate-limited, so a throttled run can briefly block the IP it came from. To keep your own
+IP safe (and make retries free), run the probe from a throwaway Fly machine:
+
+```bash
+./fetch/run-on-fly.sh        # creates a temp Fly app, runs the probe, captures data/coverage.json, destroys it
+fly deploy                   # publish the rebuilt page (run from repo root)
+```
+
+It spins up `ruby-scorecard-fetch` (worker, no HTTP), runs `scripts/coverage.rb --print` over `fly ssh`
+capturing clean JSON, rebuilds `dist/`, then tears the app down. If a run is ever throttled, just run it
+again, it gets a fresh IP. (`--print` emits JSON to stdout and progress to stderr, so it also works locally:
+`ruby scripts/coverage.rb --print > data/coverage.json`.)
+
 ## Deploy
 
 `dist/` is self-contained. Copy the whole folder to the ruby.evilmartians.com host, e.g.
