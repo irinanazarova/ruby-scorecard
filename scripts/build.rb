@@ -37,25 +37,26 @@ end
 
 # ---- Common Crawl coverage helpers ----
 def commate(num) = num.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\1,').reverse
-def cov_pct(c) = c && c["cc_pages"] && c["total_pages"] && c["total_pages"].positive? ? 100.0 * c["cc_pages"] / c["total_pages"] : nil
 
-def cov_sortkey(c)
-  return -1 unless c && c["cc_pages"]
-
-  cov_pct(c) || 100.0
-end
+# sort the column by absolute pages-in-CC (works for all 54; not-sampled sinks to the bottom)
+def cov_sortkey(c) = c && c["cc_pages"] ? c["cc_pages"] : -1
 
 def cov_cell(c)
   return %(<span class="cc-na" title="not sampled">&mdash;</span>) unless c && c["cc_pages"]
 
   cc = c["cc_pages"]
+  total = c["total_pages"]
   approx = c["cc_exact"] == false ? "~" : ""
-  pct = cov_pct(c)
-  if pct
-    label = pct < 1 ? "<1%" : "#{pct.round}%"
-    %(<span class="cc-val" title="#{label} of sitemap pages found in Common Crawl">#{approx}#{commate(cc)}<span class="cc-den">/#{commate(c["total_pages"])}</span></span>)
+  # Use the sitemap as a denominator only when it actually bounds the CC count; a sitemap that
+  # lists fewer pages than CC found is partial, so we show the bare count instead of "14/1".
+  if total&.positive? && cc <= total
+    pct = 100.0 * cc / total
+    tip = "#{pct < 1 ? "<1" : pct.round}% of sitemap pages found in Common Crawl"
+    %(<span class="cc-val" title="#{tip}">#{approx}#{commate(cc)}<span class="cc-den">/#{commate(total)}</span></span>)
   else
-    %(<span class="cc-val" title="#{commate(cc)} pages in Common Crawl; sitemap total n/a">#{approx}#{commate(cc)}<span class="cc-den">/&mdash;</span></span>)
+    tip = total ? "#{commate(cc)} in Common Crawl; sitemap lists only #{commate(total)} (partial)" \
+                : "#{commate(cc)} pages in Common Crawl; sitemap total n/a"
+    %(<span class="cc-val" title="#{tip}">#{approx}#{commate(cc)}<span class="cc-den">/&mdash;</span></span>)
   end
 end
 
@@ -173,9 +174,9 @@ PAGE = <<HTML
 <code>sorbet.org/docs</code>, <code>docs.avohq.io</code>), not its landing page. Each column is a proven,
 checkable aspect of LLM discoverability. <span class="ok">&#10003;</span> good,
 <span class="bad">&#10007;</span> missing. &ldquo;Crawlable&rdquo; fetches as a Common Crawl bot to catch
-Cloudflare/WAF blocks. The last column samples Common Crawl coverage as <em>pages found / sitemap total</em>
-(<span class="cc-na">&mdash;</span> = not sampled, the index rate-limits bulk queries); click any column
-heading to sort.</p>
+Cloudflare/WAF blocks. The last column counts pages of each docs host in the latest Common Crawl monthly
+crawl as <em>pages found / sitemap total</em> (just the count where no usable sitemap;
+<span class="cc-na">&mdash;</span> = not sampled); click any column heading to sort.</p>
 
 <scorecard-table>
   <div class="controls">

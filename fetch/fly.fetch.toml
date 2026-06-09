@@ -1,9 +1,8 @@
 # Throwaway worker app (no HTTP service) that just runs the coverage probe once.
+# The build context + dockerfile are passed on the CLI (see fetch/run-on-fly.sh) so COPY
+# can reach scripts/ and data/ at the repo root.
 app = "ruby-scorecard-fetch"
 primary_region = "ams"
-
-[build]
-  dockerfile = "fetch/Dockerfile"
 
 [[vm]]
   size = "shared-cpu-1x"

@@ -78,10 +78,25 @@ rescue StandardError
   nil
 end
 
-def cc_count(docs_url, index_id)
+# Count CC pages for the whole docs host, so the numerator matches the (whole-host) sitemap
+# denominator. Only genuinely shared hosts are path-scoped: github.com repos/wikis and
+# *.github.io project pages (where the project lives in the path). Dedicated domains and
+# project subdomains (roda.jeremyevans.net, test-prof.evilmartians.io) stay whole-host.
+def cc_scope(docs_url)
   u = URI.parse(docs_url)
-  prefix = "#{u.host}#{u.path.sub(%r{/[^/]*\.[^/]*\z}, "/")}".sub(%r{/\z}, "")
-  query = "url=#{prefix}/*&output=json&fl=url&limit=#{HOST_CAP}"
+  host = u.host
+  segs = u.path.split("/").reject(&:empty?)
+  if host == "github.com" && segs.size >= 2
+    "#{host}/#{segs[0]}/#{segs[1]}"
+  elsif host.end_with?(".github.io") && !segs.empty?
+    "#{host}/#{segs[0]}"
+  else
+    host
+  end
+end
+
+def cc_count(docs_url, index_id)
+  query = "url=#{cc_scope(docs_url)}/*&output=json&fl=url&limit=#{HOST_CAP}"
   body, ok = curl(["#{CDX_HOST}/#{index_id}-index?#{query}"], timeout: 60)
   return [nil, false] unless ok
   # A 404/empty result-set body means "reachable, zero records"; a transport failure is `ok=false`.

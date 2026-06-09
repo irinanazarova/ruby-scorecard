@@ -24,7 +24,8 @@ echo "Creating disposable Fly app $APP ..." >&2
 flyctl apps create "$APP" -o "$ORG" 2>/dev/null || true
 
 echo "Deploying the fetch image ..." >&2
-flyctl deploy -a "$APP" -c fetch/fly.fetch.toml --ha=false
+# Build context = repo root (.) so COPY can reach scripts/ and data/; dockerfile path is repo-relative.
+flyctl deploy . -a "$APP" -c fetch/fly.fetch.toml --dockerfile fetch/Dockerfile --ha=false
 
 echo "Running coverage probe on Fly (clean JSON -> data/coverage.json) ..." >&2
 flyctl ssh console -a "$APP" -C "ruby /app/scripts/coverage.rb --print" > data/coverage.json
