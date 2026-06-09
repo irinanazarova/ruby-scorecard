@@ -95,8 +95,8 @@ def cc_scope(docs_url)
   end
 end
 
-def cc_count(docs_url, index_id)
-  query = "url=#{cc_scope(docs_url)}/*&output=json&fl=url&limit=#{HOST_CAP}"
+def cc_count(scope, index_id)
+  query = "url=#{scope}/*&output=json&fl=url&limit=#{HOST_CAP}"
   body, ok = curl(["#{CDX_HOST}/#{index_id}-index?#{query}"], timeout: 60)
   return [nil, false] unless ok
   # A 404/empty result-set body means "reachable, zero records"; a transport failure is `ok=false`.
@@ -149,7 +149,8 @@ rows.each do |r|
 
   # Common Crawl page count, politely, only when the index is up
   if index_id
-    pages, exact = cc_count(r["docs"], index_id)
+    scope = r["cc_scope"] && !r["cc_scope"].empty? ? r["cc_scope"] : cc_scope(r["docs"])
+    pages, exact = cc_count(scope, index_id)
     unless pages.nil?
       entry["cc_pages"] = pages
       entry["cc_exact"] = exact

@@ -67,7 +67,51 @@ RESOURCES = [
   ["GoRails", "community & resources", "https://gorails.com/"],
   ["Drifting Ruby", "community & resources", "https://www.driftingruby.com/"],
   ["RubyEvents", "community & resources", "https://www.rubyevents.org/"],
-  ["Rails at Scale (Shopify)", "community & resources", "https://railsatscale.com/"]
+  ["Rails at Scale (Shopify)", "community & resources", "https://railsatscale.com/"],
+
+  # --- Blogs & newsletters (Rails Developer Survey 2024 top blogs) ---
+  ["Ruby Weekly", "community & resources", "https://rubyweekly.com/"],
+  ["Short Ruby", "community & resources", "https://newsletter.shortruby.com/"],
+  ["This Week in Rails", "community & resources", "https://world.hey.com/this.week.in.rails", "world.hey.com/this.week.in.rails"],
+  ["Evil Martians", "community & resources", "https://evilmartians.com/chronicles", "evilmartians.com/chronicles"],
+  ["Hotwire Weekly", "community & resources", "https://hotwire.io/newsletter", "hotwire.io/newsletter"],
+  ["Write Software Well", "community & resources", "https://www.writesoftwarewell.com"],
+  ["Thoughtbot", "community & resources", "https://thoughtbot.com/blog", "thoughtbot.com/blog"],
+  ["AppSignal Blog", "community & resources", "https://blog.appsignal.com"],
+  ["Riding Rails", "community & resources", "https://rubyonrails.org/blog", "rubyonrails.org/blog"],
+  ["Joe Masilotti", "community & resources", "https://masilotti.com"],
+  ["Code with Jason", "community & resources", "https://www.codewithjason.com/"],
+  ["Maintainable", "community & resources", "https://maintainable.fm"],
+  ["Ruby News", "community & resources", "https://www.ruby-lang.org/en/news", "www.ruby-lang.org/en/news"],
+
+  # --- Loved gems (survey 2024) not already covered ---
+  ["Devise", "libraries", "https://github.com/heartcombo/devise"],
+  ["Pundit", "libraries", "https://github.com/varvet/pundit"],
+  ["CanCanCan", "libraries", "https://github.com/CanCanCommunity/cancancan"],
+  ["Standard", "tooling & types", "https://github.com/standardrb/standard"],
+
+  # --- Tools with Ruby/Rails-specific docs (survey 2024); CC scoped to the Ruby/Rails section ---
+  ["Sentry", "tooling & types", "https://docs.sentry.io/platforms/ruby/guides/rails/", "docs.sentry.io/platforms/ruby"],
+  ["AppSignal", "tooling & types", "https://docs.appsignal.com/ruby/integrations/rails.html", "docs.appsignal.com/ruby"],
+  ["New Relic", "tooling & types", "https://docs.newrelic.com/docs/apm/agents/ruby-agent/installation/install-new-relic-ruby-agent/", "docs.newrelic.com/docs/apm/agents/ruby-agent"],
+  ["Datadog", "tooling & types", "https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/ruby/", "docs.datadoghq.com/tracing/trace_collection/dd_libraries/ruby"],
+  ["Honeybadger", "tooling & types", "https://docs.honeybadger.io/lib/ruby/", "docs.honeybadger.io/lib/ruby"],
+  ["Rollbar", "tooling & types", "https://docs.rollbar.com/docs/rails", "docs.rollbar.com/docs/rails"],
+  ["Bugsnag", "tooling & types", "https://docs.bugsnag.com/platforms/ruby/rails/", "docs.bugsnag.com/platforms/ruby"],
+  ["Scout APM", "tooling & types", "https://scoutapm.com/docs/ruby", "scoutapm.com/docs/ruby"],
+  ["Skylight", "tooling & types", "https://www.skylight.io/support/getting-started"],
+  ["Better Stack", "tooling & types", "https://betterstack.com/docs/logs/ruby-and-rails/", "betterstack.com/docs/logs/ruby-and-rails"],
+  ["Papertrail", "tooling & types", "https://documentation.solarwinds.com/en/success_center/papertrail/content/kb/configuration/configuring-centralized-logging-from-ruby-on-rails-apps.htm", "documentation.solarwinds.com/en/success_center/papertrail"],
+  ["GitHub Actions", "tooling & types", "https://docs.github.com/en/actions/tutorials/build-and-test-code/ruby", "docs.github.com/en/actions/tutorials/build-and-test-code/ruby"],
+  ["Heroku", "background, realtime & deploy", "https://devcenter.heroku.com/articles/getting-started-with-rails8", "devcenter.heroku.com/categories/ruby-support"],
+  ["Fly.io", "background, realtime & deploy", "https://fly.io/docs/rails/", "fly.io/docs/rails"],
+  ["Render", "background, realtime & deploy", "https://render.com/docs/deploy-rails-8", "render.com/docs/deploy-rails-8"],
+  ["Railway", "background, realtime & deploy", "https://docs.railway.com/guides/rails", "docs.railway.com/guides/rails"],
+  ["DigitalOcean", "background, realtime & deploy", "https://docs.digitalocean.com/products/marketplace/catalog/ruby-on-rails/", "docs.digitalocean.com/products/marketplace/catalog/ruby-on-rails"],
+  ["AWS Elastic Beanstalk", "background, realtime & deploy", "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/ruby-rails-tutorial.html", "docs.aws.amazon.com/elasticbeanstalk/latest/dg"],
+  ["PlanetScale", "background, realtime & deploy", "https://planetscale.com/docs/vitess/tutorials/connect-rails-app", "planetscale.com/docs/vitess/tutorials/connect-rails-app"],
+  ["Supabase", "background, realtime & deploy", "https://supabase.com/docs/guides/getting-started/quickstarts/ruby-on-rails", "supabase.com/docs/guides/getting-started/quickstarts/ruby-on-rails"],
+  ["Neon", "background, realtime & deploy", "https://neon.com/docs/guides/ruby-on-rails", "neon.com/docs/guides/ruby-on-rails"]
 ].freeze
 
 UA = "Mozilla/5.0 research"
@@ -175,7 +219,9 @@ def content_neg?(docs_url)
 end
 
 out = []
-RESOURCES.each do |name, cat, docs|
+# A 4th tuple element optionally overrides the Common Crawl scope (for docs that live on a
+# multi-product vendor host, so coverage counts only the Ruby/Rails section, not the whole site).
+RESOURCES.each do |name, cat, docs, cc_scope|
   root = root_of(docs)
   bare = bare_of(docs)
   ai, note = robots_ai(root)
@@ -186,7 +232,7 @@ RESOURCES.each do |name, cat, docs|
     "name" => name, "category" => cat, "docs" => docs, "root" => root,
     "robots_ai" => ai, "robots_note" => note, "bot_fetch" => bot, "bot_code" => code,
     "sitemap" => sitemap?(root), "llms_txt" => llms, "content_neg" => content_neg?(docs),
-    "md_route" => md, "docs_ok" => status(docs)
+    "md_route" => md, "docs_ok" => status(docs), "cc_scope" => cc_scope
   }
   out << row
   printf("%-24s docs=%-3s robots=%-5s bot=%-5s sitemap=%d llms=%d neg=%d md=%d\n",

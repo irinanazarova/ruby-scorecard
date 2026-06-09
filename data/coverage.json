@@ -252,7 +252,7 @@
     "total_source": null
   },
   "Rage": {
-    "cc_pages": 6,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": 33,
     "total_source": "sitemap"
@@ -266,8 +266,8 @@
   "Karafka": {
     "cc_pages": 1,
     "cc_exact": true,
-    "total_pages": 207,
-    "total_source": "sitemap"
+    "total_pages": null,
+    "total_source": null
   },
   "RubyLLM": {
     "cc_pages": 11,
@@ -322,5 +322,233 @@
     "cc_exact": true,
     "total_pages": 114,
     "total_source": "sitemap"
+  },
+  "Ruby Weekly": {
+    "cc_pages": 281,
+    "cc_exact": true,
+    "total_pages": null,
+    "total_source": null
+  },
+  "Short Ruby": {
+    "cc_pages": 211,
+    "cc_exact": true,
+    "total_pages": 293,
+    "total_source": "sitemap"
+  },
+  "This Week in Rails": {
+    "cc_pages": 26,
+    "cc_exact": true,
+    "total_pages": null,
+    "total_source": null
+  },
+  "Evil Martians": {
+    "cc_pages": 161,
+    "cc_exact": true,
+    "total_pages": 1007,
+    "total_source": "sitemap-index"
+  },
+  "Hotwire Weekly": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": null,
+    "total_source": null
+  },
+  "Write Software Well": {
+    "cc_pages": 2,
+    "cc_exact": true,
+    "total_pages": null,
+    "total_source": null
+  },
+  "Thoughtbot": {
+    "cc_pages": 1050,
+    "cc_exact": true,
+    "total_pages": 198,
+    "total_source": "sitemap"
+  },
+  "AppSignal Blog": {
+    "cc_pages": 333,
+    "cc_exact": true,
+    "total_pages": 1063,
+    "total_source": "sitemap"
+  },
+  "Riding Rails": {
+    "cc_pages": 58,
+    "cc_exact": true,
+    "total_pages": 2293,
+    "total_source": "sitemap"
+  },
+  "Joe Masilotti": {
+    "cc_pages": 2,
+    "cc_exact": true,
+    "total_pages": 134,
+    "total_source": "sitemap"
+  },
+  "Code with Jason": {
+    "cc_pages": 138,
+    "cc_exact": true,
+    "total_pages": 532,
+    "total_source": "sitemap-index"
+  },
+  "Maintainable": {
+    "cc_pages": 74,
+    "cc_exact": true,
+    "total_pages": 241,
+    "total_source": "sitemap"
+  },
+  "Ruby News": {
+    "cc_pages": 153,
+    "cc_exact": true,
+    "total_pages": null,
+    "total_source": null
+  },
+  "Devise": {
+    "cc_pages": 2,
+    "cc_exact": true,
+    "total_pages": null,
+    "total_source": null
+  },
+  "Pundit": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": null,
+    "total_source": null
+  },
+  "CanCanCan": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": null,
+    "total_source": null
+  },
+  "Standard": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": null,
+    "total_source": null
+  },
+  "Sentry": {
+    "cc_pages": 142,
+    "cc_exact": true,
+    "total_pages": 10062,
+    "total_source": "sitemap"
+  },
+  "AppSignal": {
+    "cc_pages": 15,
+    "cc_exact": true,
+    "total_pages": 436,
+    "total_source": "sitemap"
+  },
+  "New Relic": {
+    "cc_pages": 19,
+    "cc_exact": true,
+    "total_pages": 45642,
+    "total_source": "sitemap-index"
+  },
+  "Datadog": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": null,
+    "total_source": null
+  },
+  "Honeybadger": {
+    "cc_pages": 16,
+    "cc_exact": true,
+    "total_pages": 284,
+    "total_source": "sitemap-index"
+  },
+  "Rollbar": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": 413,
+    "total_source": "sitemap"
+  },
+  "Bugsnag": {
+    "cc_pages": 8,
+    "cc_exact": true,
+    "total_pages": 1046,
+    "total_source": "sitemap"
+  },
+  "Scout APM": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": 3,
+    "total_source": "sitemap-index"
+  },
+  "Skylight": {
+    "cc_pages": 69,
+    "cc_exact": true,
+    "total_pages": null,
+    "total_source": null
+  },
+  "Better Stack": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": 90,
+    "total_source": "sitemap"
+  },
+  "Papertrail": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": 7610,
+    "total_source": "sitemap"
+  },
+  "GitHub Actions": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": null,
+    "total_source": null
+  },
+  "Heroku": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": null,
+    "total_source": null
+  },
+  "Fly.io": {
+    "cc_pages": 30,
+    "cc_exact": true,
+    "total_pages": 1051,
+    "total_source": "sitemap-index"
+  },
+  "Render": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": 744,
+    "total_source": "sitemap-index"
+  },
+  "Railway": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": 307,
+    "total_source": "sitemap-index"
+  },
+  "DigitalOcean": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": 4327,
+    "total_source": "sitemap"
+  },
+  "AWS Elastic Beanstalk": {
+    "cc_pages": 66,
+    "cc_exact": true,
+    "total_pages": 1970,
+    "total_source": "sitemap-index"
+  },
+  "PlanetScale": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": 1175,
+    "total_source": "sitemap-index"
+  },
+  "Supabase": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": 3220,
+    "total_source": "sitemap-index"
+  },
+  "Neon": {
+    "cc_pages": 1,
+    "cc_exact": true,
+    "total_pages": 2027,
+    "total_source": "sitemap-index"
   }
 }

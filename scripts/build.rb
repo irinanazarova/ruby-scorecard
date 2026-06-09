@@ -43,21 +43,23 @@ def commate(num) = num.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\1,').reverse
 # sort the column by absolute pages-in-CC (works for all 54; not-sampled sinks to the bottom)
 def cov_sortkey(c) = c && c["cc_pages"] ? c["cc_pages"] : -1
 
-def cov_cell(c)
+def cov_cell(c, scoped: false)
   return %(<span class="cc-na" title="not sampled">&mdash;</span>) unless c && c["cc_pages"]
 
   cc = c["cc_pages"]
   total = c["total_pages"]
   approx = c["cc_exact"] == false ? "~" : ""
-  # Use the sitemap as a denominator only when it actually bounds the CC count; a sitemap that
-  # lists fewer pages than CC found is partial, so we show the bare count instead of "14/1".
-  if total&.positive? && cc <= total
+  # Pair with the sitemap only when both cover the same scope and the sitemap bounds the count.
+  # Scope-overridden entries count just the Ruby/Rails section, so the whole-host sitemap is not a
+  # comparable denominator; show the bare count there (and where the sitemap is partial, cc > total).
+  if !scoped && total&.positive? && cc <= total
     pct = 100.0 * cc / total
     tip = "#{pct < 1 ? "<1" : pct.round}% of sitemap pages found in Common Crawl"
     %(<span class="cc-val" title="#{tip}">#{approx}#{commate(cc)}<span class="cc-den">/#{commate(total)}</span></span>)
   else
-    tip = total ? "#{commate(cc)} in Common Crawl; sitemap lists only #{commate(total)} (partial)" \
-                : "#{commate(cc)} pages in Common Crawl; sitemap total n/a"
+    tip = scoped ? "#{commate(cc)} pages of the Ruby/Rails docs in Common Crawl" \
+                 : (total ? "#{commate(cc)} in Common Crawl; sitemap lists only #{commate(total)} (partial)" \
+                          : "#{commate(cc)} pages in Common Crawl; sitemap total n/a")
     %(<span class="cc-val" title="#{tip}">#{approx}#{commate(cc)}<span class="cc-den">/&mdash;</span></span>)
   end
 end
@@ -116,7 +118,7 @@ present_cats.each do |cat|
       "<td>#{cell_robots(r)}</td><td>#{cell_bot(r)}</td>" \
       "<td>#{mark(r["sitemap"])}</td><td>#{mark(r["llms_txt"])}</td>" \
       "<td>#{mark(r["content_neg"])}</td><td>#{mark(r["md_route"])}</td>" \
-      "<td class=\"cc\">#{cov_cell(c)}</td></tr>"
+      "<td class=\"cc\">#{cov_cell(c, scoped: !r["cc_scope"].to_s.empty?)}</td></tr>"
   end
 end
 TABLE = trows.join("\n")
@@ -132,7 +134,7 @@ CHIPS = chips.join("\n      ")
 unblocked = n - blocked.size
 GOALS_L0 = meter("Crawlable, unblocked", unblocked, n) + meter("Sitemaps", sm, n)
 GOALS_L1 = meter("Content negotiation", neg, n) + meter(".md routes", md, n) + meter("llms.txt", llms, n)
-GOALS_L2 = statuspill("Shared MCP interface", "not converged") + statuspill("Agent Skills convention", "fragmented")
+GOALS_L2 = statuspill("Shared gem/agent convention", "none yet") + statuspill("Agent Skills convention", "fragmented")
 GOALS_L3 = statuspill(%(Ruby in <a href="https://github.com/nuprl/MultiPL-E">MultiPL-E</a>), "absent") +
            statuspill(%(Ruby in <a href="https://github.com/multi-swe-bench/multi-swe-bench">Multi-SWE-bench</a>), "absent") +
            statuspill("Open idiomatic-Rails dataset", "none yet")
@@ -144,14 +146,14 @@ CONTENT_GAP = if content_gap
   solid = cells.count { |s| s == "solid" }
   heads = content_gap["stacks"].map { |s| %(<th>#{esc(s["label"])}<span class="cg-sub">#{esc(s["sub"])}</span></th>) }.join
   rows = content_gap["tasks"].map do |t|
-    %(<tr><th scope="row">#{esc(t["task"])}<span class="cg-detail">#{esc(t["detail"])}</span></th>#{cg_cell(t["js"])}#{cg_cell(t["py"])}</tr>)
+    %(<tr><th scope="row">#{esc(t["task"])} <span class="cg-detail">#{esc(t["detail"])}</span></th>#{cg_cell(t["js"])}#{cg_cell(t["py"])}</tr>)
   end.join("\n      ")
   <<CG
-<h4 class="cg-title">The comparison content to write &mdash; what exists, what's missing</h4>
-<p class="cg-metric"><strong>#{solid} of #{cells.size}</strong> are <em>solid</em> (current, task-specific,
-with real numbers); the rest are generic framework takes or absent. That is the lever: a model reaches for
-what the corpus argues for, and today almost nothing argues, with numbers, that Rails is the better build
-for these product shapes.</p>
+<h4 class="cg-title">Publish the missing comparisons</h4>
+<p class="cg-metric">Why: a model reaches for what the corpus argues for, and today almost nothing argues,
+with numbers, that Rails is the better build for these product shapes. <strong>#{solid} of #{cells.size}</strong>
+comparisons are <em>solid</em> (current, task-specific, with real numbers); the rest are generic framework
+takes or absent.</p>
 <div class="table-scroll">
 <table class="cg-table">
   <thead><tr><th scope="col">Build &hellip; in Rails</th>#{heads}</tr></thead>
@@ -163,7 +165,7 @@ for these product shapes.</p>
 <p class="note">Snapshot #{esc(content_gap["updated"])}, by web search per task &times; stack, then judged.
 <span class="cg-k cg-solid">solid</span> current + task-specific + numbers &middot;
 <span class="cg-k cg-generic">generic</span> framework pros/cons or boilerplates &middot;
-<span class="cg-k cg-missing">missing</span> nothing credible. Re-runnable: it is a search, not a manual audit.</p>
+<span class="cg-k cg-missing">missing</span> nothing credible. It's a web search, refreshed each pass.</p>
 CG
 else
   ""
@@ -195,9 +197,8 @@ PAGE = <<HTML
     <h1>Ruby &amp; Rails LLM discoverability scorecard</h1>
     <p class="lede"><strong>Ruby and Rails deliver superior productivity, for humans and AI agents
     alike.</strong> Yet the models rarely choose them on their own: in the open whichlang benchmark, 13
-    models picked Ruby <strong>0 times across 1,267 generated solutions</strong>. It is a discoverability
-    problem, not a capability one. This page measures the docs of #{n} ecosystem resources and shows what
-    the community can fix.</p>
+    models picked Ruby <strong>0 times across 1,267 generated solutions</strong>. It's a discoverability
+    problem. This page measures the docs of #{n} ecosystem resources and shows what the community can fix.</p>
     <div class="stats">
       <stat-counter class="stat" value="#{llms}" total="#{n}"><b class="stat__num" data-ref="num">#{llms}/#{n}</b><span>ship an llms.txt</span></stat-counter>
       <stat-counter class="stat" value="#{neg}" total="#{n}"><b class="stat__num" data-ref="num">#{neg}/#{n}</b><span>do content negotiation</span></stat-counter>
@@ -212,13 +213,12 @@ PAGE = <<HTML
 
 <section>
 <h2><span class="num">01</span>The scorecard</h2>
-<p class="note">Measured over HTTP, June 2026, against each project's <strong>documentation</strong> (e.g.
-<code>sorbet.org/docs</code>, <code>docs.avohq.io</code>), not its landing page. Each column is a proven,
-checkable aspect of LLM discoverability. <span class="ok">&#10003;</span> good,
-<span class="bad">&#10007;</span> missing. &ldquo;Crawlable&rdquo; fetches as a Common Crawl bot to catch
-Cloudflare/WAF blocks. The last column counts pages of each docs host in the latest Common Crawl monthly
-crawl as <em>pages found / sitemap total</em> (just the count where no usable sitemap;
-<span class="cc-na">&mdash;</span> = not sampled); click any column heading to sort.</p>
+<p class="note">Measured over HTTP, June 2026, against each project's <strong>documentation page</strong>
+(e.g. <code>sorbet.org/docs</code>, <code>docs.avohq.io</code>). Each column is a checkable signal of LLM
+discoverability: <span class="ok">&#10003;</span> good, <span class="bad">&#10007;</span> missing.
+&ldquo;Crawlable&rdquo; fetches as a Common Crawl bot to catch Cloudflare/WAF blocks. The last column shows
+Common Crawl coverage as <em>pages found / sitemap total</em> (<span class="cc-na">&mdash;</span> = not
+sampled). Click any heading to sort.</p>
 
 <scorecard-table>
   <div class="controls">
@@ -250,13 +250,13 @@ crawl as <em>pages found / sitemap total</em> (just the count where no usable si
 
 <section>
 <h2><span class="num">02</span>What will move the needle</h2>
-<p>Ordered by depth, each layer a lever on the same number. Rails is plural by design (omakase defaults
-plus swappable adapters and competing flavors), so the job is to strengthen the default and agree shared
-conventions, not to crown one winner. Each layer carries its <strong>goal</strong> as a live gauge; together
-they feed the <strong>final boss</strong> at the bottom.</p>
+<p>Four levers, ordered by depth, each acting on the same number. Rails is plural by design (omakase
+defaults, swappable adapters, competing flavors), so the job is to strengthen the default and agree on
+shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; together they feed the
+<strong>final boss</strong> below.</p>
 
 <div class="layer">
-  <h3><span class="lname">Layer 0 &mdash; get into the corpus at all</span> <span class="tag now">ship now</span></h3>
+  <h3><span class="lname">Layer 0: get into the corpus at all</span> <span class="tag now">ship now</span></h3>
   <div class="goals">#{GOALS_L0}</div>
   <ul>
     <li>Unblock AI crawlers (CCBot, GPTBot, ClaudeBot, Google-Extended) in robots.txt and at the WAF.
@@ -267,7 +267,11 @@ they feed the <strong>final boss</strong> at the bottom.</p>
   </ul>
 </div>
 <div class="layer">
-  <h3><span class="lname">Layer 1 &mdash; win retrieval (content)</span> <span class="tag now">ship now</span></h3>
+  <h3><span class="lname">Layer 1: win retrieval and publish comparisons (content)</span> <span class="tag now">ship now</span></h3>
+
+  <h4 class="cg-title">Win retrieval</h4>
+  <p class="note">Why: an agent fetching a Rails or gem doc at request time should get current Markdown it
+    can read, instead of HTML it has to scrape.</p>
   <div class="goals">#{GOALS_L1}</div>
   <ul>
     <li>Serve Markdown via content negotiation and <code>.md</code> routes
@@ -275,29 +279,32 @@ they feed the <strong>final boss</strong> at the bottom.</p>
       the durable bet. Ship llms.txt too, cheaply.</li>
     <li>Make <strong>rdoc</strong> emit Markdown + content negotiation by default; the keystone that lifts
       every gem at once.</li>
-    <li>Publish current, specific &ldquo;Rails vs X&rdquo; and &ldquo;build X in Rails&rdquo; content with
-      real numbers; quotations, statistics, and citations measurably raise LLM visibility.</li>
   </ul>
+
   #{CONTENT_GAP}
 </div>
 <div class="layer">
-  <h3><span class="lname">Layer 2 &mdash; make Rails agent-operable (tools)</span> <span class="tag now">ship now</span></h3>
+  <h3><span class="lname">Layer 2: make agents fluent in the gems and flavors (tools)</span> <span class="tag now">ship now</span></h3>
   <div class="goals">#{GOALS_L2}</div>
+  <p class="note">Why: an ecosystem that agents can actually operate is one they keep choosing and recommending.</p>
   <ul>
-    <li>Converge on a shared MCP interface (the official
-      <a href="https://github.com/modelcontextprotocol/ruby-sdk"><code>mcp</code> gem</a>) the way Active
-      Record has one adapter interface and many drivers; the pieces exist
-      (<a href="https://github.com/yjacquin/fast-mcp">fast-mcp</a>,
+    <li>The gap is the long tail. Standard Rails is in the training set (the Guides are broadly crawled),
+      so the gems, the alternative flavors (Hanami, Roda, dry-rb, Phlex), and anything past the cutoff are
+      where agents guess at APIs.</li>
+    <li>MCP and skills are the runtime channel for that missing knowledge: the agent introspects the app
+      (installed gems and versions, schema, routes) and pulls current per-gem docs on demand.</li>
+    <li>The unlock is a convention, a shared way for any gem or flavor maintainer to ship agent-discoverable
+      tooling (an MCP endpoint or a skill) the way they already ship a README, so the long tail scales.</li>
+    <li>The proof is next door: Laravel shipped <a href="https://github.com/laravel/boost">Boost</a> in 2025,
+      an official MCP server with version-pinned guidelines, on-demand skills, and a docs API over its whole
+      ecosystem. Rails has the parts (<a href="https://github.com/yjacquin/fast-mcp">fast-mcp</a>,
       <a href="https://tidewave.ai/">Tidewave</a>,
-      <a href="https://github.com/maquina-app/rails-mcp-server">rails-mcp-server</a>).</li>
-    <li>Agree a shared Agent Skills convention so the many Rails skill packs interoperate.</li>
-    <li>Copy the proven playbook: <a href="https://svelte.dev/docs/ai/overview">Svelte</a> fixed the exact
-      &ldquo;new version, AI writes old syntax&rdquo; problem with llms.txt + distilled docs + an MCP
-      server. Rails 8 has the same problem.</li>
+      <a href="https://github.com/maquina-app/rails-mcp-server">rails-mcp-server</a>, the official
+      <a href="https://github.com/modelcontextprotocol/ruby-sdk"><code>mcp</code> gem</a>) and needs the convention.</li>
   </ul>
 </div>
 <div class="layer">
-  <h3><span class="lname">Layer 3 &mdash; change the training default</span> <span class="tag slow">long game</span></h3>
+  <h3><span class="lname">Layer 3: change the training default</span> <span class="tag slow">long game</span></h3>
   <div class="goals">#{GOALS_L3}</div>
   <ul>
     <li>Get Ruby into the upstream evals labs train on. It is absent from
@@ -327,24 +334,20 @@ they feed the <strong>final boss</strong> at the bottom.</p>
 
 <section>
 <h2><span class="num">03</span>Methodology</h2>
-<p class="note">All indicators probed over HTTP, June 2026, against each project's documentation URL. robots
-parsed for AI user-agents (CCBot, GPTBot, ClaudeBot, Google-Extended and others) with
-<code>Disallow: /</code>; crawlability tested by fetching as a CCBot user-agent (catching Cloudflare/WAF
-blocks); content negotiation sent <code>Accept: text/markdown</code> and checked the response
-<code>Content-Type</code>; <code>.md</code> routes and llms.txt checked for a 200 (llms.txt at the docs
-host and the bare domain). The language-choice figure comes from the open whichlang benchmark (13 models,
-1,267 classified solutions, 0 Ruby; <a href="https://github.com/chad/whichlang">github.com/chad/whichlang</a>).
-That the same models write Rails competently when instructed is our own informal observation, not part of
-that benchmark.</p>
-<p class="note"><strong>Why Common Crawl?</strong> It is the open, permissively-licensed web crawl that
-seeds most LLM pretraining corpora (the backbone of datasets like C4, The Pile, RefinedWeb and FineWeb,
-used to train GPT, Llama, and others) and feeds many retrieval/search indexes. Pages missing from Common
-Crawl are likely missing from what a model learned in training, so a project's CC coverage is a proxy for
-whether an LLM has &ldquo;seen&rdquo; its docs at all, a separate question from whether the live site is
-crawlable today (the other columns). It is the one signal here you cannot fix this quarter: it reflects
-crawls already taken, which is why getting into it (sitemaps, unblocking bots, backlinks) is Layer 0. In
-practice the most common reason a page is missing from Common Crawl is a <strong>missing sitemap</strong>:
-with no manifest to discover from, the crawler simply never reaches it.</p>
+<p class="note">All indicators probed over HTTP, June 2026, against each project's documentation URL:
+robots.txt parsed for AI user-agents (CCBot, GPTBot, ClaudeBot, Google-Extended) with
+<code>Disallow: /</code>; crawlability tested by fetching as CCBot (to catch Cloudflare/WAF blocks); content
+negotiation via <code>Accept: text/markdown</code>; <code>.md</code> routes and llms.txt checked for a 200.
+The language-choice figure is from the open whichlang benchmark (13 models, 1,267 classified solutions, 0
+Ruby; <a href="https://github.com/chad/whichlang">github.com/chad/whichlang</a>). That the same models write
+Rails competently when instructed is our own informal observation.</p>
+<p class="note"><strong>Why Common Crawl?</strong> It's the open web crawl that seeds most LLM pretraining
+corpora (C4, The Pile, RefinedWeb, FineWeb, behind GPT, Llama, and others) and feeds many retrieval indexes.
+A project's CC coverage is a proxy for whether a model has seen its docs at all, a separate question from
+whether the live site is crawlable today. It's the one column you cannot fix this quarter, since it reflects
+crawls already taken, which is why getting in (sitemaps, unblocking bots, backlinks) is Layer 0. The usual
+reason a page is absent is a <strong>missing sitemap</strong>: with no manifest to discover from, the crawler
+never reaches it.</p>
 </section>
 
 <footer>
