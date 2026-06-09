@@ -181,10 +181,15 @@ section > p { max-width: var(--measure); }
 
 /* ---------- Table ---------- */
 .table-scroll {
-  overflow: auto;          /* both axes: vertical scroll makes the sticky <thead> pin to the top */
-  max-height: 78vh;
   border: 1px solid var(--line);
   border-radius: var(--radius);
+  /* No scroll box on wide screens: the page scrolls normally and the sticky <thead> pins to the
+     viewport top, releasing when the table ends. (An overflow ancestor would break that.) */
+}
+@media (max-width: 1040px) {
+  /* Below the table's natural width it would overflow, so contain it; the header and
+     resource column then stay pinned within the scroll box. */
+  .table-scroll { overflow: auto; max-height: 82vh; }
 }
 table { border-collapse: collapse; width: 100%; font-size: .9rem; background: var(--surface); }
 th, td { padding: .64rem .75rem; border-bottom: 1px solid var(--line); text-align: center; vertical-align: middle; }
