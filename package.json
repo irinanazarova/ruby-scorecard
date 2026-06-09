@@ -1,0 +1,20 @@
+{
+  "name": "ruby-scorecard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Front-end assets (Evil Martians design system + nanotags web components) for the Ruby & Rails LLM discoverability scorecard.",
+  "type": "module",
+  "scripts": {
+    "build:js": "esbuild src/js/main.js --bundle --minify --format=esm --outfile=dist/assets/app.js",
+    "build:css": "esbuild src/styles/index.css --bundle --minify --outfile=dist/assets/styles.css --loader:.woff2=copy --asset-names=fonts/[name]",
+    "build:assets": "npm run build:js && npm run build:css",
+    "dev": "esbuild src/js/main.js --bundle --format=esm --outfile=dist/assets/app.js --watch"
+  },
+  "dependencies": {
+    "nanostores": "^1.1.1",
+    "nanotags": "^0.15.2"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

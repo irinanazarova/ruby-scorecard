@@ -1,0 +1,4 @@
+# Only the built static output is needed in the image.
+*
+!dist
+!deploy

@@ -1,0 +1,33 @@
+/* Evil Martians' two variable typefaces, self-hosted (the originals are not CORS-enabled). */
+@font-face {
+  font-family: "Martian Grotesk";
+  font-style: normal;
+  font-weight: 100 1000;
+  font-stretch: 75% 200%;
+  font-display: swap;
+  src: url("../fonts/MartianGrotesk.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Martian Mono";
+  font-style: normal;
+  font-weight: 100 1000;
+  font-stretch: 75% 200%;
+  font-display: swap;
+  src: url("../fonts/MartianMono.woff2") format("woff2");
+}
+
+/* Metric-matched fallbacks (same overrides EM ships) so swap doesn't shift layout. */
+@font-face {
+  font-family: "Martian Grotesk Fallback";
+  src: local("Arial");
+  ascent-override: 89.48%;
+  descent-override: 17.9%;
+  size-adjust: 111.75%;
+}
+@font-face {
+  font-family: "Martian Mono Fallback";
+  src: local("Consolas");
+  ascent-override: 79.77%;
+  descent-override: 15.95%;
+  size-adjust: 125.36%;
+}
