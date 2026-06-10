@@ -315,7 +315,9 @@ shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; 
       (<a href="https://github.com/yjacquin/fast-mcp">fast-mcp</a>,
       <a href="https://tidewave.ai/">Tidewave</a>,
       <a href="https://github.com/maquina-app/rails-mcp-server">rails-mcp-server</a>) on the official Ruby
-      <a href="https://github.com/modelcontextprotocol/ruby-sdk">MCP SDK</a>.</li>
+      <a href="https://github.com/modelcontextprotocol/ruby-sdk">MCP SDK</a>, and a Boost-shaped bundle of
+      MCP + skills + guidelines is emerging in
+      <a href="https://github.com/Bakaface/rails-hyperdrive">rails-hyperdrive</a> <span class="tag new">new</span>.</li>
   </ul>
   <p class="note">Why: standard Rails is in the training set; the gems, and anything past the cutoff, are
     where agents guess. A maintainer convention is what scales the fix across that long tail.</p>

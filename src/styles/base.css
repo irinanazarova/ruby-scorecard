@@ -413,6 +413,7 @@ td.cc { white-space: nowrap; }
 }
 .tag.now { background: color-mix(in srgb, var(--olive) 16%, transparent); color: var(--ok); }
 .tag.slow { background: color-mix(in srgb, var(--red) 14%, transparent); color: var(--bad); }
+.tag.new { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); margin-left: .25em; }
 
 /* ---------- Footer ---------- */
 footer {
