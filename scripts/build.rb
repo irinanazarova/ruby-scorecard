@@ -9,6 +9,7 @@
 require "json"
 require "cgi"
 require "uri"
+require "digest"
 
 ROOT = File.expand_path("..", __dir__)
 rows = JSON.parse(File.read(File.join(ROOT, "data", "scorecard.json")))["rows"]
@@ -21,6 +22,12 @@ OK  = '<span class="ok" title="yes">&#10003;</span>'
 BAD = '<span class="bad" title="no">&#10007;</span>'
 
 def esc(str) = CGI.escapeHTML(str.to_s)
+
+# Cache-busting query from the built asset's content hash, so a deploy never serves stale CSS/JS.
+def asset_q(rel)
+  path = File.join(ROOT, "dist", rel)
+  File.exist?(path) ? "?v=#{Digest::MD5.file(path).hexdigest[0, 8]}" : ""
+end
 def mark(val) = val ? OK : BAD
 def slug(cat) = cat.downcase.gsub(/[^a-z0-9]+/, "-").gsub(/\A-|-\z/, "")
 
@@ -191,8 +198,8 @@ PAGE = <<HTML
 <title>Ruby &amp; Rails LLM Discoverability Scorecard</title>
 <meta name="description" content="A measured scorecard of how discoverable Ruby, Rails, and the wider ecosystem's documentation is to LLMs and AI coding agents, and what the community can do to move the needle.">
 <script>(function(){try{var t=localStorage.getItem('rsc-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}})();</script>
-<link rel="stylesheet" href="assets/styles.css">
-<script type="module" src="assets/app.js"></script>
+<link rel="stylesheet" href="assets/styles.css#{asset_q("assets/styles.css")}">
+<script type="module" src="assets/app.js#{asset_q("assets/app.js")}"></script>
 </head>
 <body>
 <header class="hero">

@@ -191,7 +191,8 @@ section > p { max-width: var(--measure); }
      resource column then stay pinned within the scroll box. */
   .table-scroll { overflow: auto; max-height: 82vh; }
 }
-table { border-collapse: collapse; width: 100%; font-size: .9rem; background: var(--surface); }
+/* separate + zero spacing (not collapse) so position:sticky on <th> works in Safari, looks identical */
+table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: .9rem; background: var(--surface); }
 th, td { padding: .64rem .75rem; border-bottom: 1px solid var(--line); text-align: center; vertical-align: middle; }
 thead th {
   position: sticky; top: 0;
