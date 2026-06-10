@@ -42,6 +42,11 @@ define("scorecard-table")
       return -1;
     };
 
+    // Once a column is sorted, the category grouping no longer applies, so the group
+    // separators are hidden and the whole table sorts as one list.
+    let sorted = false;
+    const tbody = table.tBodies[0];
+
     // ----- filter -----
     const applyFilter = () => {
       const q = query.get().trim().toLowerCase();
@@ -54,38 +59,32 @@ define("scorecard-table")
         row.hidden = !visible;
         if (visible) shown++;
       }
-      // hide a group header when none of its rows are visible
+      // hide a group header when sorted (flat list) or when none of its rows are visible
       for (const g of groups) {
-        const cat = g.dataset.grp;
-        const any = rows.some((r) => r.dataset.cat === cat && !r.hidden);
+        if (sorted) { g.hidden = true; continue; }
+        const any = rows.some((r) => r.dataset.cat === g.dataset.grp && !r.hidden);
         g.hidden = !any;
       }
       count.textContent = `Showing ${shown} of ${total}`;
     };
 
-    // ----- sort within each group -----
+    // ----- sort the whole table (across categories) -----
     let sortState = { col: -1, dir: 1 };
     const applySort = (col) => {
       const dir = sortState.col === col && sortState.dir === 1 ? -1 : 1;
       sortState = { col, dir };
+      sorted = true;
 
-      for (const g of groups) {
-        const cat = g.dataset.grp;
-        const groupRows = rows.filter((r) => r.dataset.cat === cat);
-        groupRows.sort((a, b) => {
+      [...rows]
+        .sort((a, b) => {
           let d;
           if (col === 0) d = a.dataset.name.localeCompare(b.dataset.name);
           else if (col === 7) d = Number(b.dataset.cc) - Number(a.dataset.cc); // coverage-first
           else d = rankCell(b, col) - rankCell(a, col); // pass-first by default
           return d * dir;
-        });
-        // re-attach in sorted order right after the group header
-        let anchor = g;
-        for (const row of groupRows) {
-          anchor.after(row);
-          anchor = row;
-        }
-      }
+        })
+        .forEach((row) => tbody.appendChild(row)); // reorder the entire table
+      for (const g of groups) g.hidden = true; // category separators no longer apply
 
       for (const h of headers) {
         const isActive = Number(h.dataset.col) === col;
