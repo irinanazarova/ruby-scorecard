@@ -23,6 +23,7 @@ SKIP_EXT = %w[.css .js .png .jpg .jpeg .svg .gif .pdf .zip .xml .ico .woff .woff
 
 PRINT_ONLY = !ARGV.delete("--print").nil?
 TARGETS = ARGV.empty? ? ["Inertia Rails", "AnyCable"] : ARGV.dup
+Thread.report_on_exception = false   # keep a flaky fetch from spamming stderr / killing the run
 
 def curl(url, timeout: 25)
   out, _err, st = Open3.capture3("curl", "-sSL", "-A", UA, "--max-time", timeout.to_s, url)
@@ -120,30 +121,41 @@ warn index_id ? "CC index up: #{index_id}" : "CC index unreachable - 'in CC' wil
 
 out = {}
 TARGETS.each do |name|
-  row = rows.find { |r| r["name"] == name }
-  unless row
-    warn "skip: no resource named #{name.inspect}"
-    next
+ begin
+  # A target may be a resource name (looked up in scorecard.json) or a raw URL to inquire directly.
+  if name =~ %r{\Ahttps?://}
+    docs = name
+    label = (URI.parse(name).host&.sub(/\Awww\./, "") || name)
+  else
+    row = rows.find { |r| r["name"] == name }
+    unless row
+      warn "skip: no resource named #{name.inspect}"
+      next
+    end
+    docs = row["docs"]
+    label = name
   end
 
-  docs = row["docs"]
   scope = cc_scope(docs)
-  warn "#{name}: crawling #{docs} ..."
+  warn "#{label}: crawling #{docs} ..."
   reference = crawl(docs)
-  warn "#{name}: querying Common Crawl (#{scope}) ..."
+  warn "#{label}: querying Common Crawl (#{scope}) ..."
   cc = index_id ? cc_urls(scope, index_id) : Set.new
 
   found = (reference & cc).sort
   not_crawled = (reference - cc).sort
   cc_only = (cc - reference).sort
-  out[name] = {
+  out[label] = {
     "docs" => docs, "scope" => scope, "index" => index_id,
     "pages_crawled" => reference.size, "pages_in_cc" => cc.size,
     "found_count" => found.size, "not_crawled_count" => not_crawled.size,
     "found" => found, "not_crawled" => not_crawled, "cc_only" => cc_only
   }
-  warn "#{name}: live=#{reference.size} cc=#{cc.size} found=#{found.size} missing=#{not_crawled.size}"
+  warn "#{label}: live=#{reference.size} cc=#{cc.size} found=#{found.size} missing=#{not_crawled.size}"
   sleep CDX_SLEEP if index_id
+ rescue StandardError => e
+  warn "#{name}: error (#{e.class}: #{e.message}); skipping"
+ end
 end
 
 if PRINT_ONLY
