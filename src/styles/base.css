@@ -417,11 +417,21 @@ td.cc { white-space: nowrap; }
 
 /* ---------- Footer ---------- */
 footer {
+  position: relative;
   margin-top: clamp(3rem, 7vw, 5rem);
   padding-top: clamp(2rem, 5vw, 3rem);
+  padding-bottom: clamp(3rem, 6vw, 4rem);
   border-top: 1px solid var(--line);
   font-size: .85rem;
   color: var(--text-soft);
+}
+/* The Evil Martians martian, lurking in the corner */
+.lurker {
+  position: absolute;
+  right: clamp(1rem, 5vw, 2.5rem);
+  bottom: clamp(1rem, 3vw, 1.6rem);
+  height: 2.9rem;
+  width: auto;
 }
 footer .label { color: var(--accent); display: block; margin-bottom: .8rem; }
 footer p { max-width: var(--measure); line-height: 1.65; margin: .6rem 0; }

@@ -10,6 +10,7 @@ require "json"
 require "cgi"
 require "uri"
 require "digest"
+require "fileutils"
 
 ROOT = File.expand_path("..", __dir__)
 rows = JSON.parse(File.read(File.join(ROOT, "data", "scorecard.json")))["rows"]
@@ -17,6 +18,14 @@ cov_path = File.join(ROOT, "data", "coverage.json")
 coverage = File.exist?(cov_path) ? JSON.parse(File.read(cov_path)) : {}
 cg_path = File.join(ROOT, "data", "content_gap.json")
 content_gap = File.exist?(cg_path) ? JSON.parse(File.read(cg_path)) : nil
+
+# Evil Martians favicon set (+ the martian used as the footer lurker), self-hosted at the site root.
+DIST = File.join(ROOT, "dist")
+FileUtils.mkdir_p(DIST)
+%w[favicon.svg favicon.ico apple-touch-icon.png].each do |f|
+  src = File.join(ROOT, "src", "assets", f)
+  FileUtils.cp(src, File.join(DIST, f)) if File.exist?(src)
+end
 
 OK  = '<span class="ok" title="yes">&#10003;</span>'
 BAD = '<span class="bad" title="no">&#10007;</span>'
@@ -198,6 +207,9 @@ PAGE = <<HTML
 <title>Ruby &amp; Rails LLM Discoverability Scorecard</title>
 <meta name="description" content="A measured scorecard of how discoverable Ruby, Rails, and the wider ecosystem's documentation is to LLMs and AI coding agents, and what the community can do to move the needle.">
 <script>(function(){try{var t=localStorage.getItem('rsc-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}})();</script>
+<link rel="icon" type="image/svg+xml" href="favicon.svg#{asset_q("favicon.svg")}">
+<link rel="icon" sizes="32x32" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="assets/styles.css#{asset_q("assets/styles.css")}">
 <script type="module" src="assets/app.js#{asset_q("assets/app.js")}"></script>
 </head>
@@ -378,6 +390,7 @@ never reaches it.</p>
   <a href="https://evilmartians.com/chronicles/3-rules-for-getting-ai-agents-to-find-use-and-not-exploit-your-devtool">&ldquo;3
   rules for getting AI agents to find, use, and not exploit your devtool&rdquo;</a> on the Evil Martians
   Chronicles.</p>
+  <img class="lurker" src="favicon.svg#{asset_q("favicon.svg")}" alt="" aria-hidden="true" width="44" height="44">
 </footer>
 
 </main>
