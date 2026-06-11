@@ -147,8 +147,3 @@ does) or wire a search API. Then rebuild.
 
 `dist/` is self-contained. Copy the whole folder to the ruby.evilmartians.com host, e.g.
 `rsync -a dist/ <host>`.
-
-## Related
-
-The detailed per-lever community reference ("what exists / does it work / who + how") lives in the
-`whichlang` project and links to this scorecard.
