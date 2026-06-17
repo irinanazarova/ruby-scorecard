@@ -49,6 +49,23 @@ NOTES = {
     - [ ] Publish a `sitemap.xml` (VitePress: set `sitemap: { hostname }`) listing the current pages.
     - [ ] Keep the `llms-full.txt` (already linked) in sync with the new structure.
     - [ ] Re-check coverage after the next monthly Common Crawl.
+  MD,
+  "evilmartians.com" => <<~MD
+    ## Why the gap (and why it's different here)
+
+    **Not blocked, not unlisted.** robots.txt allows AI crawlers (`Content-Signal: ai-train=yes`), and
+    **367 of the missing pages are in the sitemap** (`/sitemap/sitemap-index.xml`, ~1,009 URLs total).
+    llms.txt is present but irrelevant to Common Crawl: it's a runtime hint for agents, not a crawler
+    directive, so it never affects what CC ingests.
+
+    **Cause: Common Crawl's own crawl budget and URL selection.** CC samples a domain by link centrality
+    and a per-site budget rather than fetching every sitemap URL, so roughly half of evilmartians.com, the
+    deeper / newer / less-linked Chronicles articles, doesn't make the cut.
+
+    **TODO** (the on-site basics are already correct, so these raise crawl priority rather than fix a blocker)
+    - [ ] Strengthen internal linking to deeper Chronicles posts (link from high-traffic pages, cut click depth).
+    - [ ] Earn external backlinks to raise domain authority and crawl budget.
+    - [ ] Time: CC accumulates over monthly crawls; newer posts enter on later passes, re-check then.
   MD
 }.freeze
 
