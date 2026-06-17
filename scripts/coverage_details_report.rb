@@ -35,7 +35,7 @@ NOTES = {
     - [ ] Add internal links + a few external backlinks to the newer guide/cookbook pages to raise crawl priority.
     - [ ] Re-check coverage after the next monthly Common Crawl.
   MD
-  "AnyCable" => <<~MD
+  "AnyCable" => <<~MD,
     ## Why the gap, and what to do
 
     **Cause: a docs URL restructure with no redirects.** Many pages moved from flat paths into
@@ -49,7 +49,7 @@ NOTES = {
     - [ ] Publish a `sitemap.xml` (VitePress: set `sitemap: { hostname }`) listing the current pages.
     - [ ] Keep the `llms-full.txt` (already linked) in sync with the new structure.
     - [ ] Re-check coverage after the next monthly Common Crawl.
-  MD,
+  MD
   "evilmartians.com" => <<~MD
     ## Why the gap (and why it's different here)
 
