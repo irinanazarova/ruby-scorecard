@@ -2,8 +2,8 @@
 
 Docs: https://inertia-rails.dev/guide/ · scope `inertia-rails.dev` · Common Crawl index `CC-MAIN-2026-21`
 
-Of **56** documentation pages found by crawling the live site, **18**
-are present in Common Crawl (**32%**) and **38** are not.
+Of **57** documentation pages found by crawling the live site, **18**
+are present in Common Crawl (**32%**) and **39** are not.
 (1 URLs are in Common Crawl but were not reached by the crawl,
 e.g. redirects, old paths, or orphan pages.)
 
@@ -27,7 +27,7 @@ e.g. redirects, old paths, or orphan pages.)
 - https://inertia-rails.dev/guide/title-and-meta
 - https://inertia-rails.dev/guide/view-transitions
 
-## NOT in Common Crawl (38)
+## NOT in Common Crawl (39)
 - https://inertia-rails.dev/awesome
 - https://inertia-rails.dev/cookbook/inertia-modal
 - https://inertia-rails.dev/cookbook/integrating-shadcn-ui
@@ -36,6 +36,7 @@ e.g. redirects, old paths, or orphan pages.)
 - https://inertia-rails.dev/guide/authorization
 - https://inertia-rails.dev/guide/code-splitting
 - https://inertia-rails.dev/guide/configuration
+- https://inertia-rails.dev/guide/demo-application
 - https://inertia-rails.dev/guide/error-handling
 - https://inertia-rails.dev/guide/events
 - https://inertia-rails.dev/guide/file-uploads
