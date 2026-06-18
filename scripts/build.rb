@@ -18,6 +18,8 @@ cov_path = File.join(ROOT, "data", "coverage.json")
 coverage = File.exist?(cov_path) ? JSON.parse(File.read(cov_path)) : {}
 cg_path = File.join(ROOT, "data", "content_gap.json")
 content_gap = File.exist?(cg_path) ? JSON.parse(File.read(cg_path)) : nil
+q_path = File.join(ROOT, "data", "quality.json")
+quality = File.exist?(q_path) ? JSON.parse(File.read(q_path)) : {}
 
 # Evil Martians favicon set (+ the martian used as the footer lurker), self-hosted at the site root.
 DIST = File.join(ROOT, "dist")
@@ -198,6 +200,31 @@ else
   ""
 end
 
+# ---- "second gate" quality block (FineWeb-Edu classifier over each resource's docs) ----
+QUALITY = if quality && !quality.empty?
+  scored = quality.select { |_, v| v["edu"] }
+  keep  = scored.count { |_, v| v["edu"] >= 3 }
+  low   = scored.count { |_, v| v["edu"] < 2 }
+  curly = scored.count { |_, v| v["c4_curly"] }
+  unscored = quality.count { |_, v| !v["edu"] }
+  top = scored.sort_by { |_, v| -v["edu"] }.first(3).map { |k, v| "#{esc(k)} #{format('%.1f', v["edu"])}" }.join(", ")
+  <<QUAL
+<h3 class="cg-title">The second gate: would these docs survive the quality filter?</h3>
+<p class="note">Being in Common Crawl is the first gate. The second is the quality classifier that corpus
+builders run before training. Scored with FineWeb-Edu's open classifier (0&ndash;5; FineWeb-Edu keeps
+documents scoring &ge;&nbsp;3), only <strong>#{keep} of #{scored.size}</strong> of these docs clear the bar
+(#{top}), and <strong>#{low}</strong> score below&nbsp;2. Separately, <strong>#{curly}</strong> contain a
+code brace <code>{</code> that <a href="https://research.google/blog/exploring-transfer-learning-with-t5-the-text-to-text-transfer-transformer/">C4</a>
+drops outright, and #{unscored} returned no extractable text (client-rendered or blocked).</p>
+<p class="note">The classifier rewards educational prose and penalizes dense reference and code docs, so a
+low score is partly the filter's bias against technical content. That bias is the point: the filters that
+gate web training data are tuned against exactly the docs developers need, so being crawlable and in Common
+Crawl is still not enough to reach the corpus.</p>
+QUAL
+else
+  ""
+end
+
 PAGE = <<HTML
 <!doctype html>
 <html lang="en">
@@ -276,6 +303,8 @@ sampled). Click any heading to sort.</p>
   </table>
   </div>
 </scorecard-table>
+
+#{QUALITY}
 </section>
 
 <section>

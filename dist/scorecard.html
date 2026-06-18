@@ -184,6 +184,19 @@ sampled). Click any heading to sort.</p>
   </table>
   </div>
 </scorecard-table>
+
+<h3 class="cg-title">The second gate: would these docs survive the quality filter?</h3>
+<p class="note">Being in Common Crawl is the first gate. The second is the quality classifier that corpus
+builders run before training. Scored with FineWeb-Edu's open classifier (0&ndash;5; FineWeb-Edu keeps
+documents scoring &ge;&nbsp;3), only <strong>3 of 85</strong> of these docs clear the bar
+(Rails API 3.7, RubyDoc.info 3.7, Ruby (language) 3.0), and <strong>66</strong> score below&nbsp;2. Separately, <strong>27</strong> contain a
+code brace <code>{</code> that <a href="https://research.google/blog/exploring-transfer-learning-with-t5-the-text-to-text-transfer-transformer/">C4</a>
+drops outright, and 7 returned no extractable text (client-rendered or blocked).</p>
+<p class="note">The classifier rewards educational prose and penalizes dense reference and code docs, so a
+low score is partly the filter's bias against technical content. That bias is the point: the filters that
+gate web training data are tuned against exactly the docs developers need, so being crawlable and in Common
+Crawl is still not enough to reach the corpus.</p>
+
 </section>
 
 <section>

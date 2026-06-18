@@ -1,0 +1,7 @@
+# Throwaway worker for the FineWeb-Edu quality probe (needs RAM for torch + the classifier).
+app = "ruby-scorecard-quality"
+primary_region = "ams"
+
+[[vm]]
+  size = "shared-cpu-2x"
+  memory = 2048
