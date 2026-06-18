@@ -345,9 +345,12 @@ shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; 
       the agentic benchmarks, where modern coding ability is measured; adding a language to an eval
       measurably improves models on it (<a href="https://github.com/nuprl/MultiPL-T">MultiPL-T</a>,
       <a href="https://arxiv.org/abs/2410.18957">Bridge-Coder</a>).</li>
-    <li>Publish an open, idiomatic-Rails instruction dataset; contribute permissively-licensed Ruby
-      content to open corpora like <a href="https://huggingface.co/datasets/PleIAs/common_corpus">Common
-      Corpus</a>.</li>
+    <li>Grow Ruby's share of the training corpus. Code models also learn from curated GitHub archives
+      (Software Heritage &rarr; <a href="https://huggingface.co/datasets/bigcode/the-stack-v2">The Stack</a>),
+      where Ruby is ~6.8&nbsp;GB against Python's ~60 and JavaScript's ~65, and capability tracks that share.
+      Publish an open, idiomatic-Rails instruction dataset and contribute permissively-licensed Ruby to open
+      corpora like <a href="https://huggingface.co/datasets/PleIAs/common_corpus">Common Corpus</a>;
+      rebalancing a corpus toward under-represented languages measurably lifts them.</li>
     <li>Keep the public <a href="https://github.com/chad/whichlang">whichlang benchmark</a> as the
       scoreboard for the final boss below, and re-run it on each new model.</li>
   </ul>
@@ -374,12 +377,14 @@ The language-choice figure is from the open whichlang benchmark (13 models, 1,26
 Ruby; <a href="https://github.com/chad/whichlang">github.com/chad/whichlang</a>). That the same models write
 Rails competently when instructed is our own informal observation.</p>
 <p class="note"><strong>Why Common Crawl?</strong> It's the open web crawl that seeds most LLM pretraining
-corpora (C4, RefinedWeb, FineWeb, behind GPT, Llama, and others) and feeds many retrieval indexes.
-A project's CC coverage is a proxy for whether a model has seen its docs at all, a separate question from
-whether the live site is crawlable today. It's the one column you cannot fix this quarter, since it reflects
-crawls already taken, which is why getting in (sitemaps, unblocking bots, backlinks) is Layer 0. The usual
-reason a page is absent is a <strong>missing sitemap</strong>: with no manifest to discover from, the crawler
-never reaches it.</p>
+corpora (C4, RefinedWeb, FineWeb, behind GPT, Llama, and others). Common Crawl is a sampled, English-biased
+slice of the web: it picks domains and pages by
+<a href="https://facctconference.org/static/papers24/facct24-148.pdf">harmonic centrality under a fixed
+budget</a>, so a project's CC coverage is a proxy for whether a model has seen its docs at all. Inclusion is
+necessary but not sufficient: the corpora are built from heavily filtered, deduplicated derivatives, so a
+crawled page must also clear a quality filter to reach training. It's the one column you cannot fix this
+quarter (it reflects crawls already taken), which is why getting in, via sitemaps, internal links, backlinks,
+and unblocking bots, is Layer 0.</p>
 </section>
 
 <footer>
