@@ -15,6 +15,11 @@ import json, sys, re, time, urllib.request, os
 MODEL = "HuggingFaceFW/fineweb-edu-classifier"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PRINT_ONLY = "--print" in sys.argv
+# --details NAME : instead of scoring resources, score the found vs not-crawled pages of one
+# coverage-detail target (data/coverage_details.json) to test whether the missing pages are missing
+# because they'd fail the quality filter, or just were not crawled. Caps each bucket for runtime.
+DETAILS = sys.argv[sys.argv.index("--details") + 1] if "--details" in sys.argv else None
+CAP = 120
 
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -43,6 +48,61 @@ def edu_score(text):
     with torch.no_grad():
         logit = model(**inputs).logits.squeeze(-1).float().item()
     return max(0.0, min(logit, 5.0))
+
+def score_doc(url):
+    text = to_text(fetch(url))
+    if len(text) < 50:
+        return {"edu": None, "note": "no readable text"}
+    score = round(edu_score(text), 2)
+    return {"edu": score, "edu_int": int(round(score)), "keep": score >= 3,
+            "c4_curly": "{" in text, "chars": len(text)}
+
+def evenly(items, cap):
+    if len(items) <= cap:
+        return items
+    step = len(items) / cap
+    return [items[int(i * step)] for i in range(cap)]
+
+if DETAILS:
+    det = json.load(open(os.path.join(ROOT, "data", "coverage_details.json")))[DETAILS]
+    junk = re.compile(r"(?i)\.(atom|xml|json|rss|png|jpg|svg|pdf|css|js)$|%")
+    def normurls(lst):
+        seen, urls = set(), []
+        for p in lst:
+            if junk.search(p):
+                continue
+            u = "https://" + p.lstrip("/") if not p.startswith("http") else p
+            if u not in seen:
+                seen.add(u); urls.append(u)
+        return urls
+    buckets = {"found": evenly(normurls(det["found"]), CAP),
+               "not_crawled": evenly(normurls(det["not_crawled"]), CAP)}
+    out = {"target": DETAILS, "docs": det.get("docs"), "buckets": {}}
+    for bname, urls in buckets.items():
+        scored = []
+        for u in urls:
+            e = score_doc(u); e["url"] = u
+            scored.append(e)
+            print(f"[{bname}] edu={e.get('edu')} {u}", file=sys.stderr)
+            time.sleep(0.2)
+        vals = [e["edu"] for e in scored if e.get("edu") is not None]
+        vals_sorted = sorted(vals)
+        n = len(vals)
+        out["buckets"][bname] = {
+            "n_urls": len(urls), "n_scored": n,
+            "avg": round(sum(vals) / n, 2) if n else None,
+            "median": round(vals_sorted[n // 2], 2) if n else None,
+            "keep_ge3": sum(1 for v in vals if v >= 3),
+            "below2": sum(1 for v in vals if v < 2),
+            "pages": scored,
+        }
+    if PRINT_ONLY:
+        print(json.dumps(out))
+    else:
+        path = os.path.join(ROOT, "data", "quality_details.json")
+        json.dump(out, open(path, "w"), indent=1)
+        print(f"wrote {path}", file=sys.stderr)
+    sys.exit(0)
 
 rows = json.load(open(os.path.join(ROOT, "data", "scorecard.json")))["rows"]
 out = {}

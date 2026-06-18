@@ -626,3 +626,21 @@ deeper / newer / less-linked Chronicles articles, doesn't make the cut.
 - [ ] Earn external backlinks to raise domain authority and crawl budget.
 - [ ] Time: CC accumulates over monthly crawls; newer posts enter on later passes, re-check then.
 
+## Second gate: would these pages survive the quality filter?
+
+Being in Common Crawl is the first gate; corpus builders then run a quality classifier before
+training. Scoring a sample of both buckets with the open
+[FineWeb-Edu classifier](https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier) (0&ndash;5
+educational quality; FineWeb-Edu keeps documents scoring &ge; 3):
+
+| bucket | sampled | avg | median | kept (&ge; 3) |
+| --- | ---: | ---: | ---: | ---: |
+| in Common Crawl | 120 | 1.54 | 1.49 | 0 |
+| not in Common Crawl | 120 | 1.51 | 1.48 | 1 |
+
+The crawled and the missing pages score the same (avg 1.54 vs 1.51), so the gap is
+about crawl reach, not page quality: CC did not skip these pages for being low quality. Separately,
+almost none of either bucket clears the &ge; 3 bar, so even the pages already in Common Crawl would
+mostly be dropped at the quality gate. The classifier rewards educational prose and penalizes
+marketing copy, dense reference, and code, which is most of a consultancy site.
+

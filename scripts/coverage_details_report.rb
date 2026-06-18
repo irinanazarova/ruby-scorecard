@@ -14,6 +14,36 @@ details = JSON.parse(File.read(src))
 out_dir = File.join(ROOT, "data", "coverage_details")
 Dir.mkdir(out_dir) unless Dir.exist?(out_dir)
 
+# Optional: per-page FineWeb-Edu quality scores (fetch/quality-on-fly.sh --details "<target>").
+qd_path = File.join(ROOT, "data", "quality_details.json")
+QUALITY = File.exist?(qd_path) ? JSON.parse(File.read(qd_path)) : nil
+
+def quality_section(name, qd)
+  return "" unless qd && qd["target"] == name
+  f = qd.dig("buckets", "found") or return ""
+  m = qd.dig("buckets", "not_crawled") or return ""
+  <<~MD
+
+    ## Second gate: would these pages survive the quality filter?
+
+    Being in Common Crawl is the first gate; corpus builders then run a quality classifier before
+    training. Scoring a sample of both buckets with the open
+    [FineWeb-Edu classifier](https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier) (0&ndash;5
+    educational quality; FineWeb-Edu keeps documents scoring &ge; 3):
+
+    | bucket | sampled | avg | median | kept (&ge; 3) |
+    | --- | ---: | ---: | ---: | ---: |
+    | in Common Crawl | #{f["n_scored"]} | #{f["avg"]} | #{f["median"]} | #{f["keep_ge3"]} |
+    | not in Common Crawl | #{m["n_scored"]} | #{m["avg"]} | #{m["median"]} | #{m["keep_ge3"]} |
+
+    The crawled and the missing pages score the same (avg #{f["avg"]} vs #{m["avg"]}), so the gap is
+    about crawl reach, not page quality: CC did not skip these pages for being low quality. Separately,
+    almost none of either bucket clears the &ge; 3 bar, so even the pages already in Common Crawl would
+    mostly be dropped at the quality gate. The classifier rewards educational prose and penalizes
+    marketing copy, dense reference, and code, which is most of a consultancy site.
+  MD
+end
+
 JUNK = %r{/cdn-cgi/|email-protection|/feed\b|\.rss\b}
 
 # Per-resource diagnosis + fixes, appended to each report (see the scorecard investigation).
@@ -92,7 +122,7 @@ details.each do |name, d|
 
     ## NOT in Common Crawl (#{missing.size})
     #{missing.empty? ? "_none_" : li(missing)}
-    #{NOTES[name]}
+    #{NOTES[name]}#{quality_section(name, QUALITY)}
   MD
   path = File.join(out_dir, "#{slug(name)}.md")
   File.write(path, md)

@@ -2,9 +2,15 @@
 # Run the training-data quality probe (FineWeb-Edu classifier) from a disposable Fly machine,
 # scoring every resource's docs page, and capture data/quality.json. Then rebuild + deploy to publish.
 #
-# Usage:  ./fetch/quality-on-fly.sh
+# Usage:
+#   ./fetch/quality-on-fly.sh                          # score each resource -> data/quality.json
+#   ./fetch/quality-on-fly.sh --details "evilmartians.com"   # score found vs missing pages -> data/quality_details.json
 set -euo pipefail
 cd "$(dirname "$0")/.."
+
+PROBE_ARGS=("$@")
+OUT="data/quality.json"; VALIDATE='resource'
+if [[ "${1:-}" == "--details" ]]; then OUT="data/quality_details.json"; VALIDATE='details'; fi
 
 APP="${QUALITY_APP:-ruby-scorecard-quality}"
 ORG="${FETCH_ORG:-personal}"
@@ -19,9 +25,14 @@ echo "Building the quality image (torch + FineWeb-Edu classifier, this is slow) 
 flyctl deploy . -a "$APP" -c fetch/fly.quality.toml --dockerfile fetch/quality.Dockerfile --ha=false
 
 echo "Scoring docs with the FineWeb-Edu classifier ..." >&2
-flyctl ssh console -a "$APP" -C "python /app/scripts/quality.py --print" > data/quality.json
+flyctl ssh console -a "$APP" -C "python /app/scripts/quality.py --print ${PROBE_ARGS[*]}" > "$OUT"
 
-ruby -rjson -e 'q=JSON.parse(File.read("data/quality.json")); s=q.count{|_,v| v["edu"]}; warn "captured quality.json (scored #{s}/#{q.size})"' \
-  || { echo "ERROR: data/quality.json is not valid JSON; leaving it for inspection." >&2; exit 1; }
+if [[ "$VALIDATE" == "details" ]]; then
+  ruby -rjson -e 'q=JSON.parse(File.read(ARGV[0])); q["buckets"].each{|k,v| warn "#{k}: avg=#{v["avg"]} median=#{v["median"]} keep>=3=#{v["keep_ge3"]} scored=#{v["n_scored"]}/#{v["n_urls"]}"}' "$OUT" \
+    || { echo "ERROR: $OUT is not valid JSON; leaving it for inspection." >&2; exit 1; }
+else
+  ruby -rjson -e 'q=JSON.parse(File.read(ARGV[0])); s=q.count{|_,v| v["edu"]}; warn "captured (scored #{s}/#{q.size})"' "$OUT" \
+    || { echo "ERROR: $OUT is not valid JSON; leaving it for inspection." >&2; exit 1; }
+fi
 
-echo "Done -> data/quality.json. Rebuild (./build.sh) and deploy to publish." >&2
+echo "Done -> $OUT." >&2

@@ -9,4 +9,5 @@ m='HuggingFaceFW/fineweb-edu-classifier'; AutoTokenizer.from_pretrained(m); M.fr
 WORKDIR /app
 COPY scripts/quality.py scripts/quality.py
 COPY data/scorecard.json data/scorecard.json
+COPY data/coverage_details.json data/coverage_details.json
 CMD ["sleep", "infinity"]
