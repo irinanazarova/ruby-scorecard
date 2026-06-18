@@ -11,6 +11,7 @@ Being in Common Crawl is necessary but not sufficient; this measures the second 
 filtering). Run on a disposable Fly machine via fetch/quality-on-fly.sh. `--print` -> JSON on stdout.
 """
 import json, sys, re, time, urllib.request, os
+from concurrent.futures import ThreadPoolExecutor
 
 MODEL = "HuggingFaceFW/fineweb-edu-classifier"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,21 +20,35 @@ PRINT_ONLY = "--print" in sys.argv
 # coverage-detail target (data/coverage_details.json) to test whether the missing pages are missing
 # because they'd fail the quality filter, or just were not crawled. Caps each bucket for runtime.
 DETAILS = sys.argv[sys.argv.index("--details") + 1] if "--details" in sys.argv else None
-CAP = 120
+CAP = int(sys.argv[sys.argv.index("--cap") + 1]) if "--cap" in sys.argv else 120
+ONLY = sys.argv[sys.argv.index("--only") + 1] if "--only" in sys.argv else None
 
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
+torch.set_num_threads(os.cpu_count() or 4)
 tok = AutoTokenizer.from_pretrained(MODEL)
 model = AutoModelForSequenceClassification.from_pretrained(MODEL)
 model.eval()
+
+def edu_scores_batch(texts, bs=16):
+    scores = []
+    for i in range(0, len(texts), bs):
+        inp = tok(texts[i:i + bs], return_tensors="pt", truncation=True, max_length=512, padding=True)
+        with torch.no_grad():
+            logits = model(**inp).logits.squeeze(-1).float().tolist()
+        if not isinstance(logits, list):
+            logits = [logits]
+        scores.extend(max(0.0, min(l, 5.0)) for l in logits)
+        print(f"  scored {min(i + bs, len(texts))}/{len(texts)}", file=sys.stderr)
+    return scores
 
 CHROME = re.compile(r"(?is)<(script|style|svg|nav|head|header|footer|aside)\b.*?</\1>")
 
 def fetch(url):
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "ruby-scorecard/1.0 quality-probe (+https://ruby.evilmartians.com)"})
-        return urllib.request.urlopen(req, timeout=30).read().decode("utf-8", "ignore")
+        return urllib.request.urlopen(req, timeout=10).read().decode("utf-8", "ignore")
     except Exception:
         return ""
 
@@ -77,14 +92,28 @@ if DETAILS:
         return urls
     buckets = {"found": evenly(normurls(det["found"]), CAP),
                "not_crawled": evenly(normurls(det["not_crawled"]), CAP)}
+    if ONLY:
+        buckets = {ONLY: buckets[ONLY]}
     out = {"target": DETAILS, "docs": det.get("docs"), "buckets": {}}
     for bname, urls in buckets.items():
+        # Fetch concurrently (network-bound), then score in batches (torch forward pass batches well).
+        print(f"[{bname}] fetching {len(urls)} ...", file=sys.stderr)
+        with ThreadPoolExecutor(max_workers=16) as ex:
+            texts = list(ex.map(lambda u: to_text(fetch(u)), urls))
+        have = [i for i, t in enumerate(texts) if len(t) >= 50]
+        print(f"[{bname}] scoring {len(have)} with text ({len(urls) - len(have)} empty) ...", file=sys.stderr)
+        batch_scores = edu_scores_batch([texts[i] for i in have])
+        score_by_idx = dict(zip(have, batch_scores))
         scored = []
-        for u in urls:
-            e = score_doc(u); e["url"] = u
+        for i, (u, text) in enumerate(zip(urls, texts)):
+            if i not in score_by_idx:
+                e = {"edu": None, "note": "no readable text"}
+            else:
+                score = round(score_by_idx[i], 2)
+                e = {"edu": score, "edu_int": int(round(score)), "keep": score >= 3,
+                     "c4_curly": "{" in text, "chars": len(text)}
+            e["url"] = u
             scored.append(e)
-            print(f"[{bname}] edu={e.get('edu')} {u}", file=sys.stderr)
-            time.sleep(0.2)
         vals = [e["edu"] for e in scored if e.get("edu") is not None]
         vals_sorted = sorted(vals)
         n = len(vals)

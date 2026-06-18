@@ -3,5 +3,5 @@ app = "ruby-scorecard-quality"
 primary_region = "ams"
 
 [[vm]]
-  size = "shared-cpu-2x"
-  memory = 2048
+  size = "performance-4x"
+  memory = 8192
