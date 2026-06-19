@@ -645,3 +645,5 @@ across all 598 pages only 1 clears the
 classifier rewards educational prose and penalizes marketing copy, dense reference, and code, which
 is most of a consultancy site.
 
+The only page that clears it is [`/chronicles/how-to-use-p3-colors-in-svg`](https://evilmartians.com/chronicles/how-to-use-p3-colors-in-svg) (3.12, but contains a `{` that C4 drops), a self-contained how-to with worked examples, exactly the explanatory prose the classifier rewards. The next closest are explainer/tutorial posts in the 2.4&ndash;2.7 band (`variable-fonts-in-real-life-how-to-use-and-love-them` 2.71, `store-model` 2.66, `level-up-for-ux-design-lessons-from-videogames` 2.55), still short of 3.
+

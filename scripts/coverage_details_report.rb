@@ -22,6 +22,18 @@ def quality_section(name, qd)
   return "" unless qd && qd["target"] == name
   f = qd.dig("buckets", "found") or return ""
   m = qd.dig("buckets", "not_crawled") or return ""
+  pages = (f["pages"] || []) + (m["pages"] || [])
+  keepers = pages.select { |p| p["edu"] && p["edu"] >= 3 }.sort_by { |p| -p["edu"] }
+  near = pages.select { |p| p["edu"] && p["edu"] >= 2 && p["edu"] < 3 }.sort_by { |p| -p["edu"] }
+  keep_line =
+    if keepers.empty?
+      "No page on the site clears the bar."
+    else
+      list = keepers.map { |p| "[`#{p["url"].sub(%r{^https?://[^/]+}, "")}`](#{p["url"]}) (#{p["edu"]}#{p["c4_curly"] ? ", but contains a `{` that C4 drops" : ""})" }.join("; ")
+      "The only page that clears it is #{list}, a self-contained how-to with worked examples, " \
+      "exactly the explanatory prose the classifier rewards. The next closest are explainer/tutorial " \
+      "posts in the 2.4&ndash;2.7 band (#{near.first(3).map { |p| "`#{p["url"].sub(%r{^https?://[^/]+}, "").split("/").last}` #{p["edu"]}" }.join(", ")}), still short of 3."
+    end
   <<~MD
 
     ## Second gate: would these pages survive the quality filter?
@@ -42,6 +54,8 @@ def quality_section(name, qd)
     &ge; 3 bar, so even the pages already in Common Crawl would be dropped at the quality gate. The
     classifier rewards educational prose and penalizes marketing copy, dense reference, and code, which
     is most of a consultancy site.
+
+    #{keep_line}
   MD
 end
 
