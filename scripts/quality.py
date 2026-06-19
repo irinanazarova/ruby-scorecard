@@ -22,6 +22,8 @@ PRINT_ONLY = "--print" in sys.argv
 DETAILS = sys.argv[sys.argv.index("--details") + 1] if "--details" in sys.argv else None
 CAP = int(sys.argv[sys.argv.index("--cap") + 1]) if "--cap" in sys.argv else 120
 ONLY = sys.argv[sys.argv.index("--only") + 1] if "--only" in sys.argv else None
+# --extra-urls "u1,u2": score these as an extra "extra" bucket in --details mode (ad-hoc page checks).
+EXTRA = sys.argv[sys.argv.index("--extra-urls") + 1].split(",") if "--extra-urls" in sys.argv else []
 
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -94,6 +96,8 @@ if DETAILS:
                "not_crawled": evenly(normurls(det["not_crawled"]), CAP)}
     if ONLY:
         buckets = {ONLY: buckets[ONLY]}
+    if EXTRA:
+        buckets["extra"] = [u.strip() for u in EXTRA if u.strip()]
     out = {"target": DETAILS, "docs": det.get("docs"), "buckets": {}}
     for bname, urls in buckets.items():
         # Fetch concurrently (network-bound), then score in batches (torch forward pass batches well).

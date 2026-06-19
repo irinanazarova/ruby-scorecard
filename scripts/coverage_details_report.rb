@@ -15,11 +15,14 @@ out_dir = File.join(ROOT, "data", "coverage_details")
 Dir.mkdir(out_dir) unless Dir.exist?(out_dir)
 
 # Optional: per-page FineWeb-Edu quality scores (fetch/quality-on-fly.sh --details "<target>").
-qd_path = File.join(ROOT, "data", "quality_details.json")
-QUALITY = File.exist?(qd_path) ? JSON.parse(File.read(qd_path)) : nil
+# One file per target: data/quality_details_<slug>.json, indexed here by its "target" field.
+QUALITY = Dir[File.join(ROOT, "data", "quality_details*.json")].each_with_object({}) do |p, h|
+  q = JSON.parse(File.read(p))
+  h[q["target"]] = q if q["target"]
+end
 
-def quality_section(name, qd)
-  return "" unless qd && qd["target"] == name
+def quality_section(name, all)
+  qd = all[name] or return ""
   f = qd.dig("buckets", "found") or return ""
   m = qd.dig("buckets", "not_crawled") or return ""
   pages = (f["pages"] || []) + (m["pages"] || [])
@@ -53,7 +56,7 @@ def quality_section(name, qd)
     across all #{f["n_scored"] + m["n_scored"]} pages only #{f["keep_ge3"] + m["keep_ge3"]} clears the
     &ge; 3 bar, so even the pages already in Common Crawl would be dropped at the quality gate. The
     classifier rewards educational prose and penalizes marketing copy, dense reference, and code, which
-    is most of a consultancy site.
+    is most of a developer docs or product site.
 
     #{keep_line}
   MD

@@ -10,7 +10,11 @@ cd "$(dirname "$0")/.."
 
 PROBE_ARGS=("$@")
 OUT="data/quality.json"; VALIDATE='resource'
-if [[ "${1:-}" == "--details" ]]; then OUT="data/quality_details.json"; VALIDATE='details'; fi
+if [[ "${1:-}" == "--details" ]]; then
+  VALIDATE='details'
+  slug=$(echo "${2:-target}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/^-//;s/-$//')
+  OUT="data/quality_details_${slug}.json"
+fi
 
 APP="${QUALITY_APP:-ruby-scorecard-quality}"
 ORG="${FETCH_ORG:-personal}"
