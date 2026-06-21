@@ -1,8 +1,9 @@
 # nginx image needs only dist/ + deploy/; the Fly fetch image (fetch/Dockerfile) also
-# needs scripts/ + data/. node_modules, src/, etc. stay excluded.
+# needs scripts/ + data/; the check service (web/check.Dockerfile) needs scripts/ + web/.
 *
 !dist
 !deploy
 !scripts
 !data
 !fetch
+!web
