@@ -1,9 +1,6 @@
 app = "ruby-quality-api"
 primary_region = "ams"
 
-[build]
-  dockerfile = "check.Dockerfile"
-
 [http_service]
   internal_port = 8080
   force_https = true
