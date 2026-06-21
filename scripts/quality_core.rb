@@ -141,9 +141,10 @@ module QualityCore
       return { ok: false, error: "No extractable text (client-rendered or blocked)." } if text.length < 50
 
       sc = score_text(text)
-      fb = feedback(sc, features(text))
+      ft = features(text)
+      fb = feedback(sc, ft)
       { ok: true, score: sc[:score], doc_score: sc[:doc_score], int_score: sc[:int_score], keep: sc[:keep],
-        verdict: fb[:verdict], suggestions: fb[:suggestions], extracted_words: text.split.size,
+        verdict: fb[:verdict], suggestions: fb[:suggestions], features: ft, extracted_words: text.split.size,
         extraction: method, warning: WARNING }
     end
   end
