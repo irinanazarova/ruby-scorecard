@@ -32,7 +32,7 @@ def quality_section(name, all)
     if keepers.empty?
       "No page on the site clears the bar."
     else
-      list = keepers.map { |p| "[`#{p["url"].sub(%r{^https?://[^/]+}, "")}`](#{p["url"]}) (#{p["edu"]}#{p["c4_curly"] ? ", though it has `{` code lines that C4 would strip" : ""})" }.join("; ")
+      list = keepers.map { |p| "[`#{p["url"].sub(%r{^https?://[^/]+}, "")}`](#{p["url"]}) (#{p["edu"]}#{p["c4_curly"] ? ", though it contains a `{`, which C4 dropped whole pages for" : ""})" }.join("; ")
       "The only page that clears it is #{list}, a self-contained how-to with worked examples, " \
       "exactly the explanatory prose the classifier rewards. The next closest are explainer/tutorial " \
       "posts in the 2.4&ndash;2.7 band (#{near.first(3).map { |p| "`#{p["url"].sub(%r{^https?://[^/]+}, "").split("/").last}` #{p["edu"]}" }.join(", ")}), still short of 3."

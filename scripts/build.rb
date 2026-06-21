@@ -214,9 +214,9 @@ QUALITY = if quality && !quality.empty?
 builders run before training. Scored with FineWeb-Edu's open classifier (0&ndash;5; FineWeb-Edu keeps
 documents scoring &ge;&nbsp;3), only <strong>#{keep} of #{scored.size}</strong> of these docs clear the bar
 (#{top}), and <strong>#{low}</strong> score below&nbsp;2. Separately, <strong>#{curly}</strong> contain a
-code brace <code>{</code>: <a href="https://research.google/blog/exploring-transfer-learning-with-t5-the-text-to-text-transfer-transformer/">C4</a>
-strips every line with one, so a code-heavy page loses its code and can fall below C4's length filter
-entirely. #{unscored} returned no extractable text (client-rendered or blocked).</p>
+code brace <code>{</code>, and <a href="https://research.google/blog/exploring-transfer-learning-with-t5-the-text-to-text-transfer-transformer/">C4</a>
+removed any page that contained one, so a single code sample is enough to drop the whole page from that
+corpus. #{unscored} returned no extractable text (client-rendered or blocked).</p>
 <p class="note">The classifier rewards educational prose and penalizes dense reference and code docs, so a
 low score is partly the filter's bias against technical content. That bias is the point: the filters that
 gate web training data are tuned against exactly the docs developers need, so being crawlable and in Common
