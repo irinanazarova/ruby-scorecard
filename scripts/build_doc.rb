@@ -17,7 +17,7 @@ abort "no #{src}" unless File.exist?(src)
 raw = File.read(src)
 
 def slugify(text)
-  text.gsub(/<[^>]+>/, "").downcase.gsub(/[^\w\s-]/, "").strip.gsub(/\s+/, "-")
+  text.gsub(/<[^>]+>/, "").gsub(/&#?\w+;/, "").downcase.gsub(/[^\w\s-]/, "").strip.gsub(/\s+/, "-")
 end
 
 # Pull the H1 title + the first paragraph as a lead, leave the rest as the body.
