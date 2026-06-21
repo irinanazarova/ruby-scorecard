@@ -1,0 +1,19 @@
+# Action Policy docs (raw markdown = what the code-corpus channel sees)
+https://raw.githubusercontent.com/palkan/action_policy/master/docs/index.md
+https://raw.githubusercontent.com/palkan/action_policy/master/docs/guide/quick_start.md
+https://raw.githubusercontent.com/palkan/action_policy/master/docs/guide/custom_policy.md
+# TestProf docs
+https://raw.githubusercontent.com/test-prof/test-prof/master/docs/README.md
+https://raw.githubusercontent.com/test-prof/test-prof/master/docs/profilers/ruby_prof.md
+https://raw.githubusercontent.com/test-prof/test-prof/master/docs/recipes/let_it_be.md
+# AnyCable
+https://docs.anycable.io/anycable-go/getting_started
+https://anycable.io/compare/nodejs-websocket/
+# EM blog: tutorials
+https://evilmartians.com/chronicles/graphql-on-rails-1-from-zero-to-the-first-query
+https://evilmartians.com/chronicles/fighting-the-hydra-of-n-plus-one-queries
+https://evilmartians.com/chronicles/ruby-on-whales-docker-for-ruby-rails-development
+https://evilmartians.com/chronicles/testprof-a-good-doctor-for-slow-ruby-tests
+# EM blog: non-tutorial (opinion / report)
+https://evilmartians.com/chronicles/the-long-game-why-rails-survived-the-hype-cycle-and-what-it-means-for-your-startup
+https://evilmartians.com/chronicles/we-analyzed-1140-devtools-funding-rounds

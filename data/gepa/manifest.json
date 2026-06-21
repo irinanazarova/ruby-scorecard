@@ -1,0 +1,86 @@
+[
+  {
+    "i": 1,
+    "url": "https://raw.githubusercontent.com/palkan/action_policy/master/docs/guide/quick_start.md",
+    "kind": "documentation",
+    "topic": "quick start",
+    "base_score": 2.21
+  },
+  {
+    "i": 2,
+    "url": "https://raw.githubusercontent.com/palkan/action_policy/master/docs/guide/custom_policy.md",
+    "kind": "documentation",
+    "topic": "custom policy",
+    "base_score": 1.12
+  },
+  {
+    "i": 3,
+    "url": "https://raw.githubusercontent.com/test-prof/test-prof/master/docs/README.md",
+    "kind": "documentation",
+    "topic": "README",
+    "base_score": 1.61
+  },
+  {
+    "i": 4,
+    "url": "https://raw.githubusercontent.com/test-prof/test-prof/master/docs/recipes/let_it_be.md",
+    "kind": "documentation",
+    "topic": "let it be",
+    "base_score": 1.69
+  },
+  {
+    "i": 5,
+    "url": "https://docs.anycable.io/anycable-go/getting_started",
+    "kind": "documentation",
+    "topic": "getting started",
+    "base_score": 2.03
+  },
+  {
+    "i": 6,
+    "url": "https://anycable.io/compare/nodejs-websocket/",
+    "kind": "marketing comparison page",
+    "topic": "nodejs websocket",
+    "base_score": 1.4
+  },
+  {
+    "i": 7,
+    "url": "https://evilmartians.com/chronicles/graphql-on-rails-1-from-zero-to-the-first-query",
+    "kind": "tutorial blog post",
+    "topic": "graphql on rails 1 from zero to the first query",
+    "base_score": 2.03
+  },
+  {
+    "i": 8,
+    "url": "https://evilmartians.com/chronicles/fighting-the-hydra-of-n-plus-one-queries",
+    "kind": "tutorial blog post",
+    "topic": "fighting the hydra of n plus one queries",
+    "base_score": 1.65
+  },
+  {
+    "i": 9,
+    "url": "https://evilmartians.com/chronicles/ruby-on-whales-docker-for-ruby-rails-development",
+    "kind": "tutorial blog post",
+    "topic": "ruby on whales docker for ruby rails development",
+    "base_score": 1.59
+  },
+  {
+    "i": 10,
+    "url": "https://evilmartians.com/chronicles/testprof-a-good-doctor-for-slow-ruby-tests",
+    "kind": "tutorial blog post",
+    "topic": "testprof a good doctor for slow ruby tests",
+    "base_score": 1.35
+  },
+  {
+    "i": 11,
+    "url": "https://evilmartians.com/chronicles/the-long-game-why-rails-survived-the-hype-cycle-and-what-it-means-for-your-startup",
+    "kind": "non-tutorial blog post (opinion/report)",
+    "topic": "the long game why rails survived the hype cycle and what it means for your startup",
+    "base_score": 1.29
+  },
+  {
+    "i": 12,
+    "url": "https://evilmartians.com/chronicles/we-analyzed-1140-devtools-funding-rounds",
+    "kind": "non-tutorial blog post (opinion/report)",
+    "topic": "we analyzed 1140 devtools funding rounds",
+    "base_score": 0.94
+  }
+]

@@ -1,0 +1,266 @@
+[
+  {
+    "url": "https://raw.githubusercontent.com/palkan/action_policy/master/docs/guide/quick_start.md",
+    "base_score": 2.21,
+    "new_score": 3.18,
+    "delta": 0.97,
+    "base_features": {
+      "words": 486,
+      "curly": false,
+      "code_density": 0.0045,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 10.3
+    },
+    "new_features": {
+      "words": 359,
+      "curly": false,
+      "code_density": 0.0019,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 18.9
+    }
+  },
+  {
+    "url": "https://raw.githubusercontent.com/palkan/action_policy/master/docs/guide/custom_policy.md",
+    "base_score": 1.12,
+    "new_score": 1.97,
+    "delta": 0.85,
+    "base_features": {
+      "words": 166,
+      "curly": false,
+      "code_density": 0.0,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 11.1
+    },
+    "new_features": {
+      "words": 357,
+      "curly": false,
+      "code_density": 0.0,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 17.0
+    }
+  },
+  {
+    "url": "https://raw.githubusercontent.com/test-prof/test-prof/master/docs/README.md",
+    "base_score": 1.61,
+    "new_score": 2.64,
+    "delta": 1.03,
+    "base_features": {
+      "words": 517,
+      "curly": false,
+      "code_density": 0.0025,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 3.7
+    },
+    "new_features": {
+      "words": 349,
+      "curly": false,
+      "code_density": 0.0,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 21.8
+    }
+  },
+  {
+    "url": "https://raw.githubusercontent.com/test-prof/test-prof/master/docs/recipes/let_it_be.md",
+    "base_score": 1.69,
+    "new_score": 2.54,
+    "delta": 0.85,
+    "base_features": {
+      "words": 1420,
+      "curly": true,
+      "code_density": 0.0092,
+      "defines_terms": false,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 11.1
+    },
+    "new_features": {
+      "words": 359,
+      "curly": false,
+      "code_density": 0.0,
+      "defines_terms": false,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 18.9
+    }
+  },
+  {
+    "url": "https://docs.anycable.io/anycable-go/getting_started",
+    "base_score": 2.03,
+    "new_score": 2.11,
+    "delta": 0.08,
+    "base_features": {
+      "words": 552,
+      "curly": true,
+      "code_density": 0.0004,
+      "defines_terms": true,
+      "boiler_in_lead": true,
+      "avg_sentence_words": 10.6
+    },
+    "new_features": {
+      "words": 340,
+      "curly": false,
+      "code_density": 0.0,
+      "defines_terms": true,
+      "boiler_in_lead": true,
+      "avg_sentence_words": 24.3
+    }
+  },
+  {
+    "url": "https://anycable.io/compare/nodejs-websocket/",
+    "base_score": 1.4,
+    "new_score": 2.02,
+    "delta": 0.62,
+    "base_features": {
+      "words": 3291,
+      "curly": true,
+      "code_density": 0.0045,
+      "defines_terms": false,
+      "boiler_in_lead": true,
+      "avg_sentence_words": 9.1
+    },
+    "new_features": {
+      "words": 342,
+      "curly": false,
+      "code_density": 0.0009,
+      "defines_terms": true,
+      "boiler_in_lead": true,
+      "avg_sentence_words": 21.4
+    }
+  },
+  {
+    "url": "https://evilmartians.com/chronicles/graphql-on-rails-1-from-zero-to-the-first-query",
+    "base_score": 2.03,
+    "new_score": 2.5,
+    "delta": 0.47,
+    "base_features": {
+      "words": 3840,
+      "curly": true,
+      "code_density": 0.0025,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 12.6
+    },
+    "new_features": {
+      "words": 359,
+      "curly": false,
+      "code_density": 0.0,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 25.6
+    }
+  },
+  {
+    "url": "https://evilmartians.com/chronicles/fighting-the-hydra-of-n-plus-one-queries",
+    "base_score": 1.65,
+    "new_score": 2.47,
+    "delta": 0.82,
+    "base_features": {
+      "words": 2436,
+      "curly": true,
+      "code_density": 0.0008,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 11.0
+    },
+    "new_features": {
+      "words": 358,
+      "curly": false,
+      "code_density": 0.0,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 19.9
+    }
+  },
+  {
+    "url": "https://evilmartians.com/chronicles/ruby-on-whales-docker-for-ruby-rails-development",
+    "base_score": 1.59,
+    "new_score": 2.74,
+    "delta": 1.15,
+    "base_features": {
+      "words": 6578,
+      "curly": true,
+      "code_density": 0.0008,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 11.7
+    },
+    "new_features": {
+      "words": 363,
+      "curly": false,
+      "code_density": 0.0,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 27.9
+    }
+  },
+  {
+    "url": "https://evilmartians.com/chronicles/testprof-a-good-doctor-for-slow-ruby-tests",
+    "base_score": 1.35,
+    "new_score": 2.45,
+    "delta": 1.1,
+    "base_features": {
+      "words": 2396,
+      "curly": true,
+      "code_density": 0.0,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 9.4
+    },
+    "new_features": {
+      "words": 363,
+      "curly": false,
+      "code_density": 0.0005,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 21.4
+    }
+  },
+  {
+    "url": "https://evilmartians.com/chronicles/the-long-game-why-rails-survived-the-hype-cycle-and-what-it-means-for-your-startup",
+    "base_score": 1.29,
+    "new_score": 2.76,
+    "delta": 1.47,
+    "base_features": {
+      "words": 1215,
+      "curly": false,
+      "code_density": 0.0,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 13.8
+    },
+    "new_features": {
+      "words": 357,
+      "curly": false,
+      "code_density": 0.0005,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 29.8
+    }
+  },
+  {
+    "url": "https://evilmartians.com/chronicles/we-analyzed-1140-devtools-funding-rounds",
+    "base_score": 0.94,
+    "new_score": 1.73,
+    "delta": 0.79,
+    "base_features": {
+      "words": 3582,
+      "curly": false,
+      "code_density": 0.0,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 12.9
+    },
+    "new_features": {
+      "words": 344,
+      "curly": false,
+      "code_density": 0.0,
+      "defines_terms": true,
+      "boiler_in_lead": false,
+      "avg_sentence_words": 21.5
+    }
+  }
+]
