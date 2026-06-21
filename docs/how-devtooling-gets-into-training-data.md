@@ -112,7 +112,7 @@ And capability follows representation: models do well on high-resource languages
 | Question | How | Tool |
 | --- | --- | --- |
 | Is it in Common Crawl? | CDX query `url=domain/*` per crawl | [index.commoncrawl.org](https://index.commoncrawl.org/), `scripts/coverage_details.rb` |
-| Would the filter keep it? | Score with FineWeb-Edu (≥ 3); only ~512 tokens are read | [classifier](https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier), `scripts/quality_core.py`, the `/check` page |
+| Would the filter keep it? | Score with FineWeb-Edu (≥ 3); only ~512 tokens are read | [classifier](https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier), `scripts/quality_core.rb`, the `/check` page |
 | Is the code in The Stack? | Repo public + permissive license? | ["Am I in the Stack?"](https://huggingface.co/spaces/bigcode/in-the-stack) |
 | Are crawlers allowed? | `robots.txt` for `CCBot`/`ClaudeBot`/`GPTBot` | server logs, `robots.txt` |
 
@@ -149,5 +149,5 @@ And capability follows representation: models do well on high-resource languages
 - Anthropic & llms.txt: [ClaudeBot docs](https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler) ·
   [Google on llms.txt](https://www.seroundtable.com/google-does-not-endorse-llms-txt-40789.html)
 
-_Last updated 2026-06-20. Measured findings are reproducible via `scripts/quality_core.py` and
+_Last updated 2026-06-20. Measured findings are reproducible via `scripts/quality_core.rb` and
 `scripts/coverage_details.rb` in this repo._
