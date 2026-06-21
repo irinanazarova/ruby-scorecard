@@ -6,8 +6,8 @@ RUN gem install --no-document onnxruntime tokenizers nokogiri sinatra puma racku
 WORKDIR /app
 COPY scripts/quality_core.rb scripts/quality_core.rb
 COPY scripts/fetch_model.rb scripts/fetch_model.rb
+RUN ruby scripts/fetch_model.rb           # bake the ~438MB model (cached unless fetch_model.rb changes)
 COPY web/ web/
-RUN ruby scripts/fetch_model.rb           # bake the ~438MB model for fast warm starts
 ENV FWEDU_ONNX=/app/vendor/fwedu/model.onnx
 ENV FWEDU_TOKENIZER=/app/vendor/fwedu/tokenizer.json
 ENV PORT=8080

@@ -26,6 +26,7 @@ class CheckApp < Sinatra::Base
     set :server, :puma
     set :show_exceptions, false
     set :logging, true
+    set :host_authorization, permitted_hosts: [] # served behind Fly's proxy; allow any Host
   end
 
   before do
