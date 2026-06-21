@@ -1,0 +1,151 @@
+# frozen_string_literal: true
+
+# Render dist/check.html: the /check quality-checker page. Reuses the site's stylesheet (fonts + tokens)
+# and calls the inference API. Run after build.rb (which produces dist/assets/styles.css).
+
+require "digest"
+
+ROOT = File.expand_path("..", __dir__)
+DIST = File.join(ROOT, "dist")
+API = ENV.fetch("CHECK_API", "https://ruby-quality-api.fly.dev/api/check")
+
+def asset_q(rel)
+  path = File.join(DIST, rel)
+  File.exist?(path) ? "?v=#{Digest::MD5.file(path).hexdigest[0, 8]}" : ""
+end
+
+page = <<~HTML
+  <!doctype html>
+  <html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quality check &middot; Ruby &amp; Rails LLM discoverability</title>
+    <meta name="description" content="Score any URL with the open FineWeb-Edu classifier, the best available proxy for whether a modern training corpus would keep the page, and get specific, measured feedback.">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg#{asset_q('favicon.svg')}">
+    <link rel="icon" sizes="32x32" href="favicon.ico">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="stylesheet" href="assets/styles.css#{asset_q('assets/styles.css')}">
+    <style>
+      .check-wrap { max-width: 46rem; margin: 0 auto; padding: clamp(2rem, 6vw, 4rem) var(--pad) 5rem; }
+      .check-wrap .kicker { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .14em;
+        text-transform: uppercase; color: var(--link); margin: 0 0 .9rem; }
+      .check-wrap h1 { font-family: var(--font-grotesk); font-weight: 800; line-height: 1.08;
+        font-size: clamp(1.9rem, 5vw, 2.7rem); letter-spacing: -.02em; margin: 0 0 .8rem; }
+      .check-wrap .lead { color: var(--text-soft); font-size: 1.1rem; line-height: 1.6; margin: 0 0 1.8rem; }
+      form.check { display: flex; gap: .6rem; flex-wrap: wrap; margin: 0 0 .8rem; }
+      form.check input { flex: 1 1 18rem; font: inherit; padding: .7rem .9rem; border: 1px solid var(--line-strong);
+        border-radius: var(--radius); background: var(--surface); color: var(--text); }
+      form.check input:focus { outline: 2px solid var(--red); border-color: var(--red); }
+      form.check button { font-family: var(--font-mono); font-size: .9rem; font-weight: 600; cursor: pointer;
+        padding: .7rem 1.4rem; border: none; border-radius: var(--radius); background: var(--red); color: #fff; }
+      form.check button:hover { background: var(--red-deep); }
+      form.check button:disabled { opacity: .5; cursor: progress; }
+      .disclaimer { font-size: .82rem; color: var(--text-soft); margin: 0 0 1.5rem; }
+      #status { font-family: var(--font-mono); font-size: .9rem; color: var(--text-soft); min-height: 1.4rem; }
+      #status.err { color: var(--bad); }
+      .result { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface);
+        padding: 1.4rem 1.5rem; margin: .5rem 0 1.5rem; }
+      .scorebox { display: flex; align-items: baseline; gap: .5rem; margin-bottom: .6rem; }
+      .scorebox .num { font-family: var(--font-grotesk); font-weight: 800; font-size: 3rem; line-height: 1; }
+      .scorebox .num.lo { color: var(--bad); } .scorebox .num.mid { color: var(--warn); } .scorebox .num.hi { color: var(--ok); }
+      .scorebox .outof { font-family: var(--font-mono); color: var(--text-soft); font-size: 1rem; }
+      .pill { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .06em; text-transform: uppercase;
+        padding: .25rem .6rem; border-radius: 999px; margin-left: auto; }
+      .pill.ok { background: color-mix(in oklab, var(--ok) 18%, transparent); color: var(--ok); }
+      .pill.bad { background: color-mix(in oklab, var(--bad) 16%, transparent); color: var(--bad); }
+      .verdict { font-weight: 600; margin: .2rem 0 1rem; }
+      .result ul { margin: 0 0 1rem; padding-left: 1.2rem; }
+      .result li { margin: .45rem 0; line-height: 1.5; }
+      .result .meta { font-family: var(--font-mono); font-size: .78rem; color: var(--text-soft);
+        border-top: 1px solid var(--line); padding-top: .8rem; word-break: break-all; }
+      .warning { font-size: .82rem; color: var(--text-soft); line-height: 1.55; border-left: 3px solid var(--orange);
+        padding-left: .9rem; margin: 0 0 1.5rem; }
+      .back { font-family: var(--font-mono); font-size: .85rem; }
+    </style>
+  </head>
+  <body>
+    <main class="check-wrap">
+      <p class="kicker">Evil Martians &middot; Ruby</p>
+      <h1>Would a model train on this page?</h1>
+      <p class="lead">Paste a URL. We extract the main text and score it with the open
+        <a href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier">FineWeb-Edu classifier</a>,
+        the documented filter behind the FineWeb corpus, then give specific, measured feedback.</p>
+
+      <form class="check" id="f">
+        <input id="url" type="url" inputmode="url" placeholder="https://your-docs-or-post.example/page" required>
+        <button id="go" type="submit">Check</button>
+      </form>
+      <p class="disclaimer">Best available <strong>open proxy</strong>, not the actual filter used by Claude, GPT,
+        or Gemini (those are undisclosed). Only the first ~512 tokens are scored. Treat it as directional.</p>
+
+      <div id="status"></div>
+      <section class="result" id="result" hidden>
+        <div class="scorebox">
+          <span class="num" id="score">0.00</span><span class="outof">/ 5</span>
+          <span class="pill" id="pill"></span>
+        </div>
+        <p class="verdict" id="verdict"></p>
+        <ul id="suggestions"></ul>
+        <p class="meta" id="meta"></p>
+      </section>
+      <p class="warning" id="warning" hidden></p>
+
+      <p class="back"><a href="/">&larr; back to the scorecard</a></p>
+    </main>
+
+    <script>
+      const API = #{API.inspect};
+      const $ = (id) => document.getElementById(id);
+      const f = $("f"), go = $("go"), statusEl = $("status"), result = $("result");
+
+      function setStatus(msg, err) { statusEl.textContent = msg; statusEl.className = err ? "err" : ""; }
+
+      function band(s) { return s >= 3 ? "hi" : (s >= 2 ? "mid" : "lo"); }
+
+      function render(d) {
+        const num = $("score");
+        num.textContent = Number(d.score).toFixed(2);
+        num.className = "num " + band(d.score);
+        const pill = $("pill");
+        pill.textContent = d.keep ? "likely kept" : "likely dropped";
+        pill.className = "pill " + (d.keep ? "ok" : "bad");
+        $("verdict").textContent = d.verdict || "";
+        const ul = $("suggestions"); ul.innerHTML = "";
+        (d.suggestions || []).forEach((s) => { const li = document.createElement("li"); li.textContent = s; ul.appendChild(li); });
+        $("meta").textContent = "Whole-document average " + d.doc_score + " \\u00b7 " + d.extracted_words +
+          " words extracted (" + d.extraction + ")";
+        const w = $("warning"); w.textContent = d.warning || ""; w.hidden = !d.warning;
+        result.hidden = false;
+      }
+
+      f.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const url = $("url").value.trim();
+        if (!url) return;
+        go.disabled = true;
+        result.hidden = true;
+        setStatus("Scoring\\u2026 the first run can take ~30s while the model warms up.");
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 75000);
+        try {
+          const r = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url }), signal: ctrl.signal });
+          const d = await r.json().catch(() => ({}));
+          if (!r.ok) { setStatus("\\u26a0 " + (d.error || ("Error " + r.status)), true); }
+          else { render(d); setStatus(""); }
+        } catch (err) {
+          setStatus(err.name === "AbortError" ? "\\u26a0 Timed out while warming up. Try again in a moment."
+            : "\\u26a0 Network error. Try again.", true);
+        } finally {
+          clearTimeout(timer);
+          go.disabled = false;
+        }
+      });
+    </script>
+  </body>
+  </html>
+HTML
+
+File.write(File.join(DIST, "check.html"), page)
+warn "wrote dist/check.html (API: #{API})"
