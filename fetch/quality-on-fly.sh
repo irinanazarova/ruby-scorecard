@@ -14,6 +14,8 @@ if [[ "${1:-}" == "--details" ]]; then
   VALIDATE='details'
   slug=$(echo "${2:-target}" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/^-//;s/-$//')
   OUT="data/quality_details_${slug}.json"
+elif [[ "${1:-}" == "--score-texts" ]]; then
+  VALIDATE='texts'; OUT="data/quality_texts.json"
 fi
 
 APP="${QUALITY_APP:-ruby-scorecard-quality}"
@@ -31,7 +33,10 @@ flyctl deploy . -a "$APP" -c fetch/fly.quality.toml --dockerfile fetch/quality.D
 echo "Scoring docs with the FineWeb-Edu classifier ..." >&2
 flyctl ssh console -a "$APP" -C "python /app/scripts/quality.py --print ${PROBE_ARGS[*]}" > "$OUT"
 
-if [[ "$VALIDATE" == "details" ]]; then
+if [[ "$VALIDATE" == "texts" ]]; then
+  ruby -rjson -e 'JSON.parse(File.read(ARGV[0])).each{|k,v| warn format("%-18s edu=%.2f keep=%s", k, v["edu"], v["keep"])}' "$OUT" \
+    || { echo "ERROR: $OUT is not valid JSON; leaving it for inspection." >&2; exit 1; }
+elif [[ "$VALIDATE" == "details" ]]; then
   ruby -rjson -e 'q=JSON.parse(File.read(ARGV[0])); q["buckets"].each{|k,v| warn "#{k}: avg=#{v["avg"]} median=#{v["median"]} keep>=3=#{v["keep_ge3"]} scored=#{v["n_scored"]}/#{v["n_urls"]}"}' "$OUT" \
     || { echo "ERROR: $OUT is not valid JSON; leaving it for inspection." >&2; exit 1; }
 else

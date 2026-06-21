@@ -21,6 +21,9 @@ PRINT_ONLY = "--print" in sys.argv
 # coverage-detail target (data/coverage_details.json) to test whether the missing pages are missing
 # because they'd fail the quality filter, or just were not crawled. Caps each bucket for runtime.
 DETAILS = sys.argv[sys.argv.index("--details") + 1] if "--details" in sys.argv else None
+# --score-texts: score arbitrary text blobs from data/quality_experiment.json ({label: text}) instead
+# of fetching URLs. Used for the rewrite experiment (score variants of a page to see what clears >= 3).
+SCORE_TEXTS = "--score-texts" in sys.argv
 CAP = int(sys.argv[sys.argv.index("--cap") + 1]) if "--cap" in sys.argv else 120
 ONLY = sys.argv[sys.argv.index("--only") + 1] if "--only" in sys.argv else None
 # --extra-urls "u1,u2": score these as an extra "extra" bucket in --details mode (ad-hoc page checks).
@@ -80,6 +83,23 @@ def evenly(items, cap):
         return items
     step = len(items) / cap
     return [items[int(i * step)] for i in range(cap)]
+
+if SCORE_TEXTS:
+    exp = json.load(open(os.path.join(ROOT, "data", "quality_experiment.json")))
+    labels = list(exp.keys())
+    scores = edu_scores_batch([exp[l] for l in labels])
+    out = {}
+    for l, s in zip(labels, scores):
+        s = round(s, 2)
+        t = exp[l]
+        out[l] = {"edu": s, "keep": s >= 3, "c4_curly": "{" in t, "chars": len(t), "words": len(t.split())}
+        print(f"{l:16s} edu={s:.2f} keep={s >= 3}", file=sys.stderr)
+    if PRINT_ONLY:
+        print(json.dumps(out))
+    else:
+        json.dump(out, open(os.path.join(ROOT, "data", "quality_texts.json"), "w"), indent=1)
+        print("wrote data/quality_texts.json", file=sys.stderr)
+    sys.exit(0)
 
 if DETAILS:
     det = json.load(open(os.path.join(ROOT, "data", "coverage_details.json")))[DETAILS]

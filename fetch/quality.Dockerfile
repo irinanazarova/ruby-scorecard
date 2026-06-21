@@ -10,4 +10,5 @@ WORKDIR /app
 COPY scripts/quality.py scripts/quality.py
 COPY data/scorecard.json data/scorecard.json
 COPY data/coverage_details.json data/coverage_details.json
+COPY data/quality_experiment.json data/quality_experiment.json
 CMD ["sleep", "infinity"]
