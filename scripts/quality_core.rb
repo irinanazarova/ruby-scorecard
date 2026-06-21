@@ -78,7 +78,8 @@ module QualityCore
       lead = score_window(text)
       chunks = text.split.each_slice(CHUNK_WORDS).first(MAX_CHUNKS).map { |w| w.join(" ") }
       doc = chunks.size > 1 ? chunks.sum { |c| score_window(c) } / chunks.size : lead
-      { score: lead.round(2), doc_score: doc.round(2), int_score: lead.round, keep: lead >= 3 }
+      # FineWeb-Edu keeps documents with int_score >= 3 (the rounded label), i.e. raw score >= 2.5.
+      { score: lead.round(2), doc_score: doc.round(2), int_score: lead.round, keep: lead.round >= 3 }
     end
 
     def features(text)
@@ -103,10 +104,11 @@ module QualityCore
     # range +0.08 to +1.47; only content starting near ~2.2 cleared 3 on a lead rewrite alone).
     def feedback(score, feats)
       s = score[:score]
+      # FineWeb-Edu keeps int_score >= 3 (rounded), i.e. raw score >= 2.5.
       verdict =
-        if s >= 3 then "Likely kept. Clears the educational-quality bar (>= 3)."
-        elsif s >= 2 then "Borderline. A focused lead rewrite (which adds ~0.8 on average) can plausibly clear 3."
-        else "Likely dropped. A lead rewrite adds ~0.8 on average, so starting here it usually will not reach 3 on its own. Lean on the code/repo channel too."
+        if s >= 2.5 then "Likely kept. Rounds to int_score #{score[:int_score]} (FineWeb-Edu keeps int_score >= 3)."
+        elsif s >= 1.6 then "Borderline. Just under the keep threshold (raw ~2.5 rounds to 3); a focused lead rewrite (avg +0.8) can clear it."
+        else "Likely dropped. A lead rewrite adds ~0.8 on average, so starting here it usually will not reach the bar on its own. Lean on the code/repo channel too."
         end
 
       out = []
@@ -132,7 +134,7 @@ module QualityCore
         out << "High code-to-prose ratio in the opening. Surround code with explanation; the C4 filter dropped " \
                "any page containing a curly brace."
       end
-      out << "Strong opening. Keep it teaching-first if you edit further; that is what carries the score." if s >= 3 && out.empty?
+      out << "Strong opening. Keep it teaching-first if you edit further; that is what carries the score." if s >= 2.5 && out.empty?
       { verdict: verdict, suggestions: out }
     end
 

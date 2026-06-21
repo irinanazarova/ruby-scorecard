@@ -1,0 +1,58 @@
+[
+  {
+    "i": 1,
+    "slug": "unparser-real-file-lessons-migrating-ruby-tools-from-parser-to-prism",
+    "url": "https://evilmartians.com/chronicles/unparser-real-file-lessons-migrating-ruby-tools-from-parser-to-prism",
+    "base": 2.41,
+    "sent": 8.8
+  },
+  {
+    "i": 2,
+    "slug": "freezolite-the-magic-gem-for-keeping-ruby-literals-safely-frozen",
+    "url": "https://evilmartians.com/chronicles/freezolite-the-magic-gem-for-keeping-ruby-literals-safely-frozen",
+    "base": 2.14,
+    "sent": 12.3
+  },
+  {
+    "i": 3,
+    "slug": "postgresql-and-rails-sitting-in-a-tree",
+    "url": "https://evilmartians.com/chronicles/postgresql-and-rails-sitting-in-a-tree",
+    "base": 2.11,
+    "sent": 14.6
+  },
+  {
+    "i": 4,
+    "slug": "how-to-graphql-with-ruby-rails-active-record-and-no-n-plus-one",
+    "url": "https://evilmartians.com/chronicles/how-to-graphql-with-ruby-rails-active-record-and-no-n-plus-one",
+    "base": 2.1,
+    "sent": 22.4
+  },
+  {
+    "i": 5,
+    "slug": "system-of-a-test-2-robust-rails-browser-testing-with-siteprism",
+    "url": "https://evilmartians.com/chronicles/system-of-a-test-2-robust-rails-browser-testing-with-siteprism",
+    "base": 2.09,
+    "sent": 22.4
+  },
+  {
+    "i": 6,
+    "slug": "ruby-on-rails-on-webassembly-a-guide-to-full-stack-in-browser-action",
+    "url": "https://evilmartians.com/chronicles/ruby-on-rails-on-webassembly-a-guide-to-full-stack-in-browser-action",
+    "base": 2.04,
+    "sent": 19.0
+  },
+  {
+    "i": 7,
+    "slug": "graphql-on-rails-1-from-zero-to-the-first-query",
+    "url": "https://evilmartians.com/chronicles/graphql-on-rails-1-from-zero-to-the-first-query",
+    "base": 2.03,
+    "sent": 19.0
+  },
+  {
+    "i": 8,
+    "slug": "partition-and-conquer",
+    "url": "https://evilmartians.com/chronicles/partition-and-conquer",
+    "base": 2.01,
+    "sent": 21.1
+  }
+]

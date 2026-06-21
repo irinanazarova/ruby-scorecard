@@ -1,0 +1,37 @@
+[
+  {
+    "slug": "rails-getting_started",
+    "url": "https://docs.anycable.io/rails/getting_started",
+    "base": 1.82,
+    "sent": 10.6,
+    "words": 1019
+  },
+  {
+    "slug": "guides-laravel",
+    "url": "https://docs.anycable.io/guides/laravel",
+    "base": 1.72,
+    "sent": 14.1,
+    "words": 523
+  },
+  {
+    "slug": "guides-serverless",
+    "url": "https://docs.anycable.io/guides/serverless",
+    "base": 1.67,
+    "sent": 14.1,
+    "words": 1143
+  },
+  {
+    "slug": "guides-hotwire",
+    "url": "https://docs.anycable.io/guides/hotwire",
+    "base": 1.78,
+    "sent": 10.9,
+    "words": 396
+  },
+  {
+    "slug": "guides-client-side",
+    "url": "https://docs.anycable.io/guides/client-side",
+    "base": 1.95,
+    "sent": 8.6,
+    "words": 736
+  }
+]
