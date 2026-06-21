@@ -5,7 +5,8 @@ For each resource in data/scorecard.json, fetch its docs page and score it with 
 FineWeb-Edu classifier (HuggingFaceFW/fineweb-edu-classifier) — the model HuggingFace used to
 build FineWeb-Edu, which keeps documents scoring >= 3 on a 0-5 "educational quality" scale. This
 is the closest public proxy for "would a modern pretraining corpus keep this page". We also record
-the C4 curly-brace heuristic: C4 drops any page containing "{", which silently removes code.
+the C4 curly-brace heuristic: C4 strips every line containing "{" (a code-line proxy), so code-heavy
+pages lose their code and can then fall below C4's length filter. c4_curly flags pages with any "{".
 
 Being in Common Crawl is necessary but not sufficient; this measures the second gate (quality
 filtering). Run on a disposable Fly machine via fetch/quality-on-fly.sh. `--print` -> JSON on stdout.
