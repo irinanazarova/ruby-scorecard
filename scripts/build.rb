@@ -203,7 +203,7 @@ end
 # ---- "second gate" quality block (FineWeb-Edu classifier over each resource's docs) ----
 QUALITY = if quality && !quality.empty?
   scored = quality.select { |_, v| v["edu"] }
-  keep  = scored.count { |_, v| v["edu"] >= 3 }
+  keep  = scored.count { |_, v| v["edu"].round >= 3 }  # FineWeb-Edu keeps int_score >= 3 (raw >= 2.5)
   low   = scored.count { |_, v| v["edu"] < 2 }
   curly = scored.count { |_, v| v["c4_curly"] }
   unscored = quality.count { |_, v| !v["edu"] }
@@ -211,9 +211,10 @@ QUALITY = if quality && !quality.empty?
   <<QUAL
 <h3 class="cg-title">The second gate: would these docs survive the quality filter?</h3>
 <p class="note">Being in Common Crawl is the first gate. The second is the quality classifier that corpus
-builders run before training. Scored with FineWeb-Edu's open classifier (0&ndash;5; FineWeb-Edu keeps
-documents scoring &ge;&nbsp;3), only <strong>#{keep} of #{scored.size}</strong> of these docs clear the bar
-(#{top}), and <strong>#{low}</strong> score below&nbsp;2. Separately, <strong>#{curly}</strong> contain a
+builders run before training. Scored with FineWeb-Edu's open classifier (0&ndash;5; FineWeb-Edu keeps a
+document when its score rounds to &ge;&nbsp;3, that is a raw score of&nbsp;2.5 or higher), only
+<strong>#{keep} of #{scored.size}</strong> of these docs clear the bar (led by #{top}), and
+<strong>#{low}</strong> score below&nbsp;2. Separately, <strong>#{curly}</strong> contain a
 code brace <code>{</code>, and <a href="https://research.google/blog/exploring-transfer-learning-with-t5-the-text-to-text-transfer-transformer/">C4</a>
 removed any page that contained one, so a single code sample is enough to drop the whole page from that
 corpus. #{unscored} returned no extractable text (client-rendered or blocked).</p>

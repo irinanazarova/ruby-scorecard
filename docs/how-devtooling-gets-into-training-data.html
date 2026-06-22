@@ -117,17 +117,18 @@ clears the bar <strong>(measured: 2.43 → 3.19)</strong>.</li>
 <li><strong>Earn backlinks and internal links</strong> (newsletters, aggregators, cross-posts) so Common Crawl actually
 reaches new and deep pages.</li>
 <li><strong>Fix crawl hygiene:</strong> <code>sitemap.xml</code>, <code>301</code> redirects for moved URLs, expand thin pages, cut click-depth.</li>
-<li><strong>Verify</strong> (see <a href="#how-to-check" target="_blank" rel="noopener noreferrer">How to check</a>): is it in Common Crawl, does it score ≥ 3, are crawlers
-unblocked.</li>
+<li><strong>Verify</strong> (see <a href="#how-to-check" target="_blank" rel="noopener noreferrer">How to check</a>): is it in Common Crawl, does it clear the keep bar
+(int_score ≥ 3, i.e. raw ≥ 2.5), are crawlers unblocked.</li>
 </ul>
 <h3 id="dont">DON&#39;T</h3>
 
 <ul>
-<li><strong>Don&#39;t rely on the rendered docs site alone.</strong> Reference/API pages structurally fail the quality filter
-<strong>(measured: ceiling ~2.8 even fully rewritten)</strong>. Let the GitHub channel carry them.</li>
+<li><strong>Don&#39;t rely on the rendered docs site alone.</strong> Reference and config docs mostly fail the quality filter
+<strong>(measured: AnyCable guides cap ~1.7-2.0, below the keep bar even after a full rewrite)</strong>. Let the
+GitHub channel carry them.</li>
 <li><strong>Don&#39;t keep content in a private or unlicensed repo.</strong> It will not enter code corpora.</li>
 <li><strong>Don&#39;t lead posts with war-stories, anecdotes, or marketing.</strong> Benchmark and announcement genres cap
-below 3 <strong>(measured: 1.5-1.9)</strong> no matter how you edit them.</li>
+below the keep bar <strong>(measured: 1.5-1.9, which rounds to 2)</strong> no matter how you edit them.</li>
 <li><strong>Don&#39;t bury the substance below the fold.</strong> The classifier reads only the first ~512 tokens.</li>
 <li><strong>Don&#39;t expect <code>llms.txt</code> to help.</strong> <a href="https://www.seroundtable.com/google-does-not-endorse-llms-txt-40789.html" target="_blank" rel="noopener noreferrer">No major AI system uses it</a>
 for training or inference.</li>
@@ -191,11 +192,11 @@ in full</strong> (<a href="https://dl.acm.org/doi/10.1145/3630106.3659033" targe
 linked pages mostly don&#39;t. <strong>(measured: evilmartians.com 37%, docs.anycable.io 27%; crawled and missing
 pages scored identically, so the gap is reach, not quality.)</strong></li>
 <li><strong>The quality filter rewards educational prose and penalizes reference, code, and marketing.</strong> The open
-<a href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier" target="_blank" rel="noopener noreferrer">FineWeb-Edu classifier</a> (keeps documents
-scoring ≥ 3 / 5) was <a href="https://arxiv.org/abs/2406.17557" target="_blank" rel="noopener noreferrer">deliberately tuned toward school-level explanation and away from technical pages</a>.
+<a href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier" target="_blank" rel="noopener noreferrer">FineWeb-Edu classifier</a> (keeps a document
+when its score rounds to ≥ 3, i.e. a raw score ≥ 2.5) was <a href="https://arxiv.org/abs/2406.17557" target="_blank" rel="noopener noreferrer">deliberately tuned toward school-level explanation and away from technical pages</a>.
 Its ancestor <a href="https://arxiv.org/abs/1910.10683" target="_blank" rel="noopener noreferrer">C4</a> was blunter still: it dropped <em>any whole page
-containing a curly brace</em> <code>{</code> (a 2019 rule; modern filters are softer). <strong>(measured: 1 of 598
-evilmartians.com pages and 0 of 117 AnyCable docs pages cleared ≥ 3.)</strong></li>
+containing a curly brace</em> <code>{</code> (a 2019 rule; modern filters are softer). <strong>(measured: 5 of 598
+evilmartians.com pages and 0 of 117 AnyCable docs pages clear the bar.)</strong></li>
 <li><strong>Code corpora skip that filter.</strong> <a href="https://huggingface.co/datasets/bigcode/the-stack-v2" target="_blank" rel="noopener noreferrer">The Stack</a> takes
 permissively-licensed GitHub files (including <a href="https://huggingface.co/datasets/bigcode/the-stack" target="_blank" rel="noopener noreferrer">~254 GB of Markdown</a>)
 with no prose-quality classifier, which is why the public-repo path is the strongest one.</li>
@@ -215,7 +216,7 @@ short chains, the higher it is. Crawlers use it to decide what to fetch. <em>Rai
 <li><strong>Recall (coverage):</strong> the share of a site&#39;s real pages actually crawled (we measured 27-37%).</li>
 <li><strong>Corpus:</strong> a curated dataset a model trains on (C4, FineWeb, The Stack).</li>
 <li><strong>Quality classifier:</strong> a small model that scores &quot;educational value&quot; and drops low scorers (FineWeb-Edu
-keeps ≥ 3 / 5).</li>
+keeps int_score ≥ 3, i.e. a raw score ≥ 2.5).</li>
 <li><strong>Token:</strong> the unit a model reads, roughly ¾ of a word; only the first ~512 (~380 words) get scored.</li>
 <li><strong>Permissive vs. copyleft license:</strong> permissive (MIT, Apache) is kept by code corpora; copyleft (GPL) is
 largely excluded.</li>
@@ -244,7 +245,7 @@ it was trained on.</li>
 </tr>
 <tr>
 <td>Would the filter keep it?</td>
-<td>Score with FineWeb-Edu (≥ 3); only ~512 tokens are read</td>
+<td>Score with FineWeb-Edu (int_score ≥ 3, i.e. raw ≥ 2.5); only ~512 tokens are read</td>
 <td><a href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier" target="_blank" rel="noopener noreferrer">classifier</a>, <code>scripts/quality_core.rb</code>, the <code>/check</code> page</td>
 </tr>
 <tr>

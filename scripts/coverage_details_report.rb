@@ -25,17 +25,24 @@ def quality_section(name, all)
   qd = all[name] or return ""
   f = qd.dig("buckets", "found") or return ""
   m = qd.dig("buckets", "not_crawled") or return ""
+  path = ->(p) { p["url"].sub(%r{^https?://[^/]+}, "") }
+  # FineWeb-Edu keeps int_score >= 3 (the rounded label), i.e. a raw score of 2.5 or higher.
+  kept_n = ->(pages) { (pages || []).count { |p| p["edu"] && p["edu"].round >= 3 } }
+  fk = kept_n.call(f["pages"])
+  mk = kept_n.call(m["pages"])
+  total = f["n_scored"] + m["n_scored"]
   pages = (f["pages"] || []) + (m["pages"] || [])
-  keepers = pages.select { |p| p["edu"] && p["edu"] >= 3 }.sort_by { |p| -p["edu"] }
-  near = pages.select { |p| p["edu"] && p["edu"] >= 2 && p["edu"] < 3 }.sort_by { |p| -p["edu"] }
+  keepers = pages.select { |p| p["edu"] && p["edu"].round >= 3 }.sort_by { |p| -p["edu"] }
+  near = pages.select { |p| p["edu"] && p["edu"] >= 2 && p["edu"] < 2.5 }.sort_by { |p| -p["edu"] }
   keep_line =
     if keepers.empty?
-      "No page on the site clears the bar."
+      "No page on the site clears the keep bar. The closest sit in the 2.0&ndash;2.4 band " \
+      "(#{near.first(3).map { |p| "`#{path.call(p).split('/').last}` #{p["edu"]}" }.join(', ')}), which rounds to 2."
     else
-      list = keepers.map { |p| "[`#{p["url"].sub(%r{^https?://[^/]+}, "")}`](#{p["url"]}) (#{p["edu"]}#{p["c4_curly"] ? ", though it contains a `{`, which C4 dropped whole pages for" : ""})" }.join("; ")
-      "The only page that clears it is #{list}, a self-contained how-to with worked examples, " \
-      "exactly the explanatory prose the classifier rewards. The next closest are explainer/tutorial " \
-      "posts in the 2.4&ndash;2.7 band (#{near.first(3).map { |p| "`#{p["url"].sub(%r{^https?://[^/]+}, "").split("/").last}` #{p["edu"]}" }.join(", ")}), still short of 3."
+      list = keepers.first(6).map { |p| "[`#{path.call(p)}`](#{p["url"]}) (#{p["edu"]}#{p["c4_curly"] ? ", though it has a `{` C4 dropped pages for" : ""})" }.join("; ")
+      lede = keepers.size == 1 ? "The only page that clears it is" : "The #{keepers.size} pages that clear it are led by"
+      "#{lede} #{list}. These are the most explanatory, self-contained pages; most of the rest read as " \
+      "reference or marketing, which the classifier scores lower."
     end
   <<~MD
 
@@ -44,19 +51,19 @@ def quality_section(name, all)
     Being in Common Crawl is the first gate; corpus builders then run a quality classifier before
     training. Scoring every page in both buckets with the open
     [FineWeb-Edu classifier](https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier) (0&ndash;5
-    educational quality; FineWeb-Edu keeps documents scoring &ge; 3):
+    educational quality; FineWeb-Edu keeps a document when its score rounds to &ge; 3, that is a raw
+    score of 2.5 or higher):
 
-    | bucket | scored | avg | median | kept (&ge; 3) |
+    | bucket | scored | avg | median | kept (int_score &ge; 3) |
     | --- | ---: | ---: | ---: | ---: |
-    | in Common Crawl | #{f["n_scored"]} | #{f["avg"]} | #{f["median"]} | #{f["keep_ge3"]} |
-    | not in Common Crawl | #{m["n_scored"]} | #{m["avg"]} | #{m["median"]} | #{m["keep_ge3"]} |
+    | in Common Crawl | #{f["n_scored"]} | #{f["avg"]} | #{f["median"]} | #{fk} |
+    | not in Common Crawl | #{m["n_scored"]} | #{m["avg"]} | #{m["median"]} | #{mk} |
 
     The crawled and the missing pages score the same (avg #{f["avg"]} vs #{m["avg"]}), so the gap is
     about crawl reach, not page quality: CC did not skip these pages for being low quality. Separately,
-    across all #{f["n_scored"] + m["n_scored"]} pages only #{f["keep_ge3"] + m["keep_ge3"]} clears the
-    &ge; 3 bar, so even the pages already in Common Crawl would be dropped at the quality gate. The
-    classifier rewards educational prose and penalizes marketing copy, dense reference, and code, which
-    is most of a developer docs or product site.
+    across all #{total} pages only #{fk + mk} clear the keep bar, so even the pages already in Common
+    Crawl would mostly be dropped at the quality gate. The classifier rewards educational prose and
+    penalizes marketing copy, dense reference, and code, which is most of a developer docs or product site.
 
     #{keep_line}
   MD

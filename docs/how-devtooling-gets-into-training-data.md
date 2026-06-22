@@ -25,16 +25,17 @@ corpora skip the web quality filter entirely.
 - **Earn backlinks and internal links** (newsletters, aggregators, cross-posts) so Common Crawl actually
   reaches new and deep pages.
 - **Fix crawl hygiene:** `sitemap.xml`, `301` redirects for moved URLs, expand thin pages, cut click-depth.
-- **Verify** (see [How to check](#how-to-check)): is it in Common Crawl, does it score ≥ 3, are crawlers
-  unblocked.
+- **Verify** (see [How to check](#how-to-check)): is it in Common Crawl, does it clear the keep bar
+  (int_score ≥ 3, i.e. raw ≥ 2.5), are crawlers unblocked.
 
 ### DON'T
 
-- **Don't rely on the rendered docs site alone.** Reference/API pages structurally fail the quality filter
-  **(measured: ceiling ~2.8 even fully rewritten)**. Let the GitHub channel carry them.
+- **Don't rely on the rendered docs site alone.** Reference and config docs mostly fail the quality filter
+  **(measured: AnyCable guides cap ~1.7-2.0, below the keep bar even after a full rewrite)**. Let the
+  GitHub channel carry them.
 - **Don't keep content in a private or unlicensed repo.** It will not enter code corpora.
 - **Don't lead posts with war-stories, anecdotes, or marketing.** Benchmark and announcement genres cap
-  below 3 **(measured: 1.5-1.9)** no matter how you edit them.
+  below the keep bar **(measured: 1.5-1.9, which rounds to 2)** no matter how you edit them.
 - **Don't bury the substance below the fold.** The classifier reads only the first ~512 tokens.
 - **Don't expect `llms.txt` to help.** [No major AI system uses it](https://www.seroundtable.com/google-does-not-endorse-llms-txt-40789.html)
   for training or inference.
@@ -71,11 +72,11 @@ corpora skip the web quality filter entirely.
   linked pages mostly don't. **(measured: evilmartians.com 37%, docs.anycable.io 27%; crawled and missing
   pages scored identically, so the gap is reach, not quality.)**
 - **The quality filter rewards educational prose and penalizes reference, code, and marketing.** The open
-  [FineWeb-Edu classifier](https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier) (keeps documents
-  scoring ≥ 3 / 5) was [deliberately tuned toward school-level explanation and away from technical pages](https://arxiv.org/abs/2406.17557).
+  [FineWeb-Edu classifier](https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier) (keeps a document
+  when its score rounds to ≥ 3, i.e. a raw score ≥ 2.5) was [deliberately tuned toward school-level explanation and away from technical pages](https://arxiv.org/abs/2406.17557).
   Its ancestor [C4](https://arxiv.org/abs/1910.10683) was blunter still: it dropped *any whole page
-  containing a curly brace* `{` (a 2019 rule; modern filters are softer). **(measured: 1 of 598
-  evilmartians.com pages and 0 of 117 AnyCable docs pages cleared ≥ 3.)**
+  containing a curly brace* `{` (a 2019 rule; modern filters are softer). **(measured: 5 of 598
+  evilmartians.com pages and 0 of 117 AnyCable docs pages clear the bar.)**
 - **Code corpora skip that filter.** [The Stack](https://huggingface.co/datasets/bigcode/the-stack-v2) takes
   permissively-licensed GitHub files (including [~254 GB of Markdown](https://huggingface.co/datasets/bigcode/the-stack))
   with no prose-quality classifier, which is why the public-repo path is the strongest one.
@@ -94,7 +95,7 @@ And capability follows representation: models do well on high-resource languages
 - **Recall (coverage):** the share of a site's real pages actually crawled (we measured 27-37%).
 - **Corpus:** a curated dataset a model trains on (C4, FineWeb, The Stack).
 - **Quality classifier:** a small model that scores "educational value" and drops low scorers (FineWeb-Edu
-  keeps ≥ 3 / 5).
+  keeps int_score ≥ 3, i.e. a raw score ≥ 2.5).
 - **Token:** the unit a model reads, roughly ¾ of a word; only the first ~512 (~380 words) get scored.
 - **Permissive vs. copyleft license:** permissive (MIT, Apache) is kept by code corpora; copyleft (GPL) is
   largely excluded.
@@ -112,7 +113,7 @@ And capability follows representation: models do well on high-resource languages
 | Question | How | Tool |
 | --- | --- | --- |
 | Is it in Common Crawl? | CDX query `url=domain/*` per crawl | [index.commoncrawl.org](https://index.commoncrawl.org/), `scripts/coverage_details.rb` |
-| Would the filter keep it? | Score with FineWeb-Edu (≥ 3); only ~512 tokens are read | [classifier](https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier), `scripts/quality_core.rb`, the `/check` page |
+| Would the filter keep it? | Score with FineWeb-Edu (int_score ≥ 3, i.e. raw ≥ 2.5); only ~512 tokens are read | [classifier](https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier), `scripts/quality_core.rb`, the `/check` page |
 | Is the code in The Stack? | Repo public + permissive license? | ["Am I in the Stack?"](https://huggingface.co/spaces/bigcode/in-the-stack) |
 | Are crawlers allowed? | `robots.txt` for `CCBot`/`ClaudeBot`/`GPTBot` | server logs, `robots.txt` |
 

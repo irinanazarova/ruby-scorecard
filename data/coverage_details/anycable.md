@@ -154,19 +154,19 @@ dead links and the current layout is undiscovered. No `sitemap.xml` compounds it
 Being in Common Crawl is the first gate; corpus builders then run a quality classifier before
 training. Scoring every page in both buckets with the open
 [FineWeb-Edu classifier](https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier) (0&ndash;5
-educational quality; FineWeb-Edu keeps documents scoring &ge; 3):
+educational quality; FineWeb-Edu keeps a document when its score rounds to &ge; 3, that is a raw
+score of 2.5 or higher):
 
-| bucket | scored | avg | median | kept (&ge; 3) |
+| bucket | scored | avg | median | kept (int_score &ge; 3) |
 | --- | ---: | ---: | ---: | ---: |
 | in Common Crawl | 34 | 1.83 | 1.85 | 0 |
 | not in Common Crawl | 83 | 1.83 | 1.87 | 0 |
 
 The crawled and the missing pages score the same (avg 1.83 vs 1.83), so the gap is
 about crawl reach, not page quality: CC did not skip these pages for being low quality. Separately,
-across all 117 pages only 0 clears the
-&ge; 3 bar, so even the pages already in Common Crawl would be dropped at the quality gate. The
-classifier rewards educational prose and penalizes marketing copy, dense reference, and code, which
-is most of a developer docs or product site.
+across all 117 pages only 0 clear the keep bar, so even the pages already in Common
+Crawl would mostly be dropped at the quality gate. The classifier rewards educational prose and
+penalizes marketing copy, dense reference, and code, which is most of a developer docs or product site.
 
-No page on the site clears the bar.
+No page on the site clears the keep bar. The closest sit in the 2.0&ndash;2.4 band (`architecture` 2.44, `channels_state` 2.43, `middlewares` 2.23), which rounds to 2.
 

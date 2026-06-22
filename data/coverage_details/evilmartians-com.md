@@ -631,19 +631,19 @@ deeper / newer / less-linked Chronicles articles, doesn't make the cut.
 Being in Common Crawl is the first gate; corpus builders then run a quality classifier before
 training. Scoring every page in both buckets with the open
 [FineWeb-Edu classifier](https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier) (0&ndash;5
-educational quality; FineWeb-Edu keeps documents scoring &ge; 3):
+educational quality; FineWeb-Edu keeps a document when its score rounds to &ge; 3, that is a raw
+score of 2.5 or higher):
 
-| bucket | scored | avg | median | kept (&ge; 3) |
+| bucket | scored | avg | median | kept (int_score &ge; 3) |
 | --- | ---: | ---: | ---: | ---: |
-| in Common Crawl | 221 | 1.52 | 1.47 | 0 |
-| not in Common Crawl | 377 | 1.51 | 1.48 | 1 |
+| in Common Crawl | 221 | 1.52 | 1.47 | 1 |
+| not in Common Crawl | 377 | 1.51 | 1.48 | 4 |
 
 The crawled and the missing pages score the same (avg 1.52 vs 1.51), so the gap is
 about crawl reach, not page quality: CC did not skip these pages for being low quality. Separately,
-across all 598 pages only 1 clears the
-&ge; 3 bar, so even the pages already in Common Crawl would be dropped at the quality gate. The
-classifier rewards educational prose and penalizes marketing copy, dense reference, and code, which
-is most of a developer docs or product site.
+across all 598 pages only 5 clear the keep bar, so even the pages already in Common
+Crawl would mostly be dropped at the quality gate. The classifier rewards educational prose and
+penalizes marketing copy, dense reference, and code, which is most of a developer docs or product site.
 
-The only page that clears it is [`/chronicles/how-to-use-p3-colors-in-svg`](https://evilmartians.com/chronicles/how-to-use-p3-colors-in-svg) (3.12, though it contains a `{`, which C4 dropped whole pages for), a self-contained how-to with worked examples, exactly the explanatory prose the classifier rewards. The next closest are explainer/tutorial posts in the 2.4&ndash;2.7 band (`variable-fonts-in-real-life-how-to-use-and-love-them` 2.71, `store-model` 2.66, `level-up-for-ux-design-lessons-from-videogames` 2.55), still short of 3.
+The 5 pages that clear it are led by [`/chronicles/how-to-use-p3-colors-in-svg`](https://evilmartians.com/chronicles/how-to-use-p3-colors-in-svg) (3.12, though it has a `{` C4 dropped pages for); [`/chronicles/variable-fonts-in-real-life-how-to-use-and-love-them`](https://evilmartians.com/chronicles/variable-fonts-in-real-life-how-to-use-and-love-them) (2.71); [`/opensource/store-model`](https://evilmartians.com/opensource/store-model) (2.66); [`/chronicles/level-up-for-ux-design-lessons-from-videogames`](https://evilmartians.com/chronicles/level-up-for-ux-design-lessons-from-videogames) (2.55); [`/chronicles/optimizing-react-virtual-dom-explained`](https://evilmartians.com/chronicles/optimizing-react-virtual-dom-explained) (2.5, though it has a `{` C4 dropped pages for). These are the most explanatory, self-contained pages; most of the rest read as reference or marketing, which the classifier scores lower.
 
