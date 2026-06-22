@@ -1,0 +1,4193 @@
+{
+  "Ruby (language)": {
+    "ok": true,
+    "n": 5,
+    "best": 3.72,
+    "mean": 3.22,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://docs.ruby-lang.org/en/master/",
+        "type": "landing",
+        "score": 3.15,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 214
+      },
+      {
+        "url": "https://docs.ruby-lang.org/en/master/contributing/concurrency_guide_md.html",
+        "type": "guide",
+        "score": 2.83,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 1683
+      },
+      {
+        "url": "https://docs.ruby-lang.org/en/master/language/dig_methods_rdoc.html",
+        "type": "reference",
+        "score": 3.72,
+        "int": 4,
+        "keep": true,
+        "curly": true,
+        "words": 369
+      },
+      {
+        "url": "https://docs.ruby-lang.org/en/master/index.html",
+        "type": "other",
+        "score": 3.15,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 214
+      },
+      {
+        "url": "https://docs.ruby-lang.org/en/master/contributing/documentation_guide_md.html",
+        "type": "guide",
+        "score": 3.24,
+        "int": 3,
+        "keep": true,
+        "curly": true,
+        "words": 2904
+      }
+    ]
+  },
+  "Rails Guides": {
+    "ok": true,
+    "n": 5,
+    "best": 3.76,
+    "mean": 2.95,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://guides.rubyonrails.org/",
+        "type": "landing",
+        "score": 2.97,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 1623
+      },
+      {
+        "url": "https://guides.rubyonrails.org/index.html",
+        "type": "guide",
+        "score": 2.97,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 1623
+      },
+      {
+        "url": "https://guides.rubyonrails.org/getting_started.html",
+        "type": "guide",
+        "score": 3.03,
+        "int": 3,
+        "keep": true,
+        "curly": true,
+        "words": 12679
+      },
+      {
+        "url": "https://guides.rubyonrails.org/install_ruby_on_rails.html",
+        "type": "guide",
+        "score": 2.01,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 484
+      },
+      {
+        "url": "https://guides.rubyonrails.org/active_record_basics.html",
+        "type": "guide",
+        "score": 3.76,
+        "int": 4,
+        "keep": true,
+        "curly": true,
+        "words": 3333
+      }
+    ]
+  },
+  "Rails API": {
+    "ok": true,
+    "n": 4,
+    "best": 3.6,
+    "mean": 3.15,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://api.rubyonrails.org/",
+        "type": "landing",
+        "score": 3.45,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 598
+      },
+      {
+        "url": "https://api.rubyonrails.org/classes/ActiveRecord/Base.html",
+        "type": "reference",
+        "score": 2.8,
+        "int": 3,
+        "keep": true,
+        "curly": true,
+        "words": 1593
+      },
+      {
+        "url": "https://api.rubyonrails.org/files/activerecord/README_rdoc.html",
+        "type": "reference",
+        "score": 3.6,
+        "int": 4,
+        "keep": true,
+        "curly": false,
+        "words": 712
+      },
+      {
+        "url": "https://api.rubyonrails.org/files/activemodel/README_rdoc.html",
+        "type": "reference",
+        "score": 2.73,
+        "int": 3,
+        "keep": true,
+        "curly": true,
+        "words": 685
+      }
+    ]
+  },
+  "RubyGems Guides": {
+    "ok": true,
+    "n": 5,
+    "best": 2.78,
+    "mean": 2.51,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://guides.rubygems.org/",
+        "type": "landing",
+        "score": 2.58,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 327
+      },
+      {
+        "url": "https://guides.rubygems.org/contributing",
+        "type": "guide",
+        "score": 2.13,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 635
+      },
+      {
+        "url": "https://guides.rubygems.org/rubygems-basics",
+        "type": "guide",
+        "score": 2.58,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 1215
+      },
+      {
+        "url": "https://guides.rubygems.org/what-is-a-gem",
+        "type": "guide",
+        "score": 2.78,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 659
+      },
+      {
+        "url": "https://guides.rubygems.org/make-your-own-gem",
+        "type": "guide",
+        "score": 2.48,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 2923
+      }
+    ]
+  },
+  "Bundler": {
+    "ok": false,
+    "error": "landing fetch failed",
+    "pages": []
+  },
+  "RubyDoc.info": {
+    "ok": true,
+    "n": 2,
+    "best": 3.84,
+    "mean": 2.44,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://rubydoc.info/gems/rails",
+        "type": "landing",
+        "score": 3.84,
+        "int": 4,
+        "keep": true,
+        "curly": false,
+        "words": 609
+      },
+      {
+        "url": "https://rubydoc.info/gems",
+        "type": "other",
+        "score": 1.04,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 370
+      }
+    ]
+  },
+  "Hotwire": {
+    "ok": true,
+    "n": 1,
+    "best": 1.87,
+    "mean": 1.87,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://hotwired.dev/",
+        "type": "landing",
+        "score": 1.87,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 233
+      }
+    ]
+  },
+  "Turbo": {
+    "ok": true,
+    "n": 5,
+    "best": 1.97,
+    "mean": 1.75,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://turbo.hotwired.dev/handbook/introduction",
+        "type": "landing",
+        "score": 1.81,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1769
+      },
+      {
+        "url": "https://turbo.hotwired.dev/reference/drive",
+        "type": "reference",
+        "score": 1.86,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 691
+      },
+      {
+        "url": "https://turbo.hotwired.dev",
+        "type": "other",
+        "score": 1.19,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 168
+      },
+      {
+        "url": "https://turbo.hotwired.dev/reference/frames",
+        "type": "reference",
+        "score": 1.97,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 831
+      },
+      {
+        "url": "https://turbo.hotwired.dev/handbook/drive",
+        "type": "other",
+        "score": 1.94,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 2996
+      }
+    ]
+  },
+  "Stimulus": {
+    "ok": true,
+    "n": 5,
+    "best": 2.83,
+    "mean": 2.43,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://stimulus.hotwired.dev/handbook/introduction",
+        "type": "landing",
+        "score": 2.83,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 330
+      },
+      {
+        "url": "https://stimulus.hotwired.dev/reference/controllers",
+        "type": "reference",
+        "score": 2.81,
+        "int": 3,
+        "keep": true,
+        "curly": true,
+        "words": 1242
+      },
+      {
+        "url": "https://stimulus.hotwired.dev/handbook/designing-for-resilience",
+        "type": "concept",
+        "score": 2.58,
+        "int": 3,
+        "keep": true,
+        "curly": true,
+        "words": 474
+      },
+      {
+        "url": "https://stimulus.hotwired.dev",
+        "type": "other",
+        "score": 1.56,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 151
+      },
+      {
+        "url": "https://stimulus.hotwired.dev/reference/lifecycle-callbacks",
+        "type": "reference",
+        "score": 2.39,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 586
+      }
+    ]
+  },
+  "ViewComponent": {
+    "ok": true,
+    "n": 4,
+    "best": 2.81,
+    "mean": 2.4,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://viewcomponent.org/guide/getting-started.html",
+        "type": "guide",
+        "score": 2.81,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 342
+      },
+      {
+        "url": "https://viewcomponent.org/api.html",
+        "type": "reference",
+        "score": 1.92,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1717
+      },
+      {
+        "url": "https://viewcomponent.org",
+        "type": "other",
+        "score": 2.69,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 404
+      },
+      {
+        "url": "https://viewcomponent.org/guide/collections.html",
+        "type": "guide",
+        "score": 2.16,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 273
+      }
+    ]
+  },
+  "Phlex": {
+    "ok": true,
+    "n": 3,
+    "best": 3.13,
+    "mean": 2.45,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://www.phlex.fun/components/kits.html",
+        "type": "other",
+        "score": 2.96,
+        "int": 3,
+        "keep": true,
+        "curly": true,
+        "words": 418
+      },
+      {
+        "url": "https://www.phlex.fun/miscellaneous/structural-safety.html",
+        "type": "other",
+        "score": 3.13,
+        "int": 3,
+        "keep": true,
+        "curly": true,
+        "words": 606
+      },
+      {
+        "url": "https://www.phlex.fun/components/fragments.html",
+        "type": "other",
+        "score": 1.26,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 104
+      }
+    ]
+  },
+  "Ruby UI": {
+    "ok": false,
+    "error": "landing fetch failed",
+    "pages": []
+  },
+  "Inertia Rails": {
+    "ok": true,
+    "n": 5,
+    "best": 1.93,
+    "mean": 1.46,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://inertia-rails.dev/guide/",
+        "type": "landing",
+        "score": 1.93,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 342
+      },
+      {
+        "url": "https://inertia-rails.dev/guide/demo-application",
+        "type": "guide",
+        "score": 1.06,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 179
+      },
+      {
+        "url": "https://inertia-rails.dev/cookbook/integrating-shadcn-ui",
+        "type": "example",
+        "score": 1.45,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 365
+      },
+      {
+        "url": "https://inertia-rails.dev",
+        "type": "other",
+        "score": 1.39,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 627
+      },
+      {
+        "url": "https://inertia-rails.dev/guide/upgrade-guide",
+        "type": "guide",
+        "score": 1.47,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 1494
+      }
+    ]
+  },
+  "Lookbook": {
+    "ok": true,
+    "n": 4,
+    "best": 1.6,
+    "mean": 1.38,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://lookbook.build/guide/",
+        "type": "landing",
+        "score": 1.54,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 389
+      },
+      {
+        "url": "https://lookbook.build/guide/whats_new",
+        "type": "guide",
+        "score": 1.17,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 310
+      },
+      {
+        "url": "https://lookbook.build",
+        "type": "other",
+        "score": 1.22,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 319
+      },
+      {
+        "url": "https://lookbook.build/guide/installation",
+        "type": "guide",
+        "score": 1.6,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 318
+      }
+    ]
+  },
+  "Roda": {
+    "ok": true,
+    "n": 5,
+    "best": 2.01,
+    "mean": 1.71,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://roda.jeremyevans.net/documentation.html",
+        "type": "landing",
+        "score": 2.01,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 2661
+      },
+      {
+        "url": "https://roda.jeremyevans.net/rdoc/classes/Roda/RodaPlugins/Base/ClassMethods.html",
+        "type": "reference",
+        "score": 2.0,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1682
+      },
+      {
+        "url": "https://roda.jeremyevans.net/index.html",
+        "type": "other",
+        "score": 1.49,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 236
+      },
+      {
+        "url": "https://roda.jeremyevans.net/rdoc/classes/Roda/RodaPlugins/Base/InstanceMethods.html",
+        "type": "reference",
+        "score": 1.75,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 359
+      },
+      {
+        "url": "https://roda.jeremyevans.net/development.html",
+        "type": "other",
+        "score": 1.31,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 158
+      }
+    ]
+  },
+  "Sinatra": {
+    "ok": true,
+    "n": 5,
+    "best": 2.24,
+    "mean": 1.55,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://sinatrarb.com/intro.html",
+        "type": "landing",
+        "score": 2.24,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 8802
+      },
+      {
+        "url": "https://sinatrarb.com/sinatra.github.com/intro.html",
+        "type": "concept",
+        "score": 2.24,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 8802
+      },
+      {
+        "url": "https://sinatrarb.com/sinatra.github.com/documentation.html",
+        "type": "other",
+        "score": 1.29,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 396
+      },
+      {
+        "url": "https://sinatrarb.com/sinatra.github.com/blog.html",
+        "type": "other",
+        "score": 0.9,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 640
+      },
+      {
+        "url": "https://sinatrarb.com/sinatra.github.com",
+        "type": "other",
+        "score": 1.07,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 46
+      }
+    ]
+  },
+  "Hanami": {
+    "ok": true,
+    "n": 5,
+    "best": 1.9,
+    "mean": 1.9,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://guides.hanamirb.org/",
+        "type": "landing",
+        "score": 1.9,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 913
+      },
+      {
+        "url": "https://guides.hanamirb.org/blog/2026/05/01/welcome-to-hanakai",
+        "type": "guide",
+        "score": 1.9,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 913
+      },
+      {
+        "url": "https://guides.hanamirb.org/hanami",
+        "type": "guide",
+        "score": 1.9,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 913
+      },
+      {
+        "url": "https://guides.hanamirb.org/dry",
+        "type": "guide",
+        "score": 1.9,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 913
+      },
+      {
+        "url": "https://guides.hanamirb.org/rom",
+        "type": "guide",
+        "score": 1.9,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 913
+      }
+    ]
+  },
+  "Bridgetown": {
+    "ok": true,
+    "n": 5,
+    "best": 2.1,
+    "mean": 1.6,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://www.bridgetownrb.com/docs/",
+        "type": "landing",
+        "score": 1.65,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 611
+      },
+      {
+        "url": "https://www.bridgetownrb.com/docs/command-line-usage",
+        "type": "reference",
+        "score": 1.78,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1102
+      },
+      {
+        "url": "https://www.bridgetownrb.com/docs/cookbook",
+        "type": "example",
+        "score": 1.85,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 188
+      },
+      {
+        "url": "https://www.bridgetownrb.com/docs/core-concepts",
+        "type": "concept",
+        "score": 2.1,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1046
+      },
+      {
+        "url": "https://www.bridgetownrb.com/sponsor",
+        "type": "other",
+        "score": 0.62,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 187
+      }
+    ]
+  },
+  "Jekyll": {
+    "ok": true,
+    "n": 5,
+    "best": 1.89,
+    "mean": 1.3,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://jekyllrb.com/docs/",
+        "type": "landing",
+        "score": 1.89,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 202
+      },
+      {
+        "url": "https://jekyllrb.com/docs/configuration",
+        "type": "reference",
+        "score": 1.26,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 67
+      },
+      {
+        "url": "https://jekyllrb.com",
+        "type": "other",
+        "score": 1.31,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 131
+      },
+      {
+        "url": "https://jekyllrb.com/resources",
+        "type": "other",
+        "score": 1.17,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 676
+      },
+      {
+        "url": "https://jekyllrb.com/showcase",
+        "type": "other",
+        "score": 0.87,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 117
+      }
+    ]
+  },
+  "Sequel": {
+    "ok": true,
+    "n": 5,
+    "best": 1.96,
+    "mean": 1.55,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://sequel.jeremyevans.net/documentation.html",
+        "type": "landing",
+        "score": 1.24,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 593
+      },
+      {
+        "url": "https://sequel.jeremyevans.net/rdoc/classes/Sequel.html",
+        "type": "reference",
+        "score": 1.21,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 1030
+      },
+      {
+        "url": "https://sequel.jeremyevans.net/rdoc/files/doc/model_dataset_method_design_rdoc.html",
+        "type": "concept",
+        "score": 1.96,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1075
+      },
+      {
+        "url": "https://sequel.jeremyevans.net/index.html",
+        "type": "other",
+        "score": 1.65,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 160
+      },
+      {
+        "url": "https://sequel.jeremyevans.net/rdoc/classes/Sequel/Database.html",
+        "type": "reference",
+        "score": 1.68,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 9435
+      }
+    ]
+  },
+  "ROM": {
+    "ok": true,
+    "n": 5,
+    "best": 1.73,
+    "mean": 1.44,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://rom-rb.org/learn/",
+        "type": "landing",
+        "score": 1.73,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 442
+      },
+      {
+        "url": "https://rom-rb.org/learn/hanami/v2.3/getting-started",
+        "type": "guide",
+        "score": 1.71,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 522
+      },
+      {
+        "url": "https://rom-rb.org/blog/2026/05/01/welcome-to-hanakai",
+        "type": "other",
+        "score": 0.36,
+        "int": 0,
+        "keep": false,
+        "curly": false,
+        "words": 174
+      },
+      {
+        "url": "https://rom-rb.org/learn/hanami/v2.2/getting-started",
+        "type": "guide",
+        "score": 1.71,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 522
+      },
+      {
+        "url": "https://rom-rb.org",
+        "type": "other",
+        "score": 1.71,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 522
+      }
+    ]
+  },
+  "dry-rb": {
+    "ok": true,
+    "n": 5,
+    "best": 1.84,
+    "mean": 1.83,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://dry-rb.org/gems/dry-validation/",
+        "type": "landing",
+        "score": 1.78,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 209
+      },
+      {
+        "url": "https://dry-rb.org/learn",
+        "type": "guide",
+        "score": 1.84,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 938
+      },
+      {
+        "url": "https://dry-rb.org/blog/2026/05/01/welcome-to-hanakai",
+        "type": "other",
+        "score": 1.84,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 938
+      },
+      {
+        "url": "https://dry-rb.org/learn/dry/getting-started",
+        "type": "guide",
+        "score": 1.84,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 938
+      },
+      {
+        "url": "https://dry-rb.org",
+        "type": "other",
+        "score": 1.84,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 938
+      }
+    ]
+  },
+  "Sidekiq": {
+    "ok": true,
+    "n": 5,
+    "best": 1.94,
+    "mean": 1.43,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://github.com/sidekiq/sidekiq/wiki",
+        "type": "landing",
+        "score": 1.49,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 276
+      },
+      {
+        "url": "https://github.com/enterprise/startups",
+        "type": "guide",
+        "score": 0.87,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 1041
+      },
+      {
+        "url": "https://github.com/sidekiq/sidekiq/wiki/Advanced-Options",
+        "type": "reference",
+        "score": 1.94,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1167
+      },
+      {
+        "url": "https://github.com/why-github",
+        "type": "concept",
+        "score": 1.42,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 486
+      },
+      {
+        "url": "https://github.com",
+        "type": "other",
+        "score": 1.43,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 518
+      }
+    ]
+  },
+  "AnyCable": {
+    "ok": true,
+    "n": 5,
+    "best": 2.03,
+    "mean": 1.54,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://docs.anycable.io/",
+        "type": "landing",
+        "score": 0.89,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 57
+      },
+      {
+        "url": "https://docs.anycable.io/getting_started",
+        "type": "guide",
+        "score": 2.03,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 552
+      },
+      {
+        "url": "https://docs.anycable.io/anycable-go/pusher",
+        "type": "other",
+        "score": 1.4,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 480
+      },
+      {
+        "url": "https://docs.anycable.io/rails/getting_started",
+        "type": "guide",
+        "score": 1.82,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1019
+      },
+      {
+        "url": "https://docs.anycable.io/anycable-go/durable_streams",
+        "type": "other",
+        "score": 1.57,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 534
+      }
+    ]
+  },
+  "Kamal": {
+    "ok": true,
+    "n": 3,
+    "best": 1.5,
+    "mean": 1.35,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://kamal-deploy.org/docs/installation/",
+        "type": "landing",
+        "score": 1.42,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 316
+      },
+      {
+        "url": "https://kamal-deploy.org/docs/commands/view-all-commands",
+        "type": "reference",
+        "score": 1.14,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 366
+      },
+      {
+        "url": "https://kamal-deploy.org/docs/configuration/overview",
+        "type": "concept",
+        "score": 1.5,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 710
+      }
+    ]
+  },
+  "Sorbet": {
+    "ok": true,
+    "n": 5,
+    "best": 2.8,
+    "mean": 2.16,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://sorbet.org/docs/overview",
+        "type": "landing",
+        "score": 2.8,
+        "int": 3,
+        "keep": true,
+        "curly": true,
+        "words": 237
+      },
+      {
+        "url": "https://sorbet.org/docs/cli",
+        "type": "reference",
+        "score": 1.82,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 2389
+      },
+      {
+        "url": "https://sorbet.org/docs/why-type-annotations",
+        "type": "concept",
+        "score": 2.45,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1091
+      },
+      {
+        "url": "https://sorbet.org",
+        "type": "other",
+        "score": 1.84,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 667
+      },
+      {
+        "url": "https://sorbet.org/docs/cli-ref",
+        "type": "reference",
+        "score": 1.9,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 2099
+      }
+    ]
+  },
+  "RuboCop": {
+    "ok": true,
+    "n": 1,
+    "best": 1.9,
+    "mean": 1.9,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://docs.rubocop.org/rubocop/latest/index.html",
+        "type": "other",
+        "score": 1.9,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 554
+      }
+    ]
+  },
+  "RSpec": {
+    "ok": true,
+    "n": 4,
+    "best": 1.61,
+    "mean": 1.5,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://rspec.info/documentation/",
+        "type": "landing",
+        "score": 1.61,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 311
+      },
+      {
+        "url": "https://rspec.info/about",
+        "type": "other",
+        "score": 1.53,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 393
+      },
+      {
+        "url": "https://rspec.info/blog",
+        "type": "other",
+        "score": 1.39,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 373
+      },
+      {
+        "url": "https://rspec.info/upgrading-from-rspec-2",
+        "type": "other",
+        "score": 1.46,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 512
+      }
+    ]
+  },
+  "TestProf": {
+    "ok": true,
+    "n": 5,
+    "best": 2.06,
+    "mean": 1.47,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://test-prof.evilmartians.io/",
+        "type": "landing",
+        "score": 1.27,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 144
+      },
+      {
+        "url": "https://test-prof.evilmartians.io/guide/getting_started",
+        "type": "guide",
+        "score": 1.77,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 201
+      },
+      {
+        "url": "https://test-prof.evilmartians.io/ru",
+        "type": "other",
+        "score": 1.15,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 145
+      },
+      {
+        "url": "https://test-prof.evilmartians.io/guide/playbook",
+        "type": "guide",
+        "score": 2.06,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 909
+      },
+      {
+        "url": "https://test-prof.evilmartians.io/ja",
+        "type": "other",
+        "score": 1.09,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 57
+      }
+    ]
+  },
+  "GraphQL Ruby": {
+    "ok": true,
+    "n": 5,
+    "best": 2.52,
+    "mean": 1.84,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://graphql-ruby.org/getting_started",
+        "type": "landing",
+        "score": 2.04,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 586
+      },
+      {
+        "url": "https://graphql-ruby.org/guides",
+        "type": "guide",
+        "score": 1.93,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1152
+      },
+      {
+        "url": "https://graphql-ruby.org/api-doc/2.6.4",
+        "type": "reference",
+        "score": 1.39,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 188
+      },
+      {
+        "url": "https://graphql-ruby.org/pagination/connection_concepts",
+        "type": "concept",
+        "score": 2.52,
+        "int": 3,
+        "keep": true,
+        "curly": true,
+        "words": 645
+      },
+      {
+        "url": "https://graphql-ruby.org",
+        "type": "other",
+        "score": 1.31,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 260
+      }
+    ]
+  },
+  "Rodauth": {
+    "ok": true,
+    "n": 5,
+    "best": 2.04,
+    "mean": 1.67,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://rodauth.jeremyevans.net/documentation.html",
+        "type": "landing",
+        "score": 1.8,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1150
+      },
+      {
+        "url": "https://rodauth.jeremyevans.net/rdoc/files/doc/guides/admin_activation_rdoc.html",
+        "type": "guide",
+        "score": 1.31,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 226
+      },
+      {
+        "url": "https://rodauth.jeremyevans.net/rdoc/files/doc/path_class_methods_rdoc.html",
+        "type": "reference",
+        "score": 1.74,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 87
+      },
+      {
+        "url": "https://rodauth.jeremyevans.net/why.html",
+        "type": "concept",
+        "score": 2.04,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 673
+      },
+      {
+        "url": "https://rodauth.jeremyevans.net/index.html",
+        "type": "other",
+        "score": 1.48,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 118
+      }
+    ]
+  },
+  "Action Policy": {
+    "ok": true,
+    "n": 3,
+    "best": 2.65,
+    "mean": 2.01,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://actionpolicy.evilmartians.io/",
+        "type": "landing",
+        "score": 1.04,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 182
+      },
+      {
+        "url": "https://actionpolicy.evilmartians.io/guide",
+        "type": "guide",
+        "score": 2.35,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 446
+      },
+      {
+        "url": "https://actionpolicy.evilmartians.io/guide/quick_start",
+        "type": "guide",
+        "score": 2.65,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 450
+      }
+    ]
+  },
+  "Shrine": {
+    "ok": true,
+    "n": 5,
+    "best": 2.36,
+    "mean": 1.65,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://shrinerb.com/docs/getting-started",
+        "type": "landing",
+        "score": 1.35,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 3346
+      },
+      {
+        "url": "https://shrinerb.com/rdoc/classes/Shrine/UploadedFile/InstanceMethods.html",
+        "type": "reference",
+        "score": 1.53,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1155
+      },
+      {
+        "url": "https://shrinerb.com/docs/design",
+        "type": "concept",
+        "score": 2.36,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 827
+      },
+      {
+        "url": "https://shrinerb.com",
+        "type": "other",
+        "score": 1.43,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 110
+      },
+      {
+        "url": "https://shrinerb.com/docs/plugins/activerecord",
+        "type": "other",
+        "score": 1.58,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 501
+      }
+    ]
+  },
+  "Avo": {
+    "ok": true,
+    "n": 3,
+    "best": 1.55,
+    "mean": 1.39,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://docs.avohq.io/4.0/guides.html",
+        "type": "guide",
+        "score": 1.29,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 157
+      },
+      {
+        "url": "https://docs.avohq.io/4.0/index.html",
+        "type": "other",
+        "score": 1.55,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 525
+      },
+      {
+        "url": "https://docs.avohq.io/4.0/faq.html",
+        "type": "other",
+        "score": 1.32,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 938
+      }
+    ]
+  },
+  "ActiveAdmin": {
+    "ok": true,
+    "n": 3,
+    "best": 1.76,
+    "mean": 1.7,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://activeadmin.info/1-general-configuration.html",
+        "type": "reference",
+        "score": 1.58,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 686
+      },
+      {
+        "url": "https://activeadmin.info/0-installation.html",
+        "type": "other",
+        "score": 1.75,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 356
+      },
+      {
+        "url": "https://activeadmin.info/2-resource-customization.html",
+        "type": "other",
+        "score": 1.76,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1543
+      }
+    ]
+  },
+  "Ransack": {
+    "ok": true,
+    "n": 4,
+    "best": 1.4,
+    "mean": 1.2,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://activerecord-hackery.github.io/ransack/",
+        "type": "landing",
+        "score": 1.22,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 390
+      },
+      {
+        "url": "https://activerecord-hackery.github.io/ransack/getting-started/simple-mode",
+        "type": "guide",
+        "score": 1.4,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 1127
+      },
+      {
+        "url": "https://activerecord-hackery.github.io/ransack/blog",
+        "type": "other",
+        "score": 0.9,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 203
+      },
+      {
+        "url": "https://activerecord-hackery.github.io/ransack/going-further/associations",
+        "type": "other",
+        "score": 1.26,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 155
+      }
+    ]
+  },
+  "Pagy": {
+    "ok": true,
+    "n": 5,
+    "best": 1.5,
+    "mean": 1.35,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://ddnexus.github.io/pagy/",
+        "type": "landing",
+        "score": 1.37,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 819
+      },
+      {
+        "url": "https://ddnexus.github.io/pagy/guides/how-to",
+        "type": "guide",
+        "score": 1.5,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 2239
+      },
+      {
+        "url": "https://ddnexus.github.io/pagy/toolbox/configuration/initializer",
+        "type": "reference",
+        "score": 1.09,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 189
+      },
+      {
+        "url": "https://ddnexus.github.io/pagy/sandbox/playground",
+        "type": "other",
+        "score": 1.36,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 318
+      },
+      {
+        "url": "https://ddnexus.github.io/pagy/guides/quick-start",
+        "type": "guide",
+        "score": 1.42,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 149
+      }
+    ]
+  },
+  "Nokogiri": {
+    "ok": true,
+    "n": 4,
+    "best": 1.81,
+    "mean": 1.58,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://nokogiri.org/tutorials/installing_nokogiri.html",
+        "type": "landing",
+        "score": 1.56,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 3300
+      },
+      {
+        "url": "https://nokogiri.org/index.html",
+        "type": "other",
+        "score": 1.79,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1340
+      },
+      {
+        "url": "https://nokogiri.org/tutorials/getting_help.html",
+        "type": "guide",
+        "score": 1.16,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 171
+      },
+      {
+        "url": "https://nokogiri.org/rdoc/index.html",
+        "type": "other",
+        "score": 1.81,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1337
+      }
+    ]
+  },
+  "Faraday": {
+    "ok": false,
+    "n": 0,
+    "best": null,
+    "mean": null,
+    "any_keep": false,
+    "pages": []
+  },
+  "Capistrano": {
+    "ok": true,
+    "n": 5,
+    "best": 2.22,
+    "mean": 2.04,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://capistranorb.com/",
+        "type": "landing",
+        "score": 1.88,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 233
+      },
+      {
+        "url": "https://capistranorb.com/documentation/getting-started/installation",
+        "type": "guide",
+        "score": 2.22,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 555
+      },
+      {
+        "url": "https://capistranorb.com/documentation/faq/how-can-i-access-stage-configuration-variables",
+        "type": "reference",
+        "score": 2.1,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 402
+      },
+      {
+        "url": "https://capistranorb.com/documentation/overview/what-is-capistrano",
+        "type": "concept",
+        "score": 1.92,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 535
+      },
+      {
+        "url": "https://capistranorb.com/documentation/tasks/rails",
+        "type": "other",
+        "score": 2.09,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 314
+      }
+    ]
+  },
+  "Pry": {
+    "ok": true,
+    "n": 2,
+    "best": 1.68,
+    "mean": 1.68,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://pry.github.io/",
+        "type": "landing",
+        "score": 1.68,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 83
+      },
+      {
+        "url": "https://pry.github.io/index.html",
+        "type": "other",
+        "score": 1.68,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 83
+      }
+    ]
+  },
+  "Trailblazer": {
+    "ok": false,
+    "error": "landing fetch failed",
+    "pages": []
+  },
+  "Rage": {
+    "ok": true,
+    "n": 4,
+    "best": 1.7,
+    "mean": 1.49,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://rage-rb.dev/",
+        "type": "landing",
+        "score": 1.42,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 572
+      },
+      {
+        "url": "https://rage-rb.dev/api",
+        "type": "reference",
+        "score": 1.58,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 218
+      },
+      {
+        "url": "https://rage-rb.dev/docs/intro",
+        "type": "concept",
+        "score": 1.7,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 374
+      },
+      {
+        "url": "https://rage-rb.dev/blog",
+        "type": "other",
+        "score": 1.26,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 200
+      }
+    ]
+  },
+  "Falcon": {
+    "ok": true,
+    "n": 4,
+    "best": 1.96,
+    "mean": 1.78,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://socketry.github.io/falcon/guides/getting-started/index.html",
+        "type": "landing",
+        "score": 1.96,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 350
+      },
+      {
+        "url": "https://socketry.github.io/falcon/guides/index.html",
+        "type": "guide",
+        "score": 1.73,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 115
+      },
+      {
+        "url": "https://socketry.github.io/falcon/index.html",
+        "type": "other",
+        "score": 1.54,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 726
+      },
+      {
+        "url": "https://socketry.github.io/falcon/guides/rails-integration/index.html",
+        "type": "guide",
+        "score": 1.88,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 418
+      }
+    ]
+  },
+  "Karafka": {
+    "ok": true,
+    "n": 5,
+    "best": 2.58,
+    "mean": 2.0,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://karafka.io/docs/",
+        "type": "landing",
+        "score": 1.76,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 606
+      },
+      {
+        "url": "https://karafka.io/docs/Basics-Getting-Started",
+        "type": "guide",
+        "score": 1.77,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 573
+      },
+      {
+        "url": "https://karafka.io/docs/Basics-Configuration",
+        "type": "reference",
+        "score": 2.01,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1053
+      },
+      {
+        "url": "https://karafka.io/docs/Basics-Why-Kafka-and-Karafka",
+        "type": "concept",
+        "score": 2.58,
+        "int": 3,
+        "keep": true,
+        "curly": true,
+        "words": 3448
+      },
+      {
+        "url": "https://karafka.io/docs/Basics-Code-Editors-and-LLM-Setup",
+        "type": "other",
+        "score": 1.88,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1035
+      }
+    ]
+  },
+  "RubyLLM": {
+    "ok": true,
+    "n": 5,
+    "best": 2.41,
+    "mean": 1.87,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://rubyllm.com/",
+        "type": "landing",
+        "score": 1.51,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 497
+      },
+      {
+        "url": "https://rubyllm.com/getting-started",
+        "type": "guide",
+        "score": 1.96,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 522
+      },
+      {
+        "url": "https://rubyllm.com/configuration",
+        "type": "reference",
+        "score": 1.21,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 1998
+      },
+      {
+        "url": "https://rubyllm.com/overview",
+        "type": "concept",
+        "score": 2.41,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 996
+      },
+      {
+        "url": "https://rubyllm.com/chat",
+        "type": "other",
+        "score": 2.27,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 3995
+      }
+    ]
+  },
+  "Brakeman": {
+    "ok": false,
+    "error": "landing fetch failed",
+    "pages": []
+  },
+  "imgproxy": {
+    "ok": true,
+    "n": 4,
+    "best": 1.43,
+    "mean": 1.4,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://docs.imgproxy.net/",
+        "type": "landing",
+        "score": 1.37,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 909
+      },
+      {
+        "url": "https://docs.imgproxy.net/getting_started",
+        "type": "guide",
+        "score": 1.42,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 251
+      },
+      {
+        "url": "https://docs.imgproxy.net/latest",
+        "type": "other",
+        "score": 1.38,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 925
+      },
+      {
+        "url": "https://docs.imgproxy.net/configuration/options",
+        "type": "reference",
+        "score": 1.43,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 7889
+      }
+    ]
+  },
+  "Vite Ruby": {
+    "ok": true,
+    "n": 4,
+    "best": 2.13,
+    "mean": 1.95,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://vite-ruby.netlify.app/guide",
+        "type": "guide",
+        "score": 1.79,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 268
+      },
+      {
+        "url": "https://vite-ruby.netlify.app/config",
+        "type": "reference",
+        "score": 2.13,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1317
+      },
+      {
+        "url": "https://vite-ruby.netlify.app/guide/introduction",
+        "type": "guide",
+        "score": 1.85,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 338
+      },
+      {
+        "url": "https://vite-ruby.netlify.app/guide/deployment",
+        "type": "guide",
+        "score": 2.02,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 589
+      }
+    ]
+  },
+  "Flipper": {
+    "ok": true,
+    "n": 4,
+    "best": 1.66,
+    "mean": 1.39,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://www.flippercloud.io/docs",
+        "type": "landing",
+        "score": 1.5,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 436
+      },
+      {
+        "url": "https://www.flippercloud.io/docs/get-started",
+        "type": "guide",
+        "score": 0.91,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 233
+      },
+      {
+        "url": "https://www.flippercloud.io/docs/api",
+        "type": "reference",
+        "score": 1.66,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1931
+      },
+      {
+        "url": "https://www.flippercloud.io/docs/introduction",
+        "type": "concept",
+        "score": 1.5,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 436
+      }
+    ]
+  },
+  "GoRails": {
+    "ok": true,
+    "n": 5,
+    "best": 2.73,
+    "mean": 1.59,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://gorails.com/",
+        "type": "landing",
+        "score": 1.17,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 415
+      },
+      {
+        "url": "https://gorails.com/start",
+        "type": "guide",
+        "score": 2.73,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 952
+      },
+      {
+        "url": "https://gorails.com/episodes/invoker-commands-and-view-transitions",
+        "type": "reference",
+        "score": 0.87,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 128
+      },
+      {
+        "url": "https://gorails.com/episodes/adding-css-design",
+        "type": "concept",
+        "score": 0.99,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 115
+      },
+      {
+        "url": "https://gorails.com/path",
+        "type": "other",
+        "score": 2.21,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 685
+      }
+    ]
+  },
+  "Drifting Ruby": {
+    "ok": true,
+    "n": 5,
+    "best": 1.64,
+    "mean": 1.24,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://www.driftingruby.com/",
+        "type": "landing",
+        "score": 0.97,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 305
+      },
+      {
+        "url": "https://www.driftingruby.com/learning_paths",
+        "type": "guide",
+        "score": 1.64,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 552
+      },
+      {
+        "url": "https://www.driftingruby.com/episodes",
+        "type": "other",
+        "score": 1.41,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 593
+      },
+      {
+        "url": "https://www.driftingruby.com/vlogs",
+        "type": "other",
+        "score": 1.19,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 189
+      },
+      {
+        "url": "https://www.driftingruby.com/forums",
+        "type": "other",
+        "score": 1.0,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 1224
+      }
+    ]
+  },
+  "RubyEvents": {
+    "ok": true,
+    "n": 5,
+    "best": 1.08,
+    "mean": 0.66,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://www.rubyevents.org/",
+        "type": "landing",
+        "score": 1.08,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 979
+      },
+      {
+        "url": "https://www.rubyevents.org/talks/from-designing-for-beyonce-to-building-tech-the-ai-flywheel",
+        "type": "concept",
+        "score": 0.57,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 55
+      },
+      {
+        "url": "https://www.rubyevents.org/events",
+        "type": "other",
+        "score": 0.5,
+        "int": 0,
+        "keep": false,
+        "curly": true,
+        "words": 1467
+      },
+      {
+        "url": "https://www.rubyevents.org/browse",
+        "type": "other",
+        "score": 0.73,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 2276
+      },
+      {
+        "url": "https://www.rubyevents.org/speakers",
+        "type": "other",
+        "score": 0.42,
+        "int": 0,
+        "keep": false,
+        "curly": false,
+        "words": 660
+      }
+    ]
+  },
+  "Rails at Scale (Shopify)": {
+    "ok": true,
+    "n": 5,
+    "best": 3.28,
+    "mean": 1.51,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://railsatscale.com/",
+        "type": "landing",
+        "score": 1.13,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 3367
+      },
+      {
+        "url": "https://railsatscale.com/2024-04-24-autotuner-how-to-speed-up-your-rails-app",
+        "type": "example",
+        "score": 1.8,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1563
+      },
+      {
+        "url": "https://railsatscale.com/about",
+        "type": "other",
+        "score": 0.88,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 281
+      },
+      {
+        "url": "https://railsatscale.com/2023-01-12-how-to-load-code-efficiently-in-ruby",
+        "type": "example",
+        "score": 3.28,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 1594
+      },
+      {
+        "url": "https://railsatscale.com/authors/hartley-mcguire",
+        "type": "other",
+        "score": 0.47,
+        "int": 0,
+        "keep": false,
+        "curly": false,
+        "words": 54
+      }
+    ]
+  },
+  "Ruby Weekly": {
+    "ok": true,
+    "n": 3,
+    "best": 1.16,
+    "mean": 1.09,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://rubyweekly.com/issues",
+        "type": "other",
+        "score": 1.06,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 5161
+      },
+      {
+        "url": "https://rubyweekly.com/latest",
+        "type": "other",
+        "score": 1.04,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 942
+      },
+      {
+        "url": "https://rubyweekly.com/rss",
+        "type": "other",
+        "score": 1.16,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 7279
+      }
+    ]
+  },
+  "Short Ruby": {
+    "ok": true,
+    "n": 4,
+    "best": 1.17,
+    "mean": 1.11,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://newsletter.shortruby.com/",
+        "type": "landing",
+        "score": 1.17,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 735
+      },
+      {
+        "url": "https://newsletter.shortruby.com/c/why-upgrade-to-paid",
+        "type": "concept",
+        "score": 1.02,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 508
+      },
+      {
+        "url": "https://newsletter.shortruby.com/t/Newsletter",
+        "type": "other",
+        "score": 1.11,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 476
+      },
+      {
+        "url": "https://newsletter.shortruby.com/p/edition-170",
+        "type": "other",
+        "score": 1.14,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 2260
+      }
+    ]
+  },
+  "This Week in Rails": {
+    "ok": true,
+    "n": 5,
+    "best": 1.45,
+    "mean": 1.17,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://world.hey.com/this.week.in.rails",
+        "type": "landing",
+        "score": 0.83,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 1688
+      },
+      {
+        "url": "https://world.hey.com/this.week.in.rails/better-guides-better-framework-d3c67c6f",
+        "type": "guide",
+        "score": 1.34,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 754
+      },
+      {
+        "url": "https://world.hey.com/this.week.in.rails/query-command-for-database-queries-and-more-0bee7868",
+        "type": "reference",
+        "score": 1.45,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 409
+      },
+      {
+        "url": "https://world.hey.com/this.week.in.rails/this-week-in-rails-june-19-2026-f059032a",
+        "type": "other",
+        "score": 0.99,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 260
+      },
+      {
+        "url": "https://world.hey.com/this.week.in.rails/new-date-time-helpers-improved-hash-methods-and-more-ec749f14",
+        "type": "reference",
+        "score": 1.23,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 469
+      }
+    ]
+  },
+  "Evil Martians": {
+    "ok": true,
+    "n": 5,
+    "best": 1.67,
+    "mean": 1.41,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://evilmartians.com/chronicles",
+        "type": "landing",
+        "score": 0.9,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 3475
+      },
+      {
+        "url": "https://evilmartians.com/chronicles/how-to-make-complex-chrome-plugins-a-zero-gravity-guide",
+        "type": "guide",
+        "score": 1.54,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 3052
+      },
+      {
+        "url": "https://evilmartians.com/chronicles/lifes-too-short-to-hand-write-api-types-openapi-driven-react",
+        "type": "reference",
+        "score": 1.37,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 4428
+      },
+      {
+        "url": "https://evilmartians.com/chronicles/devs-in-mind-how-to-design-interfaces-for-developer-tools",
+        "type": "example",
+        "score": 1.67,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 2028
+      },
+      {
+        "url": "https://evilmartians.com/chronicles/building-a-design-system-specced-for-engineers-and-agents",
+        "type": "concept",
+        "score": 1.58,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1996
+      }
+    ]
+  },
+  "Hotwire Weekly": {
+    "ok": true,
+    "n": 3,
+    "best": 1.18,
+    "mean": 1.04,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://hotwire.io/about",
+        "type": "other",
+        "score": 0.8,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 206
+      },
+      {
+        "url": "https://hotwire.io",
+        "type": "other",
+        "score": 1.18,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 434
+      },
+      {
+        "url": "https://hotwire.io/ecosystem",
+        "type": "other",
+        "score": 1.13,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 170
+      }
+    ]
+  },
+  "Write Software Well": {
+    "ok": true,
+    "n": 4,
+    "best": 2.75,
+    "mean": 1.97,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://www.writesoftwarewell.com",
+        "type": "landing",
+        "score": 1.41,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 1379
+      },
+      {
+        "url": "https://www.writesoftwarewell.com/vibe-learning-is-underrated",
+        "type": "guide",
+        "score": 1.27,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 909
+      },
+      {
+        "url": "https://www.writesoftwarewell.com/rails-render-method",
+        "type": "reference",
+        "score": 2.75,
+        "int": 3,
+        "keep": true,
+        "curly": true,
+        "words": 1131
+      },
+      {
+        "url": "https://www.writesoftwarewell.com/why-use-strong-parameters-in-rails",
+        "type": "concept",
+        "score": 2.43,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1409
+      }
+    ]
+  },
+  "Thoughtbot": {
+    "ok": true,
+    "n": 5,
+    "best": 1.68,
+    "mean": 1.26,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://thoughtbot.com/blog",
+        "type": "landing",
+        "score": 1.04,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 439
+      },
+      {
+        "url": "https://thoughtbot.com/services/machine-learning-artificial-intelligence-ai",
+        "type": "guide",
+        "score": 1.54,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 433
+      },
+      {
+        "url": "https://thoughtbot.com/services/product-design",
+        "type": "concept",
+        "score": 1.1,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 611
+      },
+      {
+        "url": "https://thoughtbot.com",
+        "type": "other",
+        "score": 0.93,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 384
+      },
+      {
+        "url": "https://thoughtbot.com/blog/enforcing-your-ruby-style-guide-on-ai-generated-code",
+        "type": "guide",
+        "score": 1.68,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 2242
+      }
+    ]
+  },
+  "AppSignal Blog": {
+    "ok": true,
+    "n": 4,
+    "best": 2.18,
+    "mean": 1.67,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://blog.appsignal.com",
+        "type": "landing",
+        "score": 1.22,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 7138
+      },
+      {
+        "url": "https://blog.appsignal.com/2025/09/24/switching-from-pip-to-uv-in-python-a-comprehensive-guide.html",
+        "type": "guide",
+        "score": 2.18,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 2118
+      },
+      {
+        "url": "https://blog.appsignal.com/2026/05/18/building-an-api-gateway-with-koa-and-appsignal.html",
+        "type": "reference",
+        "score": 1.53,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1793
+      },
+      {
+        "url": "https://blog.appsignal.com/2026/04/09/signal-forms-the-missing-link-in-angulars-new-reactive-architecture.html",
+        "type": "concept",
+        "score": 1.76,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1954
+      }
+    ]
+  },
+  "Riding Rails": {
+    "ok": true,
+    "n": 5,
+    "best": 1.6,
+    "mean": 1.18,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://rubyonrails.org/blog",
+        "type": "landing",
+        "score": 0.85,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 404
+      },
+      {
+        "url": "https://rubyonrails.org",
+        "type": "other",
+        "score": 1.34,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 568
+      },
+      {
+        "url": "https://rubyonrails.org/docs",
+        "type": "other",
+        "score": 1.6,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 163
+      },
+      {
+        "url": "https://rubyonrails.org/community",
+        "type": "other",
+        "score": 0.92,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 412
+      },
+      {
+        "url": "https://rubyonrails.org/events",
+        "type": "other",
+        "score": 1.18,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 99
+      }
+    ]
+  },
+  "Joe Masilotti": {
+    "ok": true,
+    "n": 4,
+    "best": 1.62,
+    "mean": 1.02,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://masilotti.com",
+        "type": "landing",
+        "score": 0.83,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 152
+      },
+      {
+        "url": "https://masilotti.com/hotwire-native",
+        "type": "other",
+        "score": 1.62,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1013
+      },
+      {
+        "url": "https://masilotti.com/services",
+        "type": "other",
+        "score": 0.74,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 777
+      },
+      {
+        "url": "https://masilotti.com/about",
+        "type": "other",
+        "score": 0.89,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 269
+      }
+    ]
+  },
+  "Code with Jason": {
+    "ok": true,
+    "n": 5,
+    "best": 2.64,
+    "mean": 1.35,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://www.codewithjason.com/",
+        "type": "landing",
+        "score": 1.3,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 162
+      },
+      {
+        "url": "https://www.codewithjason.com/rails-testing-guide",
+        "type": "guide",
+        "score": 1.34,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 194
+      },
+      {
+        "url": "https://www.codewithjason.com/articles",
+        "type": "other",
+        "score": 2.64,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 1648
+      },
+      {
+        "url": "https://www.codewithjason.com/podcast",
+        "type": "other",
+        "score": 1.13,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 20179
+      },
+      {
+        "url": "https://www.codewithjason.com/about",
+        "type": "other",
+        "score": 0.36,
+        "int": 0,
+        "keep": false,
+        "curly": false,
+        "words": 61
+      }
+    ]
+  },
+  "Maintainable": {
+    "ok": true,
+    "n": 4,
+    "best": 1.6,
+    "mean": 1.28,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://maintainable.fm",
+        "type": "landing",
+        "score": 1.2,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 356
+      },
+      {
+        "url": "https://maintainable.fm/episodes/russ-olsen-the-hidden-cost-of-forgetting-why-the-code-looks-like-that",
+        "type": "concept",
+        "score": 1.6,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 668
+      },
+      {
+        "url": "https://maintainable.fm/episodes",
+        "type": "other",
+        "score": 0.97,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 225
+      },
+      {
+        "url": "https://maintainable.fm/episodes/dr-aino-vonge-corry-why-do-we-have-retrospectives-again",
+        "type": "concept",
+        "score": 1.34,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 214
+      }
+    ]
+  },
+  "Ruby News": {
+    "ok": true,
+    "n": 4,
+    "best": 3.05,
+    "mean": 2.45,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://www.ruby-lang.org/en/news",
+        "type": "landing",
+        "score": 1.14,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 263
+      },
+      {
+        "url": "https://www.ruby-lang.org/en/documentation/installation",
+        "type": "other",
+        "score": 2.92,
+        "int": 3,
+        "keep": true,
+        "curly": true,
+        "words": 1459
+      },
+      {
+        "url": "https://www.ruby-lang.org/en/documentation",
+        "type": "other",
+        "score": 2.7,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 702
+      },
+      {
+        "url": "https://www.ruby-lang.org/en/libraries",
+        "type": "other",
+        "score": 3.05,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 605
+      }
+    ]
+  },
+  "Devise": {
+    "ok": true,
+    "n": 4,
+    "best": 1.75,
+    "mean": 1.36,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://github.com/heartcombo/devise",
+        "type": "landing",
+        "score": 1.4,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 4429
+      },
+      {
+        "url": "https://github.com/enterprise/startups",
+        "type": "guide",
+        "score": 0.87,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 1041
+      },
+      {
+        "url": "https://github.com/heartcombo/devise/wiki/Example-Applications",
+        "type": "example",
+        "score": 1.75,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 359
+      },
+      {
+        "url": "https://github.com/why-github",
+        "type": "concept",
+        "score": 1.42,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 486
+      }
+    ]
+  },
+  "Pundit": {
+    "ok": true,
+    "n": 4,
+    "best": 1.43,
+    "mean": 1.26,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://github.com/varvet/pundit",
+        "type": "landing",
+        "score": 1.33,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 3376
+      },
+      {
+        "url": "https://github.com/enterprise/startups",
+        "type": "guide",
+        "score": 0.87,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 1041
+      },
+      {
+        "url": "https://github.com/why-github",
+        "type": "concept",
+        "score": 1.42,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 486
+      },
+      {
+        "url": "https://github.com",
+        "type": "other",
+        "score": 1.43,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 518
+      }
+    ]
+  },
+  "CanCanCan": {
+    "ok": true,
+    "n": 5,
+    "best": 1.43,
+    "mean": 1.12,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://github.com/CanCanCommunity/cancancan",
+        "type": "landing",
+        "score": 1.35,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 797
+      },
+      {
+        "url": "https://github.com/enterprise/startups",
+        "type": "guide",
+        "score": 0.87,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 1041
+      },
+      {
+        "url": "https://github.com/CanCanCommunity/cancancan/blob/develop/.editorconfig",
+        "type": "reference",
+        "score": 0.53,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 82
+      },
+      {
+        "url": "https://github.com/why-github",
+        "type": "concept",
+        "score": 1.42,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 486
+      },
+      {
+        "url": "https://github.com",
+        "type": "other",
+        "score": 1.43,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 518
+      }
+    ]
+  },
+  "Standard": {
+    "ok": true,
+    "n": 4,
+    "best": 1.77,
+    "mean": 1.37,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://github.com/standardrb/standard",
+        "type": "landing",
+        "score": 1.77,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 2717
+      },
+      {
+        "url": "https://github.com/enterprise/startups",
+        "type": "guide",
+        "score": 0.87,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 1041
+      },
+      {
+        "url": "https://github.com/why-github",
+        "type": "concept",
+        "score": 1.42,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 486
+      },
+      {
+        "url": "https://github.com",
+        "type": "other",
+        "score": 1.43,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 518
+      }
+    ]
+  },
+  "Sentry": {
+    "ok": true,
+    "n": 5,
+    "best": 2.78,
+    "mean": 1.56,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://docs.sentry.io/platforms/ruby/guides/rails/",
+        "type": "landing",
+        "score": 1.32,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 467
+      },
+      {
+        "url": "https://docs.sentry.io/guides",
+        "type": "guide",
+        "score": 1.3,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 103
+      },
+      {
+        "url": "https://docs.sentry.io/api",
+        "type": "reference",
+        "score": 1.4,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 209
+      },
+      {
+        "url": "https://docs.sentry.io/concepts/key-terms/tracing",
+        "type": "concept",
+        "score": 2.78,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 1129
+      },
+      {
+        "url": "https://docs.sentry.io",
+        "type": "other",
+        "score": 0.99,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 229
+      }
+    ]
+  },
+  "AppSignal": {
+    "ok": true,
+    "n": 5,
+    "best": 2.04,
+    "mean": 1.61,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://docs.appsignal.com/ruby/integrations/rails.html",
+        "type": "landing",
+        "score": 1.74,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1203
+      },
+      {
+        "url": "https://docs.appsignal.com/getting-started",
+        "type": "guide",
+        "score": 1.17,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 318
+      },
+      {
+        "url": "https://docs.appsignal.com/api",
+        "type": "reference",
+        "score": 1.17,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 203
+      },
+      {
+        "url": "https://docs.appsignal.com/elixir/why-nif",
+        "type": "concept",
+        "score": 2.04,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 340
+      },
+      {
+        "url": "https://docs.appsignal.com/application",
+        "type": "other",
+        "score": 1.94,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 261
+      }
+    ]
+  },
+  "New Relic": {
+    "ok": true,
+    "n": 5,
+    "best": 1.75,
+    "mean": 1.36,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://docs.newrelic.com/docs/apm/agents/ruby-agent/installation/install-new-relic-ruby-agent/",
+        "type": "landing",
+        "score": 1.45,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 525
+      },
+      {
+        "url": "https://docs.newrelic.com/docs/new-relic-solutions/get-started/intro-new-relic",
+        "type": "guide",
+        "score": 1.3,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 1716
+      },
+      {
+        "url": "https://docs.newrelic.com/docs/apm/agents/ruby-agent/configuration/ruby-agent-configuration",
+        "type": "reference",
+        "score": 1.75,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 6112
+      },
+      {
+        "url": "https://docs.newrelic.com",
+        "type": "other",
+        "score": 1.2,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 636
+      },
+      {
+        "url": "https://docs.newrelic.com/docs/apm/new-relic-apm/getting-started/introduction-apm",
+        "type": "guide",
+        "score": 1.09,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 465
+      }
+    ]
+  },
+  "Datadog": {
+    "ok": true,
+    "n": 5,
+    "best": 1.17,
+    "mean": 1.05,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://docs.datadoghq.com/tracing/trace_collection/dd_libraries/ruby/",
+        "type": "landing",
+        "score": 0.94,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 15877
+      },
+      {
+        "url": "https://docs.datadoghq.com/getting_started",
+        "type": "guide",
+        "score": 1.1,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 2785
+      },
+      {
+        "url": "https://docs.datadoghq.com/api",
+        "type": "reference",
+        "score": 1.17,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 2408
+      },
+      {
+        "url": "https://docs.datadoghq.com/monitors/downtimes/examples",
+        "type": "example",
+        "score": 1.03,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 2983
+      },
+      {
+        "url": "https://docs.datadoghq.com/agent/architecture",
+        "type": "concept",
+        "score": 1.0,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 2226
+      }
+    ]
+  },
+  "Honeybadger": {
+    "ok": true,
+    "n": 5,
+    "best": 2.47,
+    "mean": 1.68,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://docs.honeybadger.io/lib/ruby/",
+        "type": "landing",
+        "score": 1.48,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 318
+      },
+      {
+        "url": "https://docs.honeybadger.io/guides/errors",
+        "type": "guide",
+        "score": 1.52,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1840
+      },
+      {
+        "url": "https://docs.honeybadger.io/lib/ruby/gem-reference/configuration",
+        "type": "reference",
+        "score": 1.86,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1702
+      },
+      {
+        "url": "https://docs.honeybadger.io/lib/ruby/support/architecture",
+        "type": "concept",
+        "score": 2.47,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 717
+      },
+      {
+        "url": "https://docs.honeybadger.io",
+        "type": "other",
+        "score": 1.07,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 162
+      }
+    ]
+  },
+  "Rollbar": {
+    "ok": true,
+    "n": 5,
+    "best": 1.59,
+    "mean": 1.44,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://docs.rollbar.com/docs/rails",
+        "type": "landing",
+        "score": 1.59,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 465
+      },
+      {
+        "url": "https://docs.rollbar.com/docs/getting-started",
+        "type": "guide",
+        "score": 1.12,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 143
+      },
+      {
+        "url": "https://docs.rollbar.com/reference",
+        "type": "reference",
+        "score": 1.54,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 600
+      },
+      {
+        "url": "https://docs.rollbar.com/docs/sdk-usage-how-tos",
+        "type": "example",
+        "score": 1.41,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 1669
+      },
+      {
+        "url": "https://docs.rollbar.com/docs/sdk-overview",
+        "type": "concept",
+        "score": 1.54,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 428
+      }
+    ]
+  },
+  "Bugsnag": {
+    "ok": true,
+    "n": 5,
+    "best": 1.58,
+    "mean": 1.32,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://docs.bugsnag.com/platforms/ruby/rails/",
+        "type": "landing",
+        "score": 1.48,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 981
+      },
+      {
+        "url": "https://docs.bugsnag.com/performance/integration-guides/ruby",
+        "type": "guide",
+        "score": 1.26,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 1128
+      },
+      {
+        "url": "https://docs.bugsnag.com/platforms/ruby/rails/configuration-options",
+        "type": "reference",
+        "score": 1.31,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 1950
+      },
+      {
+        "url": "https://docs.bugsnag.com",
+        "type": "other",
+        "score": 0.99,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 194
+      },
+      {
+        "url": "https://docs.bugsnag.com/platforms/ruby/rails/reporting-handled-errors",
+        "type": "other",
+        "score": 1.58,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 779
+      }
+    ]
+  },
+  "Scout APM": {
+    "ok": true,
+    "n": 5,
+    "best": 1.44,
+    "mean": 1.22,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://scoutapm.com/docs/ruby",
+        "type": "landing",
+        "score": 1.16,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 464
+      },
+      {
+        "url": "https://scoutapm.com/docs/api",
+        "type": "reference",
+        "score": 1.28,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 454
+      },
+      {
+        "url": "https://scoutapm.com/docs",
+        "type": "other",
+        "score": 1.02,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 499
+      },
+      {
+        "url": "https://scoutapm.com/docs/ruby/configuration",
+        "type": "reference",
+        "score": 1.44,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 1449
+      },
+      {
+        "url": "https://scoutapm.com/docs/python",
+        "type": "other",
+        "score": 1.22,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 608
+      }
+    ]
+  },
+  "Skylight": {
+    "ok": true,
+    "n": 4,
+    "best": 1.48,
+    "mean": 1.31,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://www.skylight.io/support/getting-started",
+        "type": "landing",
+        "score": 1.48,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 735
+      },
+      {
+        "url": "https://www.skylight.io/support/skylight-guides",
+        "type": "guide",
+        "score": 1.38,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 2203
+      },
+      {
+        "url": "https://www.skylight.io/cookies",
+        "type": "other",
+        "score": 1.42,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 829
+      },
+      {
+        "url": "https://www.skylight.io",
+        "type": "other",
+        "score": 0.95,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 229
+      }
+    ]
+  },
+  "Better Stack": {
+    "ok": true,
+    "n": 5,
+    "best": 1.92,
+    "mean": 1.29,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://betterstack.com/docs/logs/ruby-and-rails/",
+        "type": "landing",
+        "score": 1.56,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1612
+      },
+      {
+        "url": "https://betterstack.com/community/guides",
+        "type": "guide",
+        "score": 1.92,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 587
+      },
+      {
+        "url": "https://betterstack.com/docs/logs/api/list-all-existing-sources",
+        "type": "reference",
+        "score": 1.55,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 240
+      },
+      {
+        "url": "https://betterstack.com/demos/",
+        "type": "example",
+        "score": 0.69,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 129
+      },
+      {
+        "url": "https://betterstack.com",
+        "type": "other",
+        "score": 0.75,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 2365
+      }
+    ]
+  },
+  "Papertrail": {
+    "ok": false,
+    "error": "landing fetch failed",
+    "pages": []
+  },
+  "GitHub Actions": {
+    "ok": true,
+    "n": 5,
+    "best": 2.69,
+    "mean": 2.14,
+    "any_keep": true,
+    "pages": [
+      {
+        "url": "https://docs.github.com/en/actions/tutorials/build-and-test-code/ruby",
+        "type": "landing",
+        "score": 2.29,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1665
+      },
+      {
+        "url": "https://docs.github.com/en/actions/tutorials",
+        "type": "guide",
+        "score": 1.5,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 160
+      },
+      {
+        "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax",
+        "type": "reference",
+        "score": 2.69,
+        "int": 3,
+        "keep": true,
+        "curly": true,
+        "words": 19033
+      },
+      {
+        "url": "https://docs.github.com/en/actions/how-tos/write-workflows/use-workflow-templates",
+        "type": "example",
+        "score": 1.56,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 224
+      },
+      {
+        "url": "https://docs.github.com/en/actions/concepts/workflows-and-actions/workflows",
+        "type": "concept",
+        "score": 2.64,
+        "int": 3,
+        "keep": true,
+        "curly": false,
+        "words": 444
+      }
+    ]
+  },
+  "Heroku": {
+    "ok": true,
+    "n": 5,
+    "best": 1.68,
+    "mean": 1.58,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://devcenter.heroku.com/articles/getting-started-with-rails8",
+        "type": "landing",
+        "score": 1.67,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 4909
+      },
+      {
+        "url": "https://devcenter.heroku.com/start",
+        "type": "guide",
+        "score": 1.68,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 56
+      },
+      {
+        "url": "https://devcenter.heroku.com/categories/reference",
+        "type": "reference",
+        "score": 1.48,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 509
+      },
+      {
+        "url": "https://devcenter.heroku.com/categories/heroku-architecture",
+        "type": "concept",
+        "score": 1.68,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 487
+      },
+      {
+        "url": "https://devcenter.heroku.com",
+        "type": "other",
+        "score": 1.37,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 70
+      }
+    ]
+  },
+  "Fly.io": {
+    "ok": true,
+    "n": 2,
+    "best": 1.69,
+    "mean": 1.48,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://fly.io/docs/rails/",
+        "type": "landing",
+        "score": 1.69,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 430
+      },
+      {
+        "url": "https://fly.io",
+        "type": "other",
+        "score": 1.27,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 406
+      }
+    ]
+  },
+  "Render": {
+    "ok": true,
+    "n": 5,
+    "best": 2.1,
+    "mean": 1.66,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://render.com/docs/deploy-rails-8",
+        "type": "landing",
+        "score": 2.1,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1570
+      },
+      {
+        "url": "https://render.com/docs/workflows-tutorial",
+        "type": "guide",
+        "score": 1.39,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 818
+      },
+      {
+        "url": "https://render.com/docs/configure-environment-variables",
+        "type": "reference",
+        "score": 1.64,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1258
+      },
+      {
+        "url": "https://render.com/docs/multi-service-architecture",
+        "type": "concept",
+        "score": 2.02,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1003
+      },
+      {
+        "url": "https://render.com",
+        "type": "other",
+        "score": 1.13,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 527
+      }
+    ]
+  },
+  "Railway": {
+    "ok": true,
+    "n": 5,
+    "best": 2.17,
+    "mean": 1.69,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://docs.railway.com/guides/rails",
+        "type": "landing",
+        "score": 2.17,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 2283
+      },
+      {
+        "url": "https://docs.railway.com/quick-start",
+        "type": "guide",
+        "score": 1.66,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1058
+      },
+      {
+        "url": "https://docs.railway.com/cli",
+        "type": "reference",
+        "score": 1.52,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 366
+      },
+      {
+        "url": "https://docs.railway.com/integrations/api/api-cookbook",
+        "type": "example",
+        "score": 1.14,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 233
+      },
+      {
+        "url": "https://docs.railway.com/overview/the-basics",
+        "type": "concept",
+        "score": 1.98,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 815
+      }
+    ]
+  },
+  "DigitalOcean": {
+    "ok": true,
+    "n": 5,
+    "best": 1.75,
+    "mean": 1.46,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://docs.digitalocean.com/products/marketplace/catalog/ruby-on-rails/",
+        "type": "landing",
+        "score": 1.69,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 664
+      },
+      {
+        "url": "https://docs.digitalocean.com/products/marketplace/categories/elearning",
+        "type": "guide",
+        "score": 1.27,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 113
+      },
+      {
+        "url": "https://docs.digitalocean.com/reference",
+        "type": "reference",
+        "score": 1.44,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 450
+      },
+      {
+        "url": "https://docs.digitalocean.com",
+        "type": "other",
+        "score": 1.15,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 858
+      },
+      {
+        "url": "https://docs.digitalocean.com/reference/mcp",
+        "type": "reference",
+        "score": 1.75,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 279
+      }
+    ]
+  },
+  "AWS Elastic Beanstalk": {
+    "ok": true,
+    "n": 4,
+    "best": 2.39,
+    "mean": 2.24,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/ruby-rails-tutorial.html",
+        "type": "landing",
+        "score": 2.28,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 2076
+      },
+      {
+        "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/ruby-rails-tutorial.md",
+        "type": "guide",
+        "score": 2.34,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 2074
+      },
+      {
+        "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/configuring-https.html",
+        "type": "reference",
+        "score": 2.39,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 563
+      },
+      {
+        "url": "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/AWSHowTo.S3.html",
+        "type": "example",
+        "score": 1.94,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 1131
+      }
+    ]
+  },
+  "PlanetScale": {
+    "ok": true,
+    "n": 5,
+    "best": 2.34,
+    "mean": 1.61,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://planetscale.com/docs/vitess/tutorials/connect-rails-app",
+        "type": "landing",
+        "score": 2.34,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 950
+      },
+      {
+        "url": "https://planetscale.com/docs/api/reference/getting-started-with-planetscale-api",
+        "type": "guide",
+        "score": 1.2,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 164
+      },
+      {
+        "url": "https://planetscale.com/docs/cli",
+        "type": "reference",
+        "score": 1.26,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 545
+      },
+      {
+        "url": "https://planetscale.com",
+        "type": "other",
+        "score": 1.1,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 1439
+      },
+      {
+        "url": "https://planetscale.com/docs/vitess/tutorials/connect-django-app",
+        "type": "guide",
+        "score": 2.17,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1455
+      }
+    ]
+  },
+  "Supabase": {
+    "ok": true,
+    "n": 4,
+    "best": 2.1,
+    "mean": 1.53,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://supabase.com/docs/guides/getting-started/quickstarts/ruby-on-rails",
+        "type": "landing",
+        "score": 2.1,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 276
+      },
+      {
+        "url": "https://supabase.com/docs/guides/getting-started",
+        "type": "guide",
+        "score": 1.26,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 670
+      },
+      {
+        "url": "https://supabase.com/docs",
+        "type": "other",
+        "score": 1.21,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 223
+      },
+      {
+        "url": "https://supabase.com/docs/guides/ai-tools",
+        "type": "guide",
+        "score": 1.53,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 191
+      }
+    ]
+  },
+  "Neon": {
+    "ok": true,
+    "n": 5,
+    "best": 2.2,
+    "mean": 1.38,
+    "any_keep": false,
+    "pages": [
+      {
+        "url": "https://neon.com/docs/guides/ruby-on-rails",
+        "type": "landing",
+        "score": 2.2,
+        "int": 2,
+        "keep": false,
+        "curly": false,
+        "words": 603
+      },
+      {
+        "url": "https://neon.com/docs/get-started/frameworks",
+        "type": "guide",
+        "score": 1.17,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 220
+      },
+      {
+        "url": "https://neon.com/docs/reference/neon-ts",
+        "type": "reference",
+        "score": 1.55,
+        "int": 2,
+        "keep": false,
+        "curly": true,
+        "words": 1492
+      },
+      {
+        "url": "https://neon.com/docs/introduction",
+        "type": "concept",
+        "score": 1.05,
+        "int": 1,
+        "keep": false,
+        "curly": false,
+        "words": 266
+      },
+      {
+        "url": "https://neon.com/docs/changelog/2026-06-19",
+        "type": "other",
+        "score": 0.95,
+        "int": 1,
+        "keep": false,
+        "curly": true,
+        "words": 512
+      }
+    ]
+  }
+}
