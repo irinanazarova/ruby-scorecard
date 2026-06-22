@@ -139,14 +139,14 @@ html = <<~HTML
       <p class="kicker">Evil Martians &middot; Ruby &middot; LLM discoverability</p>
       <h1>#{title}</h1>
       <div class="lead">#{lead_html.sub(/\A<p>/, "").sub(/<\/p>\s*\z/, "")}</div>
-      <p class="meta">Research note &middot; last updated 2026-06-20 &middot; every major fact links a primary source</p>
+      <p class="meta">Research note &middot; last updated 2026-06-21 &middot; every major fact links a primary source</p>
       <nav class="toc">
         <p class="toc-title">Contents</p>
         <ol>#{toc}</ol>
       </nav>
       #{body_html}
       <footer>Generated from <code>#{File.basename(src)}</code>. Findings marked &ldquo;(measured)&rdquo;
-      are reproducible via <code>scripts/quality.py</code> and <code>scripts/coverage_details.rb</code> in this repo.</footer>
+      are reproducible via <code>scripts/quality_core.rb</code> and <code>scripts/coverage_details.rb</code> in this repo.</footer>
     </article>
   </body>
   </html>

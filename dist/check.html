@@ -53,7 +53,9 @@
     <h1>Would a model train on this page?</h1>
     <p class="lead">Paste a URL. We extract the main text and score it with the open
       <a href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier">FineWeb-Edu classifier</a>,
-      the documented filter behind the FineWeb corpus, then give specific, measured feedback.</p>
+      the documented filter behind the FineWeb corpus, then give specific, measured feedback.
+      The researchers who build these filters report that people cannot guess their verdicts by eye, so
+      measuring beats guessing.</p>
 
     <form class="check" id="f">
       <input id="url" type="url" inputmode="url" placeholder="https://your-docs-or-post.example/page" required>
@@ -84,7 +86,7 @@
 
     function setStatus(msg, err) { statusEl.textContent = msg; statusEl.className = err ? "err" : ""; }
 
-    function band(s) { return s >= 3 ? "hi" : (s >= 2 ? "mid" : "lo"); }
+    function band(s) { return s >= 2.5 ? "hi" : (s >= 1.5 ? "mid" : "lo"); }
 
     function render(d) {
       const num = $("score");

@@ -87,11 +87,12 @@ footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line
     <div class="lead">To be trained on, your content has to clear <strong>two gates</strong>: get collected (a web crawl or public code
 hosting), then survive the corpus builder&#39;s quality filter. Crawlable does not mean trained on. Here is
 what to do about it, then how it works.</div>
-    <p class="meta">Research note &middot; last updated 2026-06-20 &middot; every major fact links a primary source</p>
+    <p class="meta">Research note &middot; last updated 2026-06-21 &middot; every major fact links a primary source</p>
     <nav class="toc">
       <p class="toc-title">Contents</p>
       <ol><li><a href="#do-and-dont">DO and DON'T</a></li>
 <li><a href="#how-it-works-the-short-version">How it works (the short version)</a></li>
+<li><a href="#what-the-corpus-builders-say">What the corpus builders say</a></li>
 <li><a href="#key-terms">Key terms</a></li>
 <li><a href="#how-to-check">How to check</a></li>
 <li><a href="#caveats-and-what-is-contested">Caveats and what is contested</a></li>
@@ -207,6 +208,46 @@ with no prose-quality classifier, which is why the public-repo path is the stron
 <a href="https://arxiv.org/abs/2308.09895" target="_blank" rel="noopener noreferrer">synthetic/fine-tuning data</a> can close gaps, so data share is not destiny.</p>
 
 <hr>
+<h2 id="what-the-corpus-builders-say">What the corpus builders say</h2>
+
+<p>The pipelines above are documented in papers. Their creators have also described the mechanics in recent
+talks and interviews, and they converge on four points, each with a consequence for your content.</p>
+
+<p><strong>Raw web text is mostly thrown away.</strong> Thomas Scialom, a Llama 3 lead at Meta, puts it plainly: the web
+is <a href="https://www.latent.space/p/llama-3" target="_blank" rel="noopener noreferrer">&quot;full of shit in terms of text, and training on those tokens is a waste of compute&quot;</a>.
+Andrej Karpathy, opening a real pretraining set, calls it <a href="https://www.dwarkesh.com/p/andrej-karpathy" target="_blank" rel="noopener noreferrer">&quot;total garbage&quot;</a>.
+Clearing the filter is the whole game.</p>
+
+<p><strong>A learned quality classifier is the decisive filter, and humans cannot predict it.</strong> In his
+<a href="https://www.youtube.com/watch?v=IsNqSmTPiWQ" target="_blank" rel="noopener noreferrer">DCLM keynote</a>, Ludwig Schmidt reports that model-based
+filtering was the single most important step, and that the collaborators who hand-labeled documents
+&quot;can&#39;t really tell apart&quot; the best classifier variants. Ari Morcos
+<a href="https://www.youtube.com/watch?v=yXPPcBlcF8U" target="_blank" rel="noopener noreferrer">says the same</a>: NLP graduate students &quot;could not predict
+what the DCLM classifiers would say above chance.&quot; FineWeb-Edu&#39;s creator, Loubna Ben Allal,
+<a href="https://www.latent.space/p/2024-syndata-smolmodels" target="_blank" rel="noopener noreferrer">describes the mechanism</a>: &quot;taking Llama3 and asking
+it to rate the educational content of web pages from zero to five,&quot; then training &quot;a BERT model&quot; to imitate
+it, which cuts 15T tokens to 1.5T at score &gt; 3. You cannot eyeball whether a page clears this. Score it
+(see <a href="#how-to-check" target="_blank" rel="noopener noreferrer">How to check</a>).</p>
+
+<p><strong>More filtering is not always better.</strong> Over-aggressive deduplication keeps the worst material: strip too
+hard and <a href="https://www.youtube.com/watch?v=5mCjNAQPSLw" target="_blank" rel="noopener noreferrer">&quot;you&#39;ll just be upsampling the worst-quality stuff&quot;</a>
+(Guilherme Penedo, FineWeb). Stacking more &quot;high-quality&quot; sources can also hurt, and Schmidt found that
+adding Wikipedia and arXiv on top of already-filtered web made results worse. The educational gate keeps
+documents at score ≥ 3, and pushing the threshold higher trims general-knowledge performance. Aim to clear
+the bar, not to maximize the score.</p>
+
+<p><strong>Educational prose helps smaller models most, and code and math are the reasoning levers.</strong> Penedo notes
+that heavy educational filtering <a href="https://www.youtube.com/watch?v=5mCjNAQPSLw" target="_blank" rel="noopener noreferrer">&quot;is really important for very small models&quot;</a>,
+with larger models wanting more diversity later in training. Code and math are deliberately upweighted across
+labs for reasoning (<a href="https://www.dwarkesh.com/p/jeff-dean-and-noam-shazeer" target="_blank" rel="noopener noreferrer">Jeff Dean</a>, Scialom). Technical
+tutorial writing is exactly what the filter rewards, and the public-code channel
+(<a href="https://huggingface.co/datasets/bigcode/the-stack-v2" target="_blank" rel="noopener noreferrer">The Stack</a>) is stronger still.</p>
+
+<p>And the gate is tightening. As labs report exhausting fresh human text (Ilya Sutskever: the field has
+<a href="https://www.youtube.com/watch?v=1yvBqasHLZs" target="_blank" rel="noopener noreferrer">&quot;reached peak data&quot;</a>), quality filtering and synthetic data
+carry more weight, so clearing the bar matters more over time.</p>
+
+<hr>
 <h2 id="key-terms">Key terms</h2>
 
 <ul>
@@ -293,13 +334,21 @@ only the first ~512 tokens are scored.</li>
 <a href="https://arxiv.org/abs/2308.09895" target="_blank" rel="noopener noreferrer">low-resource / MultiPL-T</a></li>
 <li>Anthropic &amp; llms.txt: <a href="https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler" target="_blank" rel="noopener noreferrer">ClaudeBot docs</a> ·
 <a href="https://www.seroundtable.com/google-does-not-endorse-llms-txt-40789.html" target="_blank" rel="noopener noreferrer">Google on llms.txt</a></li>
+<li>Talks &amp; interviews (primary, spoken): <a href="https://www.youtube.com/watch?v=5mCjNAQPSLw" target="_blank" rel="noopener noreferrer">Penedo / FineWeb, GOSIM 2025</a> ·
+<a href="https://www.latent.space/p/2024-syndata-smolmodels" target="_blank" rel="noopener noreferrer">Ben Allal / FineWeb-Edu, Latent Space @ NeurIPS 2024</a> ·
+<a href="https://www.youtube.com/watch?v=2-SPH9hIKT8" target="_blank" rel="noopener noreferrer">Wolf / building LLMs in 2024</a> ·
+<a href="https://www.youtube.com/watch?v=IsNqSmTPiWQ" target="_blank" rel="noopener noreferrer">Schmidt / DCLM keynote 2025</a> ·
+<a href="https://www.youtube.com/watch?v=yXPPcBlcF8U" target="_blank" rel="noopener noreferrer">Morcos / data curation, Latent Space 2025</a> ·
+<a href="https://www.latent.space/p/llama-3" target="_blank" rel="noopener noreferrer">Scialom / Llama 3, Latent Space 2024</a> ·
+<a href="https://www.dwarkesh.com/p/andrej-karpathy" target="_blank" rel="noopener noreferrer">Karpathy, Dwarkesh 2025</a> ·
+<a href="https://www.youtube.com/watch?v=1yvBqasHLZs" target="_blank" rel="noopener noreferrer">Sutskever / &quot;peak data&quot;, NeurIPS 2024</a></li>
 </ul>
 
-<p><u>Last updated 2026-06-20. Measured findings are reproducible via <code>scripts/quality_core.rb</code> and
+<p><u>Last updated 2026-06-21. Measured findings are reproducible via <code>scripts/quality_core.rb</code> and
 <code>scripts/coverage_details.rb</code> in this repo.</u></p>
 
     <footer>Generated from <code>how-devtooling-gets-into-training-data.md</code>. Findings marked &ldquo;(measured)&rdquo;
-    are reproducible via <code>scripts/quality.py</code> and <code>scripts/coverage_details.rb</code> in this repo.</footer>
+    are reproducible via <code>scripts/quality_core.rb</code> and <code>scripts/coverage_details.rb</code> in this repo.</footer>
   </article>
 </body>
 </html>
