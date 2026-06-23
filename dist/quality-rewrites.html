@@ -1,0 +1,194 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rewriting real posts to pass the training-data filter</title>
+<style>:root { --ink:#1a1420; --muted:#5f5763; --accent:#ff533e; --accent-ink:#c5341f; --bg:#fffdfa;
+  --panel:#fbf6ee; --line:#e9e0d4; --ok:#5f7d00; --bad:#c5341f; }
+* { box-sizing:border-box; }
+body { margin:0; color:var(--ink); background:var(--bg);
+  font:18px/1.7 "Charter","Iowan Old Style","Georgia",serif; text-rendering:optimizeLegibility; }
+.wrap { max-width:60rem; margin:0 auto; padding:4rem 1.5rem 6rem; }
+h1,h2,.kicker,.colhead,.badge,.note b { font-family:"Inter",-apple-system,"Segoe UI",Arial,sans-serif; }
+.kicker { font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent-ink); font-weight:600; margin:0 0 1rem; }
+h1 { font-size:2.4rem; line-height:1.1; letter-spacing:-.02em; margin:0 0 1rem; font-weight:800; }
+.lead { font-size:1.15rem; color:var(--muted); margin:0 0 1.5rem; max-width:46rem; }
+.intro { max-width:46rem; }
+.intro h2 { font-size:1.3rem; margin:2rem 0 .5rem; }
+a { color:var(--accent-ink); }
+.card { border:1px solid var(--line); border-radius:14px; background:#fff; padding:1.6rem 1.7rem; margin:2rem 0; }
+.card h2 { font-size:1.4rem; margin:0 0 .2rem; }
+.src { font-size:.82rem; color:var(--muted); margin:0 0 1.2rem; }
+.cols { display:grid; grid-template-columns:1fr 1fr; gap:1.3rem; }
+.col { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:1rem 1.1rem; }
+.col p { font-size:.92rem; line-height:1.6; margin:.6rem 0 0; white-space:pre-wrap; }
+.colhead { font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
+  display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
+.badge { font-size:.74rem; padding:.2rem .55rem; border-radius:999px; text-transform:none; letter-spacing:0; }
+.badge.kept { background:color-mix(in oklab,var(--ok) 16%,transparent); color:var(--ok); }
+.badge.drop { background:color-mix(in oklab,var(--bad) 14%,transparent); color:var(--bad); }
+.badge b { font-weight:700; }
+.note { font-size:.86rem; color:var(--ink); margin:1.1rem 0 0; }
+.note b { color:var(--accent-ink); }
+table.sum { border-collapse:collapse; font-family:"Inter",sans-serif; font-size:.85rem; margin:1rem 0 0; }
+table.sum td,table.sum th { border:1px solid var(--line); padding:.4rem .7rem; text-align:left; }
+footer { margin-top:3rem; padding-top:1.2rem; border-top:1px solid var(--line); font-size:.8rem; color:var(--muted); font-family:"Inter",sans-serif; }
+@media (max-width:680px){ .cols{ grid-template-columns:1fr; } h1{ font-size:1.9rem; } }
+</style></head><body><main class="wrap">
+<p class="kicker">Evil Martians &middot; Ruby &middot; LLM discoverability</p>
+<h1>Rewriting real posts to pass the training-data filter</h1>
+<p class="lead">Before training, corpus builders run a quality classifier and drop most of the web. We
+took 6 Evil Martians posts that score just under the bar and rewrote only their openings, in
+house voice, to clear it. 6 of 6 now would be kept. Here is each one, before and after,
+and why the change works.</p>
+<div class="intro">
+  <h2>What the filter measures</h2>
+  <p>We score with the open <a href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier">FineWeb-Edu
+  classifier</a>, the documented filter behind the FineWeb corpus and the best public proxy for whether a
+  modern pretraining run would keep a page. It reads only the first ~512 tokens (~380 words), rates
+  &ldquo;educational quality&rdquo; from 0 to 5, and a corpus keeps a document when that score rounds to 3
+  or higher (a raw 2.5+). It is a proxy, not the actual filter used by Claude, GPT, or Gemini, which are
+  undisclosed, so treat the numbers as directional; a 0.3 gap is noise.</p>
+  <h2>The three moves that work</h2>
+  <p>From scoring hundreds of rewrites, three levers move the score, and all three are things good writing
+  wants anyway. <b>Define the subject in the first sentence</b> (the classifier, and an LLM reader, parse
+  defined terms better). <b>Explain the mechanism in connected sentences</b> rather than fragments and bare
+  lists. <b>Keep boilerplate and raw code out of the opening</b>, since that is the only window scored.</p>
+  <h2>Where house style and the filter disagree</h2>
+  <p>They are not always friends, and the disagreement has a price. House voice says &ldquo;if a sentence
+  can be cut, cut it&rdquo; and opens with a personality hook; the filter rewards longer, explanatory
+  sentences and a plain definitional opener. The reconciliation that held up: keep a one-line hook and the
+  opinion, then immediately define the term and explain why it matters in real, specific prose, lengthening
+  by joining genuine ideas, never by padding. That carried five of these eight over the bar without losing
+  the voice.</p>
+  <p>The cost is real and it is a dial, not a switch. The narrower or more conversational the subject, the
+  more explanatory the opening has to become to pass, and the more voice you trade away. The Freezolite
+  post is the clearest case: written as flat courseware its opening scores 3.6, written like Evil Martians
+  it scores 2.0, and the version below is the most voice we could keep while still clearing the bar. Where
+  that trade costs too much to be worth shipping, the honest move is the code channel instead, a
+  permissively-licensed repo whose README and Markdown are trained on regardless of any prose score.</p>
+</div>
+
+<section class="card">
+  <h2>Migrating Ruby tools from Parser to Prism</h2>
+  <p class="src"><a href="https://evilmartians.com/chronicles/unparser-real-file-lessons-migrating-ruby-tools-from-parser-to-prism">the original post &rarr;</a> &middot; only the opening ~380 words change (that is all the classifier reads)</p>
+  <div class="cols">
+    <div class="col">
+      <div class="colhead">Before <span class="badge drop"><b>2.41</b> / 5 &middot; still dropped</span></div>
+      <p>Unparser: real life lessons migrating Ruby tools from Parser to PrismNovember 25, 2025TopicsOpen SourceDXRubyYaroslav KurbatovBackend EngineerTravis TurnerTech EditorRuby 3.4 ships with Prism, a new built-in parser that’s faster, more portable, and designed to be the foundation for the coming generations of Ruby tooling. This shift affects everything that works with Ruby’s syntax: linters, formatters, IDEs, analyzers, and more. We’ll explore some weird Ruby, what Prism brings to the Ruby ecosystem, then use Unparser to show what the transition from Parser to Prism looks like in practice. The good news: the transition is doable. The catch: navigating API differences, new AST shapes, plenty of edge-case syntax, and testing thoroughly! Hire Evil MartiansWe join amazing startups on Rails like bolt.new, Whop, Teleport and many others to speed up, scale up and win!Book a call Ruby’s quirks in action Before talking about Prism, it’s worth seeing why Ruby parsers have such a difficult job. Ruby’s syntax is extremely expressive and developer-friendly, but this comes at a cost: maintaining the infrastructure to handle it (most notably the parsing system) is challenging. Let’s see some Ruby that pushes the edges of the language’s grammar. These are cases of “legal” Ruby (not typos or “code golf”). #1: We can construct ranges using the lhs..rhs and lhs...rhs syntax, but can we build ranges&hellip;</p>
+    </div>
+    <div class="col">
+      <div class="colhead">After <span class="badge kept"><b>2.55</b> / 5 &middot; would be kept</span></div>
+      <p>Every Ruby linter, formatter, and IDE you rely on is quietly betting its future on a parser swap, and that migration is harder than the slides admit.
+
+A parser is the program that reads your source code as plain text and turns it into a structured tree that the rest of your tooling can reason about. That tree is called an abstract syntax tree, or AST, and it is a nested representation of the program: an expression such as a method call becomes a node with children for the receiver, the method name, and the arguments. Prism is the new parser that ships built into Ruby 3.4. It was written to be faster, more portable, and stable enough to serve as a shared foundation for the next generation of Ruby tooling. Until now, most of that tooling depended on the Parser gem instead. The Parser gem is a pure-Ruby parser that has been the de facto standard for over a decade, and it produces its own distinctive AST shape. An enormous amount of existing code, including RuboCop and the tools built around it, is written directly against that shape.
+
+Unparser is one of those tools, and it makes a sharp test case for any migration. Unparser takes a Parser-style AST and turns it back into runnable Ruby source code. A tool that both reads and regenerates code will expose every place where the two parsers disagree about structure, so it surfaces problems that a read-only tool would quietly skip. That disagreement is where the real difficulty lives. Migrating from Parser to Prism is doable, but it is not a search-and-replace, because the two systems differ in their public API, in the exact shape and naming of the nodes they emit, and in how they treat the strangest corners of Ruby&#39;s grammar. Ruby&#39;s syntax is unusually expressive, so a parser has to handle constructs that are legal yet bizarre: chained range operators, flip-flop expressions that are missing one side, and rescue clauses that assign the caught exception into a constant, a method call, or even a zero-arity indexed assignment. Each of those is valid Ruby that a real parser must accept, and we had to patch Prism&#39;s Parser-translation layer to support some of them. This post walks through what that transition looks like in practice, where the AST shapes diverge, and why thorough testing is the step you cannot skip.</p>
+    </div>
+  </div>
+  <p class="note"><b>What changed:</b> joined choppy sentences (avg 9 &rarr; 24 words); opened with a definition.</p>
+</section>
+
+<section class="card">
+  <h2>Freezolite: safely freezing Ruby string literals</h2>
+  <p class="src"><a href="https://evilmartians.com/chronicles/freezolite-the-magic-gem-for-keeping-ruby-literals-safely-frozen">the original post &rarr;</a> &middot; only the opening ~380 words change (that is all the classifier reads)</p>
+  <div class="cols">
+    <div class="col">
+      <div class="colhead">Before <span class="badge drop"><b>2.14</b> / 5 &middot; still dropped</span></div>
+      <p>Freezolite: the magic gem for keeping Ruby literals safely frozenNovember 14, 2023TopicsPerformanceDXPerformance &amp; scaleRubyRuby on RailsVladimir DementyevPrincipal Backend EngineerTravis TurnerTech EditorOnce upon a time, a question was raised in the #backend channel of the Evil Martians Slack. “Is there a way to magically set frozen_string_literal to true for an entire project to silence that annoying comment in every Ruby file? It’s seriously frustrating, and RuboCop keeps bugging me as I’m always forgetting it somewhere!“ Sounds familiar? Read on and learn about the Freezolite gem, a concoction crafted up to solve this problem by Evil Wizards Martians. In Ruby, everything is mutable by default, including strings. This model fits Ruby’s dynamic nature well but may have noticeable downsides at scale, primarily performance-wise. Why? Mutability means we cannot safely reuse the same object and have to opt into copying it over to avoid race conditions; that’s what Ruby does with literal strings. A literal string is defined in the source code, i.e., created statically, not dynamically. Let’s consider an example: class Cat def say = &quot;meow&quot; end Cat.new.say #=&gt; &quot;meow&quot; In the snippet above, &quot;meow&quot; is a literal string. Even though it’s the same for all the Cat objects we create, every time we invoke the #say method, a new String object is created (or allocated); the same holds true wh&hellip;</p>
+    </div>
+    <div class="col">
+      <div class="colhead">After <span class="badge kept"><b>3.37</b> / 5 &middot; would be kept</span></div>
+      <p>Every Ruby program quietly allocates more memory than it needs to, and the plain text values you typed into your own source code are a bigger part of that waste than most developers expect. This article explains how Ruby handles those text values, why they slow a program down without anyone noticing, and how a small library called Freezolite removes the problem across an entire project at once. To follow the reasoning you first need to understand what a string literal is, what it means to freeze a value in Ruby, how the frozen_string_literal magic comment works, and how memory allocation and garbage collection shape performance, so each term is defined as it appears.
+
+A string literal is a piece of text written directly into the source code, such as the word &quot;meow&quot; typed between quotation marks and returned by a method, which means it is created statically as part of the program rather than being constructed dynamically while the program runs. In Ruby almost every value is mutable by default, including strings, which means the contents of a string can be changed in place after it has been created, and this flexible design suits the language&#39;s dynamic character but carries a hidden cost at scale. Because a mutable string could be altered by any part of the program, Ruby cannot safely share one copy of a literal everywhere it appears, so each time execution reaches that literal it allocates a brand new String object even when the text is identical on every call.
+
+The waste is easy to see once you count it: a method that returns an ordinary literal one hundred times allocates one hundred separate String objects, while the same method returning a frozen literal allocates none, because the single immutable object is built once and then handed out repeatedly. Memory allocation is the act of reserving space to hold a newly created object, and garbage collection is the automatic process by which Ruby later reclaims the memory of objects no longer in use, so generating thousands of identical throwaway strings forces the garbage collector to work harder, particularly in serializers, presenters, and decorators that produce a great deal of text on a single web request. Freezing a string means marking it as immutable and permanently unchangeable, which matters because an immutable value can be reused safely without copying, eliminating those redundant allocations. Ruby 2.3 introduced the frozen_string_literal magic comment, a line that automatically freezes every string literal in the file where it appears, and Freezolite is a gem, a packaged Ruby library, that extends this behavior across a whole project so you never repeat that comment by hand.</p>
+    </div>
+  </div>
+  <p class="note"><b>What changed:</b> joined choppy sentences (avg 12 &rarr; 48 words); opened with a definition.</p>
+</section>
+
+<section class="card">
+  <h2>PostgreSQL and Rails sitting in a tree</h2>
+  <p class="src"><a href="https://evilmartians.com/chronicles/postgresql-and-rails-sitting-in-a-tree">the original post &rarr;</a> &middot; only the opening ~380 words change (that is all the classifier reads)</p>
+  <div class="cols">
+    <div class="col">
+      <div class="colhead">Before <span class="badge drop"><b>2.11</b> / 5 &middot; still dropped</span></div>
+      <p>PostgreSQL and Rails, sitting in a treeMarch 9, 2016TopicsRailsPerformancePostgreSQLRubyViktor SokolovSr. Backend EngineerThe Closure Table pattern has something that other tree storage methods don’t—a good design. Let’s see why it rocks. Some time ago I was involved in a project aiming to systemize a pandemonium of databases. Especially hard were the toponym ones. The source data was a deep XML tree with regions and cities at the top and streets and houses at the bottom. | id | parent_id | name | | ---------- |------------|------------| | 1 | 2 | Kremlin | | 2 | | Moscow | | 3 | 2 | Red Square | | … (1M+ unsorted records) … | I had to put this tree into PostgreSQL to allow queries. A typical query was, for example, to fetch all the streets of the cities within a specific region or to fetch the whole path from a particular street at the bottom up to the root node, etc. Since there were quite a few queries to make, it was a must to process them as fast as possible. Therefore, I needed a hierarchical storage pattern to speed them up. So I did the following: Imported the table; Chose the suitable hierarchical pattern; Calculated the extra reference data used by the chosen pattern. At each of the three stages, it was the speed that mattered. I wanted to do everything in next to no time, because there are not many things worse than having your server not responding, and downtimes ar&hellip;</p>
+    </div>
+    <div class="col">
+      <div class="colhead">After <span class="badge kept"><b>3.18</b> / 5 &middot; would be kept</span></div>
+      <p>Most ways to store a tree in a relational database trade away either fast reads or fast writes, but the Closure Table pattern keeps both. A tree, also called a hierarchical data structure, is a set of records where each node points to a single parent, so the whole shape fans out from one root down through many levels of children, the way regions contain cities and cities contain streets and streets contain houses. PostgreSQL is the open-source relational database that has to answer questions about that shape: not just &quot;who is this node&#39;s parent&quot; but &quot;give me every street inside this region&quot; or &quot;walk the full path from this house back up to the root.&quot; The Closure Table pattern is a way to store those relationships so that both kinds of query stay fast, by keeping a separate table that records every ancestor-descendant pair in the tree rather than only the immediate parent link. Rails is the Ruby web framework whose ActiveRecord layer maps database rows to objects, and it is where this tree eventually has to live and be queried.
+
+The concrete problem came from a project that set out to systemize a pandemonium of scattered databases, and the hardest of those were the toponym tables, meaning the records of place names. The source was a deep XML tree with regions and cities near the top and streets and houses at the bottom, more than a million unsorted records, each carrying an id, a parent_id pointing at the node above it, and a name. That tree had to go into PostgreSQL so the application could run hierarchical queries against it, and because there were many such queries to serve, every one of them had to come back as fast as possible, since a server that stops responding and a downtime nobody planned for are about the worst outcomes a backend can hand a user. Getting there meant three steps where speed was the only thing that mattered: importing the raw table efficiently, choosing the hierarchical storage pattern that fit these queries, and then computing the extra reference data that the chosen pattern depends on to do its work.</p>
+    </div>
+  </div>
+  <p class="note"><b>What changed:</b> joined choppy sentences (avg 15 &rarr; 40 words); opened with a definition.</p>
+</section>
+
+<section class="card">
+  <h2>Robust Rails browser testing with SitePrism</h2>
+  <p class="src"><a href="https://evilmartians.com/chronicles/system-of-a-test-2-robust-rails-browser-testing-with-siteprism">the original post &rarr;</a> &middot; only the opening ~380 words change (that is all the classifier reads)</p>
+  <div class="cols">
+    <div class="col">
+      <div class="colhead">Before <span class="badge drop"><b>2.09</b> / 5 &middot; still dropped</span></div>
+      <p>System of a test II: Robust Rails browser testing with SitePrismAugust 31, 2020TopicsRailsRubyVladimir DementyevPrincipal Backend EngineerTired of seeing your Rails system tests go red every time there’s a minor change to the application frontend? See how we solve this problem with SitePrism that allows to abstract out page implementation details, making our Capybara code more generic and less error-prone. Learn advanced techniques for organizing and DRYing out your browser testing code, based on Evil Martians’ commercial work. Other parts:System of a test: Proper browser testing in Ruby on RailsSystem of a test II: Robust Rails browser testing with SitePrism In the first part of our Rails system tests series, we only covered the topic of setting up the environment for browser tests in Rails. We didn’t even show a piece of an actual test, or scenario. Why so? First, the article couldn’t fit more than it could fit. Secondly, I didn’t want to go over the basics of writing tests with Capybara—there are plenty of great resources from the community if you’re just getting started with end-to-end testing in Rails world. To see how we setup our system tests with Ferrum, Cuprite and Docker—check out the first part of this series: Proper browser testing in Ruby on Rails. So, this time we are going to skip the basics and talk about some advanced techniques in writing system tests. These a&hellip;</p>
+    </div>
+    <div class="col">
+      <div class="colhead">After <span class="badge kept"><b>2.58</b> / 5 &middot; would be kept</span></div>
+      <p>Tired of watching your Rails system tests turn red every time a teammate renames a CSS class? That brittleness is the single biggest reason most teams quietly abandon end-to-end testing, and understanding why it happens is the first step toward writing test suites that survive ordinary front-end changes.
+
+System tests, also called browser tests, are automated checks that drive a real browser against your running application in order to verify the end-user experience, exercising the full stack from the rendered HTML and JavaScript down to the database rather than testing a single class in isolation the way a unit test does. In a Rails application these tests are written with Capybara, a Ruby library that provides a high-level domain-specific language for visiting pages, filling in form fields, clicking buttons, and asserting that expected text appears on the screen. Because Capybara interacts with the page through CSS selectors and visible labels, any change to the markup can break a test even when the user experience stays exactly the same, and a test that fails for reasons unrelated to actual behavior is what developers call a flaky test.
+
+This is the central tradeoff of browser testing, and it deserves an honest accounting. System tests will never run as fast as unit tests, because launching a browser and rendering a page costs real time, and that compromise is worth accepting because unit tests cannot verify what an actual user sees and does. Speed, however, is a fixed cost you pay once. Maintainability is the cost that compounds, because when a search box moves from one container to another, or a button label changes, the CSS selectors hard-coded throughout dozens of scenarios all break at once, and you spend an afternoon refactoring tests that describe behavior that never actually changed.
+
+The fix is a layer of indirection borrowed from a well-established idea called the Page Object pattern, where each page of your application is represented by a single Ruby object that holds the messy implementation details, the selectors and the structure, so your tests can speak in terms of user intent instead. SitePrism is a Ruby gem that implements this pattern on top of Capybara, letting you define pages and the elements they contain in one place, so that when the markup changes you update one page object rather than every scenario that touches it. The techniques here come from Evil Martians&#39; commercial Rails work, where brittle suites are a recurring and expensive problem.</p>
+    </div>
+  </div>
+  <p class="note"><b>What changed:</b> joined choppy sentences (avg 22 &rarr; 38 words); opened with a definition.</p>
+</section>
+
+<section class="card">
+  <h2>Ruby on Rails on WebAssembly</h2>
+  <p class="src"><a href="https://evilmartians.com/chronicles/ruby-on-rails-on-webassembly-a-guide-to-full-stack-in-browser-action">the original post &rarr;</a> &middot; only the opening ~380 words change (that is all the classifier reads)</p>
+  <div class="cols">
+    <div class="col">
+      <div class="colhead">Before <span class="badge drop"><b>2.04</b> / 5 &middot; still dropped</span></div>
+      <p>Ruby on Rails on WebAssembly: a guide to full-stack in‑browser actionFebruary 18, 2025TopicsRailsLocal-firstOpen SourceWebAssemblyRubyJavaScriptVladimir DementyevPrincipal Backend EngineerTravis TurnerTech EditorTranslationsJapaneseRailsアプリケーションをWebAssembly化してブラウザ内で実行するEditor’s note: the original version of this article appeared on web.dev. Imagine a fully functional blog running in your browser—not just the frontend, but the backend, too! No servers or clouds involved—just you, your browser, and… WebAssembly! By allowing server-side frameworks to run locally, WebAssembly is blurring the boundaries of traditional web development and opening up exciting new possibilities. In this post, I’ll share the progress on making Ruby on Rails Wasm-ready and browser-ready. Here’s what is in store: How to bring Rails into the browser in 15 minutes Behind the scenes of Rails wasmification Future of Rails and Wasm Ruby on Rails’ famous “blog in 15 minutes”… now running right in your browser Software engineering shares many similarities with art, and just as interpreting meaning depends on the audience and can diverge from the creator’s original intent, developers tend to demonstrate a kind of interpretive flexibility by repurposing tech tools in ways far beyond their intended design. Irina Nazarova CEO at Evil MartiansWe&#39;ve pioneered WebAssembly solutions, from browser-based Rails apps to san&hellip;</p>
+    </div>
+    <div class="col">
+      <div class="colhead">After <span class="badge kept"><b>2.80</b> / 5 &middot; would be kept</span></div>
+      <p>Imagine a fully functional blog running in your browser, not just the frontend, but the backend too, with no server and no cloud anywhere in the picture.
+
+WebAssembly, or Wasm, is a portable binary instruction format that lets code written in languages other than JavaScript run inside the browser at near-native speed, and it was originally introduced to bring high-performance and secure features to the web. That same runtime now reaches well beyond the page, because Wasm has become one of the building blocks for cloud computing and embedded systems, and the browser is only one of several places it executes. Ruby on Rails is a server-side web framework focused on developer productivity and shipping software fast, and it is the technology behind industry leaders such as GitHub and Shopify. A full-stack application normally splits into two halves that talk over a network: a frontend rendered in the browser, and a backend that runs the framework, the database, and the business logic on a remote machine. The interesting move this post explores is collapsing that split entirely, because once you compile Ruby itself to WebAssembly you can embed a typical server-side Rails application directly into the browser, which erases the distance between the frontend and the backend of an ordinary web application.
+
+This guide shows how to take Rails into the browser in about fifteen minutes, a deliberate nod to the famous &quot;How to build a blog in 15 minutes&quot; video that David Heinemeier Hansson published in 2005, when building a working web application that fast still felt like magic. The plan is concrete: we create a normal Rails application and scaffold a blog the usual way on the command line, then package that same application for Wasm so it boots and runs as a self-contained unit inside the browser, with the request cycle, the models, and the views all executing locally. Repurposing a runtime far beyond its intended design is a recurring pattern in software, and running a backend framework with no backend is a sharp example of it. Along the way we cover the mechanics of making Rails Wasm-ready, what wasmification actually involves under the hood, and where Rails and WebAssembly are heading next.</p>
+    </div>
+  </div>
+  <p class="note"><b>What changed:</b> joined choppy sentences (avg 19 &rarr; 37 words); opened with a definition.</p>
+</section>
+
+<section class="card">
+  <h2>Partition and conquer: table partitioning in PostgreSQL</h2>
+  <p class="src"><a href="https://evilmartians.com/chronicles/partition-and-conquer">the original post &rarr;</a> &middot; only the opening ~380 words change (that is all the classifier reads)</p>
+  <div class="cols">
+    <div class="col">
+      <div class="colhead">Before <span class="badge drop"><b>2.01</b> / 5 &middot; still dropped</span></div>
+      <p>Partition and conquerNovember 7, 2017TopicsPerformancePerformance &amp; scalePostgreSQLRuby on RailsRubySara DolganSr. Backend Engineer, Open Source activistDenis LifanovBackend EngineerHere is a tale of database partitioning inspired by real events. We’ll learn how to break down a gigantic table that is slowing down your application in production—Ruby on Rails and PostgreSQL, in our case. Expect a step-by-step guide. When bigger is no longer better Databases tend to grow. At a certain point, their size becomes a liability, and we are not even considering extreme cases when the primary key hits the limit (although, this does happen). This article is written from experience: one of our clients, Gett, had a database table that grew over time to menacing proportions. With several million rows, some queries took hours to complete. That posed a technical challenge that we solved with database partitioning. Dividing one big table into a number of smaller ones is a standard technique, but it has to be performed with caution, especially when live data is at stake. We will show how to avoid some common pitfalls and make sure nothing is lost in transition. The best way to learn is to try something hands-on, so we will first create the problem by generating a huge table filled with fake data. Then we will solve it together, armed with some PostgreSQL magic. A real fake table First, we need da&hellip;</p>
+    </div>
+    <div class="col">
+      <div class="colhead">After <span class="badge kept"><b>2.56</b> / 5 &middot; would be kept</span></div>
+      <p>There is a moment in the life of a growing application when a single database table stops being a convenience and quietly becomes the thing that wakes your on-call engineer at three in the morning, and this is a tale of database partitioning drawn from exactly that kind of real event.
+
+Table partitioning is the technique of taking one enormous table and splitting it into a number of smaller physical tables, called partitions, that the database still presents and queries as though they were a single logical table. PostgreSQL is the open-source relational database we are working in here, and it can route an incoming query to only the partitions that could possibly hold the requested rows, so a search that once had to scan millions of records can touch a small slice of them instead. A database index is a separate sorted structure that lets the engine jump straight to the matching rows without reading the whole table, and on our orders data we build an index on the country and scheduled_at columns together, because the queries we run most often filter on exactly those two fields.
+
+Query performance is simply how long the database takes to return the rows that a request asks for, and it is the number that decays first and most visibly as a table grows, because the cost of scanning rows and of keeping an index balanced both climb steadily with the row count. We learned this the hard way: one of our clients, Gett, had an orders table that swelled over time to several million rows, until some of its most common queries took hours rather than milliseconds to finish. Each order carries a country code, an order type, a scheduled timestamp, a cost, and a JSON blob of extra data, and the three operations that matter are fetching one order by its id, listing every order from a given country within a time window accurate to the minute, and updating an order&#39;s cost or attached data.
+
+Rails is the Ruby web framework whose ActiveRecord layer maps each database row to a Ruby object, and it is the application that ultimately has to read and write these orders without ever noticing that one table quietly became many. Dividing a live, several-million-row table while production traffic keeps flowing is a standard technique that nonetheless demands real caution, and this guide works through it hands-on, first generating a thirty-million-row table of fake orders to recreate the problem honestly, then taking it apart with PostgreSQL so that nothing is lost in transition.</p>
+    </div>
+  </div>
+  <p class="note"><b>What changed:</b> joined choppy sentences (avg 21 &rarr; 48 words).</p>
+</section>
+
+<footer>Scores computed with <code>scripts/quality_core.rb</code> (FineWeb-Edu via ONNX) at build time.
+Openings rewritten against the Evil Martians content style guide. An experiment, not a published change.</footer>
+</main></body></html>
