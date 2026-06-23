@@ -1,0 +1,922 @@
+{
+  "Ruby (language)": {
+    "repo": "ruby/ruby",
+    "license": "Ruby",
+    "kind": "language",
+    "code_channel": "permissive",
+    "docs_repo": "ruby/ruby",
+    "docs_location": "generated",
+    "docs_license": "NOASSERTION",
+    "docs_in_stack": "yes"
+  },
+  "Rails Guides": {
+    "repo": "rails/rails",
+    "license": "MIT",
+    "kind": "docs-portal",
+    "code_channel": "permissive",
+    "docs_repo": "rails/rails",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Rails API": {
+    "repo": "rails/rails",
+    "license": "MIT",
+    "kind": "docs-portal",
+    "code_channel": "permissive",
+    "docs_repo": "rails/rails",
+    "docs_location": "generated",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "RubyGems Guides": {
+    "repo": "rubygems/rubygems",
+    "license": "MIT",
+    "kind": "docs-portal",
+    "code_channel": "permissive",
+    "docs_repo": "rubygems/guides",
+    "docs_location": "separate-repo",
+    "docs_license": "NOASSERTION",
+    "docs_in_stack": "yes"
+  },
+  "Bundler": {
+    "repo": "rubygems/rubygems",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "rubygems/bundler-site",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "RubyDoc.info": {
+    "repo": null,
+    "license": null,
+    "kind": "docs-portal",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "generated",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Hotwire": {
+    "repo": null,
+    "license": null,
+    "kind": "framework",
+    "code_channel": "none",
+    "docs_repo": "hotwired/hotwire-site",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Turbo": {
+    "repo": "hotwired/turbo",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "hotwired/turbo-site",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Stimulus": {
+    "repo": "hotwired/stimulus",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "hotwired/stimulus-site",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "ViewComponent": {
+    "repo": "ViewComponent/view_component",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "ViewComponent/view_component",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Phlex": {
+    "repo": "yippee-fun/phlex",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "yippee-fun/phlex.fun",
+    "docs_location": "separate-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Ruby UI": {
+    "repo": "ruby-ui/ruby_ui",
+    "license": null,
+    "kind": "library",
+    "code_channel": "no_license",
+    "docs_repo": "ruby-ui/ruby_ui",
+    "docs_location": "in-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Inertia Rails": {
+    "repo": "inertiajs/inertia-rails",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "inertiajs/inertia-rails",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Lookbook": {
+    "repo": "lookbook-hq/lookbook",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "lookbook-hq/lookbook",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Roda": {
+    "repo": "jeremyevans/roda",
+    "license": "MIT",
+    "kind": "framework",
+    "code_channel": "permissive",
+    "docs_repo": "jeremyevans/roda",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Sinatra": {
+    "repo": "sinatra/sinatra",
+    "license": "MIT",
+    "kind": "framework",
+    "code_channel": "permissive",
+    "docs_repo": "sinatra/sinatra.github.com",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Hanami": {
+    "repo": "hanami/hanami",
+    "license": "MIT",
+    "kind": "framework",
+    "code_channel": "permissive",
+    "docs_repo": "hanami/guides",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Bridgetown": {
+    "repo": "bridgetownrb/bridgetown",
+    "license": "MIT",
+    "kind": "framework",
+    "code_channel": "permissive",
+    "docs_repo": "bridgetownrb/bridgetown",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Jekyll": {
+    "repo": "jekyll/jekyll",
+    "license": "MIT",
+    "kind": "framework",
+    "code_channel": "permissive",
+    "docs_repo": "jekyll/jekyll",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Sequel": {
+    "repo": "jeremyevans/sequel",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "jeremyevans/sequel",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "ROM": {
+    "repo": "rom-rb/rom",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "rom-rb/rom-rb.org",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "dry-rb": {
+    "repo": null,
+    "license": null,
+    "kind": "docs-portal",
+    "code_channel": "none",
+    "docs_repo": "dry-rb/dry-rb.org",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Sidekiq": {
+    "repo": "sidekiq/sidekiq",
+    "license": "LGPL-3.0",
+    "kind": "library",
+    "code_channel": "copyleft",
+    "docs_repo": "sidekiq/sidekiq",
+    "docs_location": "wiki",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "AnyCable": {
+    "repo": "anycable/anycable",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "anycable/docs.anycable.io",
+    "docs_location": "separate-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Kamal": {
+    "repo": "basecamp/kamal",
+    "license": "MIT",
+    "kind": "framework",
+    "code_channel": "permissive",
+    "docs_repo": "basecamp/kamal-site",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Sorbet": {
+    "repo": "sorbet/sorbet",
+    "license": "Apache-2.0",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "sorbet/sorbet",
+    "docs_location": "in-repo",
+    "docs_license": "Apache-2.0",
+    "docs_in_stack": "yes"
+  },
+  "RuboCop": {
+    "repo": "rubocop/rubocop",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "rubocop/rubocop",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "RSpec": {
+    "repo": "rspec/rspec",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "rspec/rspec.github.io",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "TestProf": {
+    "repo": "test-prof/test-prof",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "test-prof/test-prof",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "GraphQL Ruby": {
+    "repo": "rmosolgo/graphql-ruby",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "rmosolgo/graphql-ruby",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Rodauth": {
+    "repo": "jeremyevans/rodauth",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "jeremyevans/rodauth",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Action Policy": {
+    "repo": "palkan/action_policy",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "palkan/action_policy",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Shrine": {
+    "repo": "shrinerb/shrine",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "shrinerb/shrine",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Avo": {
+    "repo": "avo-hq/avo",
+    "license": "LGPL-3.0",
+    "kind": "library",
+    "code_channel": "copyleft",
+    "docs_repo": "avo-hq/docs.avohq.io",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "ActiveAdmin": {
+    "repo": "activeadmin/activeadmin",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "activeadmin/activeadmin",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Ransack": {
+    "repo": "activerecord-hackery/ransack",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "activerecord-hackery/ransack",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Pagy": {
+    "repo": "ddnexus/pagy",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "ddnexus/pagy",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Nokogiri": {
+    "repo": "sparklemotion/nokogiri",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "sparklemotion/nokogiri.org",
+    "docs_location": "separate-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Faraday": {
+    "repo": "lostisland/faraday",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "lostisland/faraday",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Capistrano": {
+    "repo": "capistrano/capistrano",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "capistrano/capistrano",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Pry": {
+    "repo": "pry/pry",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "pry/pry.github.io",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Trailblazer": {
+    "repo": "trailblazer/trailblazer",
+    "license": "LGPL-3.0",
+    "kind": "framework",
+    "code_channel": "copyleft",
+    "docs_repo": "trailblazer/website",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Rage": {
+    "repo": "rage-rb/rage",
+    "license": "MIT",
+    "kind": "framework",
+    "code_channel": "permissive",
+    "docs_repo": "rage-rb/website",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Falcon": {
+    "repo": "socketry/falcon",
+    "license": "MIT",
+    "kind": "framework",
+    "code_channel": "permissive",
+    "docs_repo": "socketry/falcon",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Karafka": {
+    "repo": "karafka/karafka",
+    "license": "LGPL-3.0",
+    "kind": "framework",
+    "code_channel": "copyleft",
+    "docs_repo": "karafka/wiki",
+    "docs_location": "separate-repo",
+    "docs_license": "NOASSERTION",
+    "docs_in_stack": "no"
+  },
+  "RubyLLM": {
+    "repo": "crmne/ruby_llm",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "crmne/ruby_llm",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Brakeman": {
+    "repo": "presidentbeef/brakeman",
+    "license": "Brakeman-Public-Use",
+    "kind": "library",
+    "code_channel": "other",
+    "docs_repo": "presidentbeef/brakeman-site",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "imgproxy": {
+    "repo": "imgproxy/imgproxy",
+    "license": "Apache-2.0",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "imgproxy/imgproxy-docs",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Vite Ruby": {
+    "repo": "ElMassimo/vite_ruby",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "ElMassimo/vite_ruby",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Flipper": {
+    "repo": "flippercloud/flipper",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "flippercloud/flipper",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "GoRails": {
+    "repo": null,
+    "license": null,
+    "kind": "commercial",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Drifting Ruby": {
+    "repo": null,
+    "license": null,
+    "kind": "commercial",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "RubyEvents": {
+    "repo": "rubyevents/rubyevents",
+    "license": null,
+    "kind": "content",
+    "code_channel": "no_license",
+    "docs_repo": "rubyevents/rubyevents",
+    "docs_location": "in-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Rails at Scale (Shopify)": {
+    "repo": null,
+    "license": null,
+    "kind": "content",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Ruby Weekly": {
+    "repo": null,
+    "license": null,
+    "kind": "content",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Short Ruby": {
+    "repo": null,
+    "license": null,
+    "kind": "content",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "This Week in Rails": {
+    "repo": null,
+    "license": null,
+    "kind": "content",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Evil Martians": {
+    "repo": null,
+    "license": null,
+    "kind": "content",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Hotwire Weekly": {
+    "repo": null,
+    "license": null,
+    "kind": "content",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Write Software Well": {
+    "repo": null,
+    "license": null,
+    "kind": "content",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Thoughtbot": {
+    "repo": null,
+    "license": null,
+    "kind": "content",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "AppSignal Blog": {
+    "repo": null,
+    "license": null,
+    "kind": "content",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Riding Rails": {
+    "repo": null,
+    "license": null,
+    "kind": "content",
+    "code_channel": "none",
+    "docs_repo": "rails/website",
+    "docs_location": "in-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Joe Masilotti": {
+    "repo": null,
+    "license": null,
+    "kind": "content",
+    "code_channel": "none",
+    "docs_repo": "joemasilotti/masilotti.com-bridgetown",
+    "docs_location": "in-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Code with Jason": {
+    "repo": null,
+    "license": null,
+    "kind": "content",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Maintainable": {
+    "repo": null,
+    "license": null,
+    "kind": "content",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Ruby News": {
+    "repo": null,
+    "license": null,
+    "kind": "content",
+    "code_channel": "none",
+    "docs_repo": "ruby/www.ruby-lang.org",
+    "docs_location": "in-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Devise": {
+    "repo": "heartcombo/devise",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "heartcombo/devise",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Pundit": {
+    "repo": "varvet/pundit",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "varvet/pundit",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "CanCanCan": {
+    "repo": "CanCanCommunity/cancancan",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "CanCanCommunity/cancancan",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Standard": {
+    "repo": "standardrb/standard",
+    "license": "MIT",
+    "kind": "library",
+    "code_channel": "permissive",
+    "docs_repo": "standardrb/standard",
+    "docs_location": "in-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "Sentry": {
+    "repo": "getsentry/sentry-ruby",
+    "license": "MIT",
+    "kind": "commercial",
+    "code_channel": "permissive",
+    "docs_repo": "getsentry/sentry-docs",
+    "docs_location": "separate-repo",
+    "docs_license": "FSL-1.1-Apache-2.0",
+    "docs_in_stack": "no"
+  },
+  "AppSignal": {
+    "repo": "appsignal/appsignal-ruby",
+    "license": "MIT",
+    "kind": "commercial",
+    "code_channel": "permissive",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "New Relic": {
+    "repo": "newrelic/newrelic-ruby-agent",
+    "license": "Apache-2.0",
+    "kind": "commercial",
+    "code_channel": "permissive",
+    "docs_repo": "newrelic/docs-website",
+    "docs_location": "separate-repo",
+    "docs_license": "CC-BY-NC-SA-4.0",
+    "docs_in_stack": "no"
+  },
+  "Datadog": {
+    "repo": "DataDog/dd-trace-rb",
+    "license": "Apache-2.0",
+    "kind": "commercial",
+    "code_channel": "permissive",
+    "docs_repo": "DataDog/documentation",
+    "docs_location": "separate-repo",
+    "docs_license": "BSD-3-Clause",
+    "docs_in_stack": "yes"
+  },
+  "Honeybadger": {
+    "repo": "honeybadger-io/honeybadger-ruby",
+    "license": "MIT",
+    "kind": "commercial",
+    "code_channel": "permissive",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Rollbar": {
+    "repo": "rollbar/rollbar-gem",
+    "license": "MIT",
+    "kind": "commercial",
+    "code_channel": "permissive",
+    "docs_repo": "rollbar/docs",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Bugsnag": {
+    "repo": "bugsnag/bugsnag-ruby",
+    "license": "MIT",
+    "kind": "commercial",
+    "code_channel": "permissive",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Scout APM": {
+    "repo": "scoutapp/scout_apm_ruby",
+    "license": "MIT",
+    "kind": "commercial",
+    "code_channel": "permissive",
+    "docs_repo": "scoutapp/scout_help_sphinx",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  },
+  "Skylight": {
+    "repo": "skylightio/skylight-ruby",
+    "license": "proprietary",
+    "kind": "commercial",
+    "code_channel": "other",
+    "docs_repo": "skylightio/skylight-docs",
+    "docs_location": "separate-repo",
+    "docs_license": "CC-BY-NC-SA-4.0",
+    "docs_in_stack": "no"
+  },
+  "Better Stack": {
+    "repo": "logtail/logtail-ruby-rails",
+    "license": "ISC",
+    "kind": "commercial",
+    "code_channel": "permissive",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Papertrail": {
+    "repo": null,
+    "license": null,
+    "kind": "commercial",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "GitHub Actions": {
+    "repo": null,
+    "license": null,
+    "kind": "commercial",
+    "code_channel": "none",
+    "docs_repo": "github/docs",
+    "docs_location": "separate-repo",
+    "docs_license": "CC-BY-4.0",
+    "docs_in_stack": "yes"
+  },
+  "Heroku": {
+    "repo": null,
+    "license": null,
+    "kind": "commercial",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Fly.io": {
+    "repo": null,
+    "license": null,
+    "kind": "commercial",
+    "code_channel": "none",
+    "docs_repo": "superfly/docs",
+    "docs_location": "separate-repo",
+    "docs_license": "Apache-2.0",
+    "docs_in_stack": "yes"
+  },
+  "Render": {
+    "repo": null,
+    "license": null,
+    "kind": "commercial",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "Railway": {
+    "repo": null,
+    "license": null,
+    "kind": "commercial",
+    "code_channel": "none",
+    "docs_repo": "railwayapp/docs",
+    "docs_location": "separate-repo",
+    "docs_license": "MIT",
+    "docs_in_stack": "yes"
+  },
+  "DigitalOcean": {
+    "repo": null,
+    "license": null,
+    "kind": "commercial",
+    "code_channel": "none",
+    "docs_repo": null,
+    "docs_location": "hosted",
+    "docs_license": null,
+    "docs_in_stack": "no"
+  },
+  "AWS Elastic Beanstalk": {
+    "repo": null,
+    "license": null,
+    "kind": "commercial",
+    "code_channel": "none",
+    "docs_repo": "awsdocs/aws-elastic-beanstalk-developer-guide",
+    "docs_location": "separate-repo",
+    "docs_license": "CC-BY-SA-4.0",
+    "docs_in_stack": "no"
+  },
+  "PlanetScale": {
+    "repo": null,
+    "license": null,
+    "kind": "commercial",
+    "code_channel": "none",
+    "docs_repo": "planetscale/docs",
+    "docs_location": "separate-repo",
+    "docs_license": "Apache-2.0",
+    "docs_in_stack": "yes"
+  },
+  "Supabase": {
+    "repo": "supabase/supabase",
+    "license": "Apache-2.0",
+    "kind": "commercial",
+    "code_channel": "permissive",
+    "docs_repo": "supabase/supabase",
+    "docs_location": "in-repo",
+    "docs_license": "Apache-2.0",
+    "docs_in_stack": "yes"
+  },
+  "Neon": {
+    "repo": "neondatabase/neon",
+    "license": "Apache-2.0",
+    "kind": "commercial",
+    "code_channel": "permissive",
+    "docs_repo": "neondatabase/website",
+    "docs_location": "separate-repo",
+    "docs_license": null,
+    "docs_in_stack": "yes"
+  }
+}

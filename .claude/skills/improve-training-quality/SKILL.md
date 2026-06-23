@@ -13,6 +13,11 @@ description: >
 You iteratively rewrite the **opening** of a page and measure it with a local scorer until it clears the
 bar or you prove it cannot. The model (you) does the rewriting; the deterministic scorer is the signal.
 
+Trust the scorer over intuition. The researchers who built these classifiers report that people cannot
+predict their verdicts by eye ([DCLM keynote](https://www.youtube.com/watch?v=IsNqSmTPiWQ); graduate
+annotators "could not predict what the classifiers would say above chance"), which is exactly why this loop
+measures every rewrite instead of guessing.
+
 ## Why only the opening
 
 The classifier reads only the **first ~512 tokens (~380 words)**. Optimize that opening; do not waste

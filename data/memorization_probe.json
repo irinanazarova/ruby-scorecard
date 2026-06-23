@@ -2,17 +2,95 @@
   "model": "claude-opus-4-8",
   "method": "tools-off verbatim-continuation probe; longest contiguous shared word-run vs the true continuation (55-word prefix). Directional memorization signal, NOT proof of training-set membership.",
   "controls": [
-    {"name": "MIT License (control+)", "run": 31, "overlap": 1.0, "verdict": "STRONG memorization", "expect": "should fire"},
-    {"name": "Dickens opening (control+)", "run": 15, "overlap": 1.0, "verdict": "STRONG memorization", "expect": "should fire"},
-    {"name": "Fabricated text (control-)", "run": 1, "overlap": 0.0, "verdict": "no verbatim recall", "expect": "should stay clean"}
+    {
+      "name": "MIT License (control+)",
+      "run": 31,
+      "overlap": 1.0,
+      "verdict": "STRONG memorization",
+      "expect": "should fire"
+    },
+    {
+      "name": "Dickens opening (control+)",
+      "run": 15,
+      "overlap": 1.0,
+      "verdict": "STRONG memorization",
+      "expect": "should fire"
+    },
+    {
+      "name": "Fabricated text (control-)",
+      "run": 1,
+      "overlap": 0.0,
+      "verdict": "no verbatim recall",
+      "expect": "should stay clean"
+    }
   ],
   "test_pages": [
-    {"name": "Supabase Auth", "url": "https://supabase.com/docs/guides/auth", "run": 23, "overlap": 0.45, "verdict": "STRONG memorization"},
-    {"name": "Resend Node quickstart", "url": "https://resend.com/docs/send-with-nodejs", "run": 15, "overlap": 0.19, "verdict": "STRONG memorization"},
-    {"name": "Supabase RLS", "url": "https://supabase.com/docs/guides/database/postgres/row-level-security", "run": 5, "overlap": 0.013, "verdict": "no verbatim recall"},
-    {"name": "AnyCable reliable_streams", "url": "https://docs.anycable.io/anycable-go/reliable_streams", "run": 5, "overlap": 0.012, "verdict": "no verbatim recall"},
-    {"name": "EM ruby-on-whales", "url": "https://evilmartians.com/chronicles/ruby-on-whales-docker-for-ruby-rails-development", "run": 2, "overlap": 0.0, "verdict": "no verbatim recall"},
-    {"name": "EM the-long-game", "url": "https://evilmartians.com/chronicles/the-long-game-why-rails-survived-the-hype-cycle-and-what-it-means-for-your-startup", "run": 2, "overlap": 0.0, "verdict": "no verbatim recall"}
+    {
+      "name": "Supabase Auth",
+      "url": "https://supabase.com/docs/guides/auth",
+      "run": 23,
+      "overlap": 0.45,
+      "verdict": "STRONG memorization"
+    },
+    {
+      "name": "Resend Node quickstart",
+      "url": "https://resend.com/docs/send-with-nodejs",
+      "run": 15,
+      "overlap": 0.19,
+      "verdict": "STRONG memorization"
+    },
+    {
+      "name": "Supabase RLS",
+      "url": "https://supabase.com/docs/guides/database/postgres/row-level-security",
+      "run": 5,
+      "overlap": 0.013,
+      "verdict": "no verbatim recall"
+    },
+    {
+      "name": "AnyCable reliable_streams",
+      "url": "https://docs.anycable.io/anycable-go/reliable_streams",
+      "run": 5,
+      "overlap": 0.012,
+      "verdict": "no verbatim recall"
+    },
+    {
+      "name": "EM ruby-on-whales",
+      "url": "https://evilmartians.com/chronicles/ruby-on-whales-docker-for-ruby-rails-development",
+      "run": 2,
+      "overlap": 0.0,
+      "verdict": "no verbatim recall"
+    },
+    {
+      "name": "EM the-long-game",
+      "url": "https://evilmartians.com/chronicles/the-long-game-why-rails-survived-the-hype-cycle-and-what-it-means-for-your-startup",
+      "run": 2,
+      "overlap": 0.0,
+      "verdict": "no verbatim recall"
+    }
   ],
-  "finding": "Method validated end-to-end: controls behave, and real popular docs (Supabase Auth, Resend quickstart) show STRONG verbatim memorization while niche pages (AnyCable, EM, even Supabase RLS) show none. Memorization tracks how heavily a specific page's text is duplicated across the web/repos, not product popularity alone. Confirms the AnyCable/EM negatives are a genuine prominence gap, not a probe artifact."
+  "finding": "Method validated end-to-end: controls behave, and real popular docs (Supabase Auth, Resend quickstart) show STRONG verbatim memorization while niche pages (AnyCable, EM, even Supabase RLS) show none. Memorization tracks how heavily a specific page's text is duplicated across the web/repos, not product popularity alone. Confirms the AnyCable/EM negatives are a genuine prominence gap, not a probe artifact.",
+  "quality_and_license_crosscheck": {
+    "note": "The two memorized pages FAIL the FineWeb-Edu quality gate but their content is in permissive public repos -> code channel, not web channel.",
+    "Supabase Auth": {
+      "quality_score": 1.43,
+      "keeps": false,
+      "docs_repo": "supabase/supabase",
+      "license": "Apache-2.0",
+      "in_stack": true
+    },
+    "Resend Node quickstart": {
+      "quality_score": 1.68,
+      "keeps": false,
+      "snippet_repos": [
+        "resend/resend-node (MIT)",
+        "resend/resend-examples (MIT)"
+      ],
+      "github_code_hits": 1840
+    },
+    "Supabase RLS (contrast)": {
+      "verbatim_recall": false,
+      "same_repo": "supabase/supabase Apache-2.0",
+      "reason": "prose paraphrased, not a copied snippet"
+    }
+  }
 }

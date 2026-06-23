@@ -87,6 +87,76 @@ And capability follows representation: models do well on high-resource languages
 
 ---
 
+## What the corpus builders say
+
+The pipelines above are documented in papers. Their creators have also described the mechanics in recent
+talks and interviews, and they converge on four points, each with a consequence for your content.
+
+**Raw web text is mostly thrown away.** Thomas Scialom, a Llama 3 lead at Meta, puts it plainly: the web
+is ["full of shit in terms of text, and training on those tokens is a waste of compute"](https://www.latent.space/p/llama-3).
+Andrej Karpathy, opening a real pretraining set, calls it ["total garbage"](https://www.dwarkesh.com/p/andrej-karpathy).
+Clearing the filter is the whole game.
+
+**A learned quality classifier is the decisive filter, and humans cannot predict it.** In his
+[DCLM keynote](https://www.youtube.com/watch?v=IsNqSmTPiWQ), Ludwig Schmidt reports that model-based
+filtering was the single most important step, and that the collaborators who hand-labeled documents
+"can't really tell apart" the best classifier variants. Ari Morcos
+[says the same](https://www.youtube.com/watch?v=yXPPcBlcF8U): NLP graduate students "could not predict
+what the DCLM classifiers would say above chance." FineWeb-Edu's creator, Loubna Ben Allal,
+[describes the mechanism](https://www.latent.space/p/2024-syndata-smolmodels): "taking Llama3 and asking
+it to rate the educational content of web pages from zero to five," then training "a BERT model" to imitate
+it, which cuts 15T tokens to 1.5T at score > 3. You cannot eyeball whether a page clears this. Score it
+(see [How to check](#how-to-check)).
+
+**More filtering is not always better.** Over-aggressive deduplication keeps the worst material: strip too
+hard and ["you'll just be upsampling the worst-quality stuff"](https://www.youtube.com/watch?v=5mCjNAQPSLw)
+(Guilherme Penedo, FineWeb). Stacking more "high-quality" sources can also hurt, and Schmidt found that
+adding Wikipedia and arXiv on top of already-filtered web made results worse. The educational gate keeps
+documents at score ≥ 3, and pushing the threshold higher trims general-knowledge performance. Aim to clear
+the bar, not to maximize the score.
+
+**Educational prose helps smaller models most, and code and math are the reasoning levers.** Penedo notes
+that heavy educational filtering ["is really important for very small models"](https://www.youtube.com/watch?v=5mCjNAQPSLw),
+with larger models wanting more diversity later in training. Code and math are deliberately upweighted across
+labs for reasoning ([Jeff Dean](https://www.dwarkesh.com/p/jeff-dean-and-noam-shazeer), Scialom). Technical
+tutorial writing is exactly what the filter rewards, and the public-code channel
+([The Stack](https://huggingface.co/datasets/bigcode/the-stack-v2)) is stronger still.
+
+And the gate is tightening. As labs report exhausting fresh human text (Ilya Sutskever: the field has
+["reached peak data"](https://www.youtube.com/watch?v=1yvBqasHLZs)), quality filtering and synthetic data
+carry more weight, so clearing the bar matters more over time.
+
+---
+
+## Worked example: memorized despite failing the quality gate
+
+We measured this directly. **(measured)** Supabase and Resend are tools the agentic-coding wave made
+ubiquitous, and both teams believe their docs are in training. We tested two of their stable, popular
+pages two ways: the FineWeb-Edu quality score, and a tools-off verbatim-recall probe against Claude Opus
+(give the model a page's opening and measure the longest exact continuation it reproduces; validated with
+known-memorized positive controls and a fabricated negative control, see `scripts/memorization_probe.rb`).
+
+| page | quality score | would the filter keep it? | verbatim recall by Opus |
+| --- | ---: | :--: | :--: |
+| Supabase Auth guide | 1.43 | no | yes (23-word exact run) |
+| Resend Node.js quickstart | 1.68 | no | yes (15-word exact run) |
+
+Both pages **fail the quality gate** (short, code-snippet quickstarts are exactly what the classifier
+scores low), yet Opus reproduces them verbatim. They reached training through the **code channel**, not
+the web one: Supabase's docs live in [`supabase/supabase`](https://github.com/supabase/supabase) (Apache-2.0,
+so the Markdown is in The Stack), and Resend's quickstart is the canonical snippet from its MIT-licensed
+[`resend-node`](https://github.com/resend/resend-node) and `resend-examples` repos, copied into ~1,840
+GitHub repositories. The permissive public code bypasses the quality filter entirely, then sheer
+duplication tips it from "in the corpus" to "reproduced from memory."
+
+The control sharpens it: Supabase's Row Level Security guide sits in the **same** Apache repo yet showed
+**no** verbatim recall, because it is prose that gets paraphrased rather than a snippet that gets copied.
+The lesson: eligibility comes from a permissive public repo; memorization comes from being the canonical
+artifact everyone duplicates. Being in the repo is necessary; being copied is what makes a model know it
+by heart.
+
+---
+
 ## Key terms
 
 - **Centrality (harmonic centrality):** a link-popularity score; the more pages link to you, directly or via
@@ -149,6 +219,14 @@ And capability follows representation: models do well on high-resource languages
   [low-resource / MultiPL-T](https://arxiv.org/abs/2308.09895)
 - Anthropic & llms.txt: [ClaudeBot docs](https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler) ·
   [Google on llms.txt](https://www.seroundtable.com/google-does-not-endorse-llms-txt-40789.html)
+- Talks & interviews (primary, spoken): [Penedo / FineWeb, GOSIM 2025](https://www.youtube.com/watch?v=5mCjNAQPSLw) ·
+  [Ben Allal / FineWeb-Edu, Latent Space @ NeurIPS 2024](https://www.latent.space/p/2024-syndata-smolmodels) ·
+  [Wolf / building LLMs in 2024](https://www.youtube.com/watch?v=2-SPH9hIKT8) ·
+  [Schmidt / DCLM keynote 2025](https://www.youtube.com/watch?v=IsNqSmTPiWQ) ·
+  [Morcos / data curation, Latent Space 2025](https://www.youtube.com/watch?v=yXPPcBlcF8U) ·
+  [Scialom / Llama 3, Latent Space 2024](https://www.latent.space/p/llama-3) ·
+  [Karpathy, Dwarkesh 2025](https://www.dwarkesh.com/p/andrej-karpathy) ·
+  [Sutskever / "peak data", NeurIPS 2024](https://www.youtube.com/watch?v=1yvBqasHLZs)
 
-_Last updated 2026-06-20. Measured findings are reproducible via `scripts/quality_core.rb` and
+_Last updated 2026-06-21. Measured findings are reproducible via `scripts/quality_core.rb` and
 `scripts/coverage_details.rb` in this repo._

@@ -93,6 +93,7 @@ what to do about it, then how it works.</div>
       <ol><li><a href="#do-and-dont">DO and DON'T</a></li>
 <li><a href="#how-it-works-the-short-version">How it works (the short version)</a></li>
 <li><a href="#what-the-corpus-builders-say">What the corpus builders say</a></li>
+<li><a href="#worked-example-memorized-despite-failing-the-quality-gate">Worked example: memorized despite failing the quality gate</a></li>
 <li><a href="#key-terms">Key terms</a></li>
 <li><a href="#how-to-check">How to check</a></li>
 <li><a href="#caveats-and-what-is-contested">Caveats and what is contested</a></li>
@@ -246,6 +247,51 @@ tutorial writing is exactly what the filter rewards, and the public-code channel
 <p>And the gate is tightening. As labs report exhausting fresh human text (Ilya Sutskever: the field has
 <a href="https://www.youtube.com/watch?v=1yvBqasHLZs" target="_blank" rel="noopener noreferrer">&quot;reached peak data&quot;</a>), quality filtering and synthetic data
 carry more weight, so clearing the bar matters more over time.</p>
+
+<hr>
+<h2 id="worked-example-memorized-despite-failing-the-quality-gate">Worked example: memorized despite failing the quality gate</h2>
+
+<p>We measured this directly. <strong>(measured)</strong> Supabase and Resend are tools the agentic-coding wave made
+ubiquitous, and both teams believe their docs are in training. We tested two of their stable, popular
+pages two ways: the FineWeb-Edu quality score, and a tools-off verbatim-recall probe against Claude Opus
+(give the model a page&#39;s opening and measure the longest exact continuation it reproduces; validated with
+known-memorized positive controls and a fabricated negative control, see <code>scripts/memorization_probe.rb</code>).</p>
+
+<table><thead>
+<tr>
+<th>page</th>
+<th style="text-align: right">quality score</th>
+<th style="text-align: center">would the filter keep it?</th>
+<th style="text-align: center">verbatim recall by Opus</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Supabase Auth guide</td>
+<td style="text-align: right">1.43</td>
+<td style="text-align: center">no</td>
+<td style="text-align: center">yes (23-word exact run)</td>
+</tr>
+<tr>
+<td>Resend Node.js quickstart</td>
+<td style="text-align: right">1.68</td>
+<td style="text-align: center">no</td>
+<td style="text-align: center">yes (15-word exact run)</td>
+</tr>
+</tbody></table>
+
+<p>Both pages <strong>fail the quality gate</strong> (short, code-snippet quickstarts are exactly what the classifier
+scores low), yet Opus reproduces them verbatim. They reached training through the <strong>code channel</strong>, not
+the web one: Supabase&#39;s docs live in <a href="https://github.com/supabase/supabase" target="_blank" rel="noopener noreferrer"><code>supabase/supabase</code></a> (Apache-2.0,
+so the Markdown is in The Stack), and Resend&#39;s quickstart is the canonical snippet from its MIT-licensed
+<a href="https://github.com/resend/resend-node" target="_blank" rel="noopener noreferrer"><code>resend-node</code></a> and <code>resend-examples</code> repos, copied into ~1,840
+GitHub repositories. The permissive public code bypasses the quality filter entirely, then sheer
+duplication tips it from &quot;in the corpus&quot; to &quot;reproduced from memory.&quot;</p>
+
+<p>The control sharpens it: Supabase&#39;s Row Level Security guide sits in the <strong>same</strong> Apache repo yet showed
+<strong>no</strong> verbatim recall, because it is prose that gets paraphrased rather than a snippet that gets copied.
+The lesson: eligibility comes from a permissive public repo; memorization comes from being the canonical
+artifact everyone duplicates. Being in the repo is necessary; being copied is what makes a model know it
+by heart.</p>
 
 <hr>
 <h2 id="key-terms">Key terms</h2>
