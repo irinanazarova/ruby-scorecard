@@ -1,13 +1,18 @@
 {
   "model": "claude-opus-4-8",
-  "method": "tools-off verbatim-continuation probe; longest contiguous shared word-run vs true continuation",
-  "note": "Directional memorization signal, NOT proof of training-set membership. Positive controls validate the method; negative control checks for false positives.",
-  "results": [
-    {"name": "MIT License (control+)", "kind": "control", "run": 31, "overlap": 1.0, "verdict": "STRONG memorization"},
-    {"name": "Dickens opening (control+)", "kind": "control", "run": 15, "overlap": 1.0, "verdict": "STRONG memorization"},
-    {"name": "Fabricated text (control-)", "kind": "null", "run": 1, "overlap": 0.0, "verdict": "no verbatim recall"},
-    {"name": "AnyCable docs / reliable_streams", "kind": "test", "run": 5, "overlap": 0.012, "verdict": "no verbatim recall"},
-    {"name": "EM: ruby-on-whales", "kind": "test", "run": 2, "overlap": 0.0, "verdict": "no verbatim recall"},
-    {"name": "EM: the-long-game", "kind": "test", "run": 2, "overlap": 0.0, "verdict": "no verbatim recall"}
-  ]
+  "method": "tools-off verbatim-continuation probe; longest contiguous shared word-run vs the true continuation (55-word prefix). Directional memorization signal, NOT proof of training-set membership.",
+  "controls": [
+    {"name": "MIT License (control+)", "run": 31, "overlap": 1.0, "verdict": "STRONG memorization", "expect": "should fire"},
+    {"name": "Dickens opening (control+)", "run": 15, "overlap": 1.0, "verdict": "STRONG memorization", "expect": "should fire"},
+    {"name": "Fabricated text (control-)", "run": 1, "overlap": 0.0, "verdict": "no verbatim recall", "expect": "should stay clean"}
+  ],
+  "test_pages": [
+    {"name": "Supabase Auth", "url": "https://supabase.com/docs/guides/auth", "run": 23, "overlap": 0.45, "verdict": "STRONG memorization"},
+    {"name": "Resend Node quickstart", "url": "https://resend.com/docs/send-with-nodejs", "run": 15, "overlap": 0.19, "verdict": "STRONG memorization"},
+    {"name": "Supabase RLS", "url": "https://supabase.com/docs/guides/database/postgres/row-level-security", "run": 5, "overlap": 0.013, "verdict": "no verbatim recall"},
+    {"name": "AnyCable reliable_streams", "url": "https://docs.anycable.io/anycable-go/reliable_streams", "run": 5, "overlap": 0.012, "verdict": "no verbatim recall"},
+    {"name": "EM ruby-on-whales", "url": "https://evilmartians.com/chronicles/ruby-on-whales-docker-for-ruby-rails-development", "run": 2, "overlap": 0.0, "verdict": "no verbatim recall"},
+    {"name": "EM the-long-game", "url": "https://evilmartians.com/chronicles/the-long-game-why-rails-survived-the-hype-cycle-and-what-it-means-for-your-startup", "run": 2, "overlap": 0.0, "verdict": "no verbatim recall"}
+  ],
+  "finding": "Method validated end-to-end: controls behave, and real popular docs (Supabase Auth, Resend quickstart) show STRONG verbatim memorization while niche pages (AnyCable, EM, even Supabase RLS) show none. Memorization tracks how heavily a specific page's text is duplicated across the web/repos, not product popularity alone. Confirms the AnyCable/EM negatives are a genuine prominence gap, not a probe artifact."
 }

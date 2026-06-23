@@ -55,11 +55,16 @@ CONTROLS = [
 ].freeze
 
 # --- real test pages (fetched live; we take a distinctive mid-article chunk, past the boilerplate lead) ---
-TEST_URLS = [
+# Override from the command line:  ruby scripts/memorization_probe.rb "Name=https://..." "https://..."
+DEFAULT_TEST_URLS = [
   { name: "AnyCable docs / reliable_streams", url: "https://docs.anycable.io/anycable-go/reliable_streams" },
   { name: "EM: ruby-on-whales", url: "https://evilmartians.com/chronicles/ruby-on-whales-docker-for-ruby-rails-development" },
   { name: "EM: the-long-game", url: "https://evilmartians.com/chronicles/the-long-game-why-rails-survived-the-hype-cycle-and-what-it-means-for-your-startup" }
 ].freeze
+TEST_URLS = ARGV.empty? ? DEFAULT_TEST_URLS : ARGV.map { |a|
+  name, url = a.include?("=") ? a.split("=", 2) : [a.split("/").reject(&:empty?).last, a]
+  { name: name, url: url }
+}
 
 def norm(text)
   text.downcase.gsub(/[^a-z0-9\s]/, " ").split
