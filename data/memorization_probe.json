@@ -1,0 +1,13 @@
+{
+  "model": "claude-opus-4-8",
+  "method": "tools-off verbatim-continuation probe; longest contiguous shared word-run vs true continuation",
+  "note": "Directional memorization signal, NOT proof of training-set membership. Positive controls validate the method; negative control checks for false positives.",
+  "results": [
+    {"name": "MIT License (control+)", "kind": "control", "run": 31, "overlap": 1.0, "verdict": "STRONG memorization"},
+    {"name": "Dickens opening (control+)", "kind": "control", "run": 15, "overlap": 1.0, "verdict": "STRONG memorization"},
+    {"name": "Fabricated text (control-)", "kind": "null", "run": 1, "overlap": 0.0, "verdict": "no verbatim recall"},
+    {"name": "AnyCable docs / reliable_streams", "kind": "test", "run": 5, "overlap": 0.012, "verdict": "no verbatim recall"},
+    {"name": "EM: ruby-on-whales", "kind": "test", "run": 2, "overlap": 0.0, "verdict": "no verbatim recall"},
+    {"name": "EM: the-long-game", "kind": "test", "run": 2, "overlap": 0.0, "verdict": "no verbatim recall"}
+  ]
+}
