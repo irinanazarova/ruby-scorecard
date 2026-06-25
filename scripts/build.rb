@@ -449,11 +449,11 @@ shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; 
 
 <div class="panel target boss">
   <p class="label">&#9733; The final boss</p>
-  <p><strong>Frontier models reach for Ruby on their own.</strong> The single metric every layer above
+  <p><strong>Frontier models reach for Ruby more often.</strong> The single metric every layer above
   serves, measured by the public <a href="https://github.com/chad/whichlang">whichlang benchmark</a>: given
   a free choice of language across 13 models, Ruby was picked <strong>0 times in 1,267 generated
-  solutions</strong> (the defaults are Python, JavaScript, and Go). Win condition: that zero starts
-  climbing, model after model.</p>
+  solutions</strong> (the defaults are Python, JavaScript, and Go). Win condition: that zero starts climbing,
+  model after model, as agents pick Ruby whenever it is the better fit.</p>
   <div class="goals goals--boss">#{BOSS_METERS}</div>
 </div>
 </section>
