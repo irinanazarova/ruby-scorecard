@@ -6,9 +6,11 @@ primary_region = "ams"
 [http_service]
   internal_port = 80
   force_https = true
+  # Keep one machine always warm so ruby.evilmartians.com never cold-starts (no scale-to-zero latency).
+  # Extra machines spun up under load can still auto-stop; the floor of 1 stays up.
   auto_stop_machines = "stop"
   auto_start_machines = true
-  min_machines_running = 0
+  min_machines_running = 1
 
 [[vm]]
   size = "shared-cpu-1x"
