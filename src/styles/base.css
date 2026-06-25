@@ -216,6 +216,25 @@ thead th[aria-sort="ascending"] .arrow,
 thead th[aria-sort="descending"] .arrow { opacity: 1; color: var(--accent); }
 thead th[aria-sort="descending"] .arrow { display: inline-block; transform: rotate(180deg); }
 
+/* ---- two-row grouped header (Retrieval | Training); both rows stay sticky ---- */
+thead tr.grouprow th { top: 0; height: 2.2rem; padding-block: .4rem; border-bottom: 1px solid var(--line); }
+thead tr.colrow th { top: 2.2rem; }
+thead th.res { top: 0; }                       /* resource spans both header rows */
+.grouphead { text-transform: none; letter-spacing: 0; font-family: var(--font-grotesk);
+  font-size: .82rem; font-weight: 700; color: var(--text); }
+.grouphead__sub { display: block; font-family: var(--font-mono); font-size: .54rem; font-weight: 400;
+  text-transform: none; letter-spacing: .02em; color: var(--text-soft); margin-top: .1rem; }
+.th-sub { display: block; font-family: var(--font-mono); font-size: .52rem; font-weight: 400;
+  text-transform: none; letter-spacing: 0; color: var(--text-soft); }
+/* tint the Training columns and divide them from Retrieval */
+thead th.train, td.train { background: var(--bg-warm); }
+.grouphead--train { background: var(--bg-warm); }
+thead th.train.train, td.train--code { border-left: 2px solid var(--line-strong); }
+.grouphead--train { border-left: 2px solid var(--line-strong); }
+thead th[data-col="7"] { border-left: 2px solid var(--line-strong); }
+/* code already in The Stack -> web gates secondary, shown dimmed */
+td.train.muted { opacity: .4; }
+
 td.res, th.res { text-align: left; white-space: nowrap; }
 /* Pin the resource column when the table scrolls horizontally (mobile / wide table). */
 td.res, th.res { position: sticky; left: 0; background: var(--surface); border-right: 1px solid var(--line); }

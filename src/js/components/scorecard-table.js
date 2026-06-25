@@ -79,8 +79,8 @@ define("scorecard-table")
         .sort((a, b) => {
           let d;
           if (col === 0) d = a.dataset.name.localeCompare(b.dataset.name);
-          else if (col === 7) d = Number(b.dataset.cc) - Number(a.dataset.cc); // coverage-first
-          else d = rankCell(b, col) - rankCell(a, col); // pass-first by default
+          else if (col === 8) d = Number(b.dataset.cc) - Number(a.dataset.cc); // Common Crawl coverage-first
+          else d = rankCell(b, col) - rankCell(a, col); // pass-first by default (code/quality use .ok/.warn/.bad)
           return d * dir;
         })
         .forEach((row) => tbody.appendChild(row)); // reorder the entire table

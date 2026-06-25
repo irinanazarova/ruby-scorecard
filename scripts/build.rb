@@ -22,6 +22,8 @@ q_path = File.join(ROOT, "data", "quality.json")
 quality = File.exist?(q_path) ? JSON.parse(File.read(q_path)) : {}
 qs_path = File.join(ROOT, "data", "quality_sample.json")
 quality_sample = File.exist?(qs_path) ? JSON.parse(File.read(qs_path)) : {}
+repos_path = File.join(ROOT, "data", "repos.json")
+repos = File.exist?(repos_path) ? JSON.parse(File.read(repos_path)) : {}
 
 # Evil Martians favicon set (+ the martian used as the footer lurker), self-hosted at the site root.
 DIST = File.join(ROOT, "dist")
@@ -85,6 +87,36 @@ def cov_cell(c, scoped: false)
   end
 end
 
+# ---- Training-channel helpers ----
+# Code channel: are the docs in a public, permissively-licensed (or unlicensed) repo? That puts the
+# Markdown in The Stack and bypasses the web quality filter. For GitHub-hosted docs we only check the
+# license; the web gates (Common Crawl, quality) are then secondary and shown muted.
+def cell_code(rp)
+  return %(<span class="cc-na" title="no public docs repo found">&mdash;</span>) unless rp && rp["docs_repo"]
+
+  lic = case rp["docs_license"]
+        when nil then "no license"
+        when "NOASSERTION" then "custom"
+        else rp["docs_license"]
+        end
+  if rp["docs_in_stack"] == "yes"
+    OK + %(<span class="sub" title="docs in #{esc(rp["docs_repo"])} (#{esc(lic)}) &rarr; in The Stack">#{esc(lic)}</span>)
+  else
+    BAD + %(<span class="sub" title="#{esc(rp["docs_repo"])} docs are #{esc(lic)}: excluded from The Stack">#{esc(lic)}</span>)
+  end
+end
+def code_in_stack?(rp) = rp && rp["docs_in_stack"] == "yes"
+
+# Web channel, Gate 2: best of up to 5 sampled pages (FineWeb-Edu; keeps int_score >= 3, raw >= 2.5).
+def cell_quality(qs)
+  return %(<span class="cc-na" title="no extractable text">&mdash;</span>) unless qs && qs["ok"] && qs["best"]
+
+  best = qs["best"]
+  cls = qs["any_keep"] ? "ok" : (best >= 2.0 ? "warn" : "bad")
+  glyph = qs["any_keep"] ? "&#10003;" : "&#10007;"
+  %(<span class="#{cls}" title="best of #{qs["n"]} sampled pages: #{format('%.1f', best)}; FineWeb-Edu keeps int_score &ge; 3">#{glyph}<span class="sub">#{format('%.1f', best)}</span></span>)
+end
+
 # ---- goal graphics (progress meters + status pills) ----
 # Colour by progress toward the goal: green when nearly there, amber partway, red barely started.
 def meter(label, value, total, tone: nil)
@@ -135,15 +167,22 @@ blocked     = rows.select { |r| r["robots_ai"] == "block" || r["bot_fetch"] == "
 present_cats = CAT_ORDER.select { |c| rows.any? { |r| r["category"] == c } }
 trows = []
 present_cats.each do |cat|
-  trows << %(<tr class="grp" data-grp="#{slug(cat)}"><td colspan="8">#{esc(CAT_LABEL[cat])}</td></tr>)
+  trows << %(<tr class="grp" data-grp="#{slug(cat)}"><td colspan="10">#{esc(CAT_LABEL[cat])}</td></tr>)
   rows.select { |r| r["category"] == cat }.each do |r|
     c = coverage[r["name"]]
+    rp = repos[r["name"]]
+    qs = quality_sample[r["name"]]
+    # When the docs already reach The Stack via a permissive repo, the web gates are secondary: mute them.
+    mute = code_in_stack?(rp) ? " muted" : ""
+    muted_tip = code_in_stack?(rp) ? %( title="already eligible via the code corpus; the web gates are secondary here") : ""
     trows << %(<tr data-cat="#{slug(cat)}" data-name="#{esc(r["name"].downcase)}" data-cc="#{cov_sortkey(c)}">) \
       "<td class=\"res\"><a href=\"#{esc(r["docs"])}\">#{esc(r["name"])}</a></td>" \
       "<td>#{cell_robots(r)}</td><td>#{cell_bot(r)}</td>" \
       "<td>#{mark(r["sitemap"])}</td><td>#{mark(r["llms_txt"])}</td>" \
       "<td>#{mark(r["content_neg"])}</td><td>#{mark(r["md_route"])}</td>" \
-      "<td class=\"cc\">#{cov_cell(c, scoped: !r["cc_scope"].to_s.empty?)}</td></tr>"
+      "<td class=\"train train--code\">#{cell_code(rp)}</td>" \
+      "<td class=\"train cc#{mute}\"#{muted_tip}>#{cov_cell(c, scoped: !r["cc_scope"].to_s.empty?)}</td>" \
+      "<td class=\"train#{mute}\"#{muted_tip}>#{cell_quality(qs)}</td></tr>"
   end
 end
 TABLE = trows.join("\n")
@@ -162,7 +201,7 @@ GOALS_L1 = meter("Content negotiation", neg, n) + meter(".md routes", md, n) + m
 GOALS_L2 = statuspill("Shared gem/agent convention", "none yet") + statuspill("Agent Skills convention", "fragmented")
 GOALS_L3 = statuspill(%(Ruby in <a href="https://github.com/multi-swe-bench/multi-swe-bench">Multi-SWE-bench</a>), "absent") +
            statuspill("Open idiomatic-Rails dataset", "none yet")
-BOSS_METERS = meter("Ruby picks", 0, 1267) + meter("Models that default to Ruby", 0, 13)
+BOSS_METERS = meter("Ruby picks", 0, 1267)
 
 # ---- content-gap matrix (the "Rails vs the field" comparison content that does/doesn't exist) ----
 CONTENT_GAP = if content_gap
@@ -283,11 +322,16 @@ PAGE = <<HTML
 <section>
 <h2><span class="num">01</span>The scorecard</h2>
 <p class="note">Measured over HTTP, June 2026, against each project's <strong>documentation page</strong>
-(e.g. <code>sorbet.org/docs</code>, <code>docs.avohq.io</code>). Each column is a checkable signal of LLM
-discoverability: <span class="ok">&#10003;</span> good, <span class="bad">&#10007;</span> missing.
-&ldquo;Crawlable&rdquo; fetches as a Common Crawl bot to catch Cloudflare/WAF blocks. The last column shows
-Common Crawl coverage as <em>pages found / sitemap total</em> (<span class="cc-na">&mdash;</span> = not
-sampled). Click any heading to sort.</p>
+(e.g. <code>sorbet.org/docs</code>, <code>docs.avohq.io</code>): <span class="ok">&#10003;</span> good,
+<span class="bad">&#10007;</span> missing. The columns split into two questions. <strong>Retrieval</strong>
+is whether an agent can find the docs at request time (robots, WAF, sitemap, llms.txt, content negotiation,
+<code>.md</code> routes). <strong>Training</strong> is whether the docs would reach a model's corpus, by
+two routes: the <strong>code corpus</strong> (are the docs in a public repo, and under what license, &mdash;
+permissive or unlicensed reaches <a href="https://huggingface.co/datasets/bigcode/the-stack-v2">The Stack</a>
+and skips the web filters), or the <strong>web corpus</strong> (Common Crawl coverage as <em>pages found /
+sitemap total</em>, then best-of-5 sampled FineWeb-Edu quality, kept at &ge;&nbsp;3). When the docs already
+qualify via the code corpus, the two web-gate cells are <span style="opacity:.4">dimmed</span> as secondary.
+Click any heading to sort.</p>
 
 <scorecard-table>
   <div class="controls">
@@ -299,15 +343,22 @@ sampled). Click any heading to sort.</p>
   </div>
   <div class="table-scroll">
   <table data-ref="table">
-    <thead><tr>
-      <th class="res sortable" data-col="0">Resource (docs) <span class="arrow">&#9650;</span></th>
+    <thead>
+    <tr class="grouprow">
+      <th class="res sortable" rowspan="2" data-col="0">Resource (docs) <span class="arrow">&#9650;</span></th>
+      <th class="grouphead" colspan="6">Retrieval <span class="grouphead__sub">can an agent find it at request time</span></th>
+      <th class="grouphead grouphead--train" colspan="3">Training <span class="grouphead__sub">would it reach the corpus</span></th>
+    </tr>
+    <tr class="colrow">
       <th class="sortable" data-col="1">robots<br>allows AI <span class="arrow">&#9650;</span></th>
       <th class="sortable" data-col="2">crawlable<br>(no WAF) <span class="arrow">&#9650;</span></th>
       <th class="sortable" data-col="3">sitemap <span class="arrow">&#9650;</span></th>
       <th class="sortable" data-col="4">llms.txt <span class="arrow">&#9650;</span></th>
       <th class="sortable" data-col="5">content<br>negotiation <span class="arrow">&#9650;</span></th>
       <th class="sortable" data-col="6">.md<br>routes <span class="arrow">&#9650;</span></th>
-      <th class="sortable" data-col="7">Common<br>Crawl <span class="arrow">&#9650;</span></th>
+      <th class="sortable train" data-col="7">code corpus<br><span class="th-sub">docs repo license</span> <span class="arrow">&#9650;</span></th>
+      <th class="sortable train" data-col="8">Common<br>Crawl <span class="arrow">&#9650;</span></th>
+      <th class="sortable train" data-col="9">quality<br><span class="th-sub">best of 5, &ge;3</span> <span class="arrow">&#9650;</span></th>
     </tr></thead>
     <tbody>
 #{TABLE}
