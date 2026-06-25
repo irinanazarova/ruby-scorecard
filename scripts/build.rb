@@ -33,6 +33,10 @@ FileUtils.mkdir_p(DIST)
   FileUtils.cp(src, File.join(DIST, f)) if File.exist?(src)
 end
 
+# Publish the long-form guide alongside the scorecard so "read more" links resolve at /guide.
+guide_src = File.join(ROOT, "docs", "how-devtooling-gets-into-training-data.html")
+FileUtils.cp(guide_src, File.join(DIST, "guide.html")) if File.exist?(guide_src)
+
 OK  = '<span class="ok" title="yes">&#10003;</span>'
 BAD = '<span class="bad" title="no">&#10007;</span>'
 
@@ -254,23 +258,19 @@ QUALITY = if quality_sample && !quality_sample.empty?
   top = ok.sort_by { |_, v| -v["best"] }.first(3)
         .map { |k, v| "#{esc(k)} #{format('%.1f', v['best'])}" }.join(", ")
   <<QUAL
-<h3 class="cg-title">The second gate: would these docs survive the quality filter?</h3>
-<p class="note">Being in Common Crawl is the first gate. The second is the quality classifier that corpus
-builders run before training. We sampled <strong>up to five pages per resource</strong> (the landing page
-plus a guide, a reference page, an example where they exist, #{pages_total} pages across #{ok.size}
-resources) and scored each with FineWeb-Edu's open classifier (0&ndash;5; it keeps a document when the
-score rounds to &ge;&nbsp;3, a raw score of&nbsp;2.5 or higher). Even counting each resource's
-<em>best</em> page, only <strong>#{keep_res} of #{total_res}</strong> have a single page that would clear
-the bar (best ones: #{top}); for <strong>#{best_below2}</strong> the best of five still scores below&nbsp;2.
-Separately, <strong>#{curly}</strong> of the sampled pages contain a code brace <code>{</code>, and
-<a href="https://research.google/blog/exploring-transfer-learning-with-t5-the-text-to-text-transfer-transformer/">C4</a>
-removed any page that contained one outright. A further <strong>#{no_text}</strong> resources returned no
-extractable text at all: their docs are client-rendered or blocked, so they fail both gates at once, a
-crawler and the classifier alike see an empty page.</p>
-<p class="note">The classifier rewards educational prose and penalizes dense reference and code docs, so a
-low score is partly the filter's bias against technical content. That bias is the point: the filters that
-gate web training data are tuned against exactly the docs developers need, so being crawlable and in Common
-Crawl is still not enough to reach the corpus.</p>
+<h3 class="cg-title">The second gate: would the docs survive the quality filter?</h3>
+<p class="note">Being crawled is the first gate. The second is a quality classifier. We scored up to five
+pages per resource with the open <a href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier">FineWeb-Edu</a>
+filter (kept at score&nbsp;&ge;&nbsp;3). Even counting each resource's <em>best</em> page, only
+<strong>#{keep_res} of #{total_res}</strong> clear the bar (top: #{top}); for <strong>#{best_below2}</strong>
+the best of five scores below&nbsp;2. The filter rewards educational prose and penalizes reference and code,
+exactly the docs developers need.</p>
+<p class="note">There is a way around it. Docs in a <strong>public, permissively-licensed repo</strong> reach
+the code corpus (<a href="https://huggingface.co/datasets/bigcode/the-stack-v2">The Stack</a>) and
+<strong>skip the quality filter entirely</strong>, the Training column shows which resources qualify. And
+once a snippet is in public code and copied widely, models reproduce it verbatim: Supabase Auth and
+Resend's quickstart both <em>fail</em> this filter yet Claude recites them from memory.
+<a href="/guide">Read the full guide &rarr;</a></p>
 QUAL
 else
   ""
@@ -303,10 +303,12 @@ PAGE = <<HTML
       </theme-toggle>
     </div>
     <h1>Ruby &amp; Rails LLM discoverability scorecard</h1>
-    <p class="lede"><strong>Ruby and Rails deliver superior productivity, for humans and AI agents
-    alike.</strong> Yet the models rarely choose them on their own: in the open whichlang benchmark, 13
-    models picked Ruby <strong>0 times across 1,267 generated solutions</strong>. It's a discoverability
-    problem. This page measures the docs of #{n} ecosystem resources and shows what the community can fix.</p>
+    <p class="lede"><strong>Ruby and Rails are a great default, for humans and AI agents alike.</strong>
+    Yet models rarely reach for them: across the open whichlang benchmark, 13 models picked Ruby
+    <strong>0 times in 1,267 solutions</strong>. That is a discoverability problem, and it starts with the
+    docs. We score #{n} ecosystem resources on whether agents can <strong>find</strong> them and whether
+    they would reach a model's <strong>training</strong> data. <a href="/guide">How docs get into training
+    &rarr;</a></p>
     <div class="stats">
       <stat-counter class="stat" value="#{llms}" total="#{n}"><b class="stat__num" data-ref="num">#{llms}/#{n}</b><span>ship an llms.txt</span></stat-counter>
       <stat-counter class="stat" value="#{neg}" total="#{n}"><b class="stat__num" data-ref="num">#{neg}/#{n}</b><span>do content negotiation</span></stat-counter>
@@ -322,16 +324,13 @@ PAGE = <<HTML
 <section>
 <h2><span class="num">01</span>The scorecard</h2>
 <p class="note">Measured over HTTP, June 2026, against each project's <strong>documentation page</strong>
-(e.g. <code>sorbet.org/docs</code>, <code>docs.avohq.io</code>): <span class="ok">&#10003;</span> good,
-<span class="bad">&#10007;</span> missing. The columns split into two questions. <strong>Retrieval</strong>
-is whether an agent can find the docs at request time (robots, WAF, sitemap, llms.txt, content negotiation,
-<code>.md</code> routes). <strong>Training</strong> is whether the docs would reach a model's corpus, by
-two routes: the <strong>code corpus</strong> (are the docs in a public repo, and under what license, &mdash;
-permissive or unlicensed reaches <a href="https://huggingface.co/datasets/bigcode/the-stack-v2">The Stack</a>
-and skips the web filters), or the <strong>web corpus</strong> (Common Crawl coverage as <em>pages found /
-sitemap total</em>, then best-of-5 sampled FineWeb-Edu quality, kept at &ge;&nbsp;3). When the docs already
-qualify via the code corpus, the two web-gate cells are <span style="opacity:.4">dimmed</span> as secondary.
-Click any heading to sort.</p>
+(<span class="ok">&#10003;</span> good, <span class="bad">&#10007;</span> missing). Columns split into two
+questions: <strong>Retrieval</strong>, can an agent find the docs at request time, and
+<strong>Training</strong>, would they reach a model's corpus, either through the <strong>code corpus</strong>
+(docs in a public, permissively-licensed repo, which skips the web filters) or the <strong>web corpus</strong>
+(Common Crawl coverage, then best-of-5 FineWeb-Edu quality). Where the code corpus already qualifies, the
+web cells are <span style="opacity:.45">dimmed</span> as secondary. Click any heading to sort;
+<a href="/guide">what each column means &rarr;</a></p>
 
 <scorecard-table>
   <div class="controls">
@@ -481,12 +480,12 @@ and unblocking bots, is Layer 0.</p>
 
 <footer>
   <span class="label">Evil Martians</span>
-  <p>Built by Evil Martians. A living scorecard, re-run the probes to update it. Background reading:
+  <p>Built by Evil Martians. A living scorecard, re-run the probes to update it. Read more: our
+  <a href="/guide">guide to how devtooling docs get into training data</a>, plus
   <a href="https://evilmartians.com/chronicles/how-to-make-your-website-visible-to-llms">&ldquo;How to make
   your website visible to LLMs&rdquo;</a> and
   <a href="https://evilmartians.com/chronicles/3-rules-for-getting-ai-agents-to-find-use-and-not-exploit-your-devtool">&ldquo;3
-  rules for getting AI agents to find, use, and not exploit your devtool&rdquo;</a> on the Evil Martians
-  Chronicles.</p>
+  rules for getting AI agents to find, use, and not exploit your devtool&rdquo;</a> on the Chronicles.</p>
   <img class="lurker" src="favicon.svg#{asset_q("favicon.svg")}" alt="" aria-hidden="true" width="44" height="44">
 </footer>
 
