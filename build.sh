@@ -13,5 +13,6 @@ npm run build:assets
 
 # Server-rendered HTML from the probed data.
 ruby scripts/build.rb
+ruby scripts/build_contributors.rb
 
 echo "Built dist/ -> deploy with: rsync -a dist/ <host>"
