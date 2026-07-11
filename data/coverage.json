@@ -1,30 +1,30 @@
 {
   "Ruby (language)": {
-    "cc_pages": 4004,
+    "cc_pages": 4097,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Rails Guides": {
-    "cc_pages": 165,
+    "cc_pages": 442,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Rails API": {
-    "cc_pages": 4968,
+    "cc_pages": 4956,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "RubyGems Guides": {
-    "cc_pages": 23,
+    "cc_pages": 35,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Bundler": {
-    "cc_pages": 160,
+    "cc_pages": 119,
     "cc_exact": true,
     "total_pages": 1440,
     "total_source": "sitemap"
@@ -36,85 +36,85 @@
     "total_source": null
   },
   "Hotwire": {
-    "cc_pages": 6,
+    "cc_pages": 8,
     "cc_exact": true,
     "total_pages": 2,
     "total_source": "sitemap"
   },
   "Turbo": {
-    "cc_pages": 6,
+    "cc_pages": 3,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Stimulus": {
-    "cc_pages": 6,
+    "cc_pages": 1,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "ViewComponent": {
-    "cc_pages": 9,
+    "cc_pages": 7,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Phlex": {
-    "cc_pages": 9,
+    "cc_pages": 4,
     "cc_exact": true,
     "total_pages": 40,
     "total_source": "sitemap"
   },
   "Ruby UI": {
-    "cc_pages": 62,
+    "cc_pages": 105,
     "cc_exact": true,
-    "total_pages": 63,
+    "total_pages": 67,
     "total_source": "sitemap"
   },
   "Inertia Rails": {
-    "cc_pages": 19,
+    "cc_pages": 15,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Lookbook": {
-    "cc_pages": 17,
+    "cc_pages": 18,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Roda": {
-    "cc_pages": 31,
+    "cc_pages": 8,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Sinatra": {
-    "cc_pages": 22,
+    "cc_pages": 33,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Hanami": {
-    "cc_pages": 28,
+    "cc_pages": 14,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Bridgetown": {
-    "cc_pages": 34,
+    "cc_pages": 16,
     "cc_exact": true,
-    "total_pages": null,
-    "total_source": null
+    "total_pages": 139,
+    "total_source": "sitemap"
   },
   "Jekyll": {
-    "cc_pages": 30,
+    "cc_pages": 52,
     "cc_exact": true,
     "total_pages": 210,
     "total_source": "sitemap"
   },
   "Sequel": {
-    "cc_pages": 181,
+    "cc_pages": 359,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -126,7 +126,7 @@
     "total_source": null
   },
   "dry-rb": {
-    "cc_pages": 46,
+    "cc_pages": 72,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -138,55 +138,55 @@
     "total_source": null
   },
   "AnyCable": {
-    "cc_pages": 42,
+    "cc_pages": 16,
     "cc_exact": true,
-    "total_pages": null,
-    "total_source": null
+    "total_pages": 77,
+    "total_source": "sitemap"
   },
   "Kamal": {
-    "cc_pages": 81,
+    "cc_pages": 19,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Sorbet": {
-    "cc_pages": 15,
+    "cc_pages": 21,
     "cc_exact": true,
     "total_pages": 86,
     "total_source": "sitemap"
   },
   "RuboCop": {
-    "cc_pages": 360,
+    "cc_pages": 486,
     "cc_exact": true,
     "total_pages": 1583,
     "total_source": "sitemap-index"
   },
   "RSpec": {
-    "cc_pages": 223,
+    "cc_pages": 150,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "TestProf": {
-    "cc_pages": 35,
+    "cc_pages": 11,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "GraphQL Ruby": {
-    "cc_pages": 1595,
+    "cc_pages": 1801,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Rodauth": {
-    "cc_pages": 54,
+    "cc_pages": 35,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Action Policy": {
-    "cc_pages": 4,
+    "cc_pages": 2,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -194,35 +194,35 @@
   "Shrine": {
     "cc_pages": 4,
     "cc_exact": true,
-    "total_pages": 124,
+    "total_pages": 125,
     "total_source": "sitemap"
   },
   "Avo": {
-    "cc_pages": 71,
+    "cc_pages": 46,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "ActiveAdmin": {
-    "cc_pages": 10,
+    "cc_pages": 6,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Ransack": {
-    "cc_pages": 2,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Pagy": {
-    "cc_pages": 2,
+    "cc_pages": 1,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Nokogiri": {
-    "cc_pages": 14,
+    "cc_pages": 12,
     "cc_exact": true,
     "total_pages": 1,
     "total_source": "sitemap"
@@ -234,31 +234,31 @@
     "total_source": null
   },
   "Capistrano": {
-    "cc_pages": 16,
+    "cc_pages": 2,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Pry": {
-    "cc_pages": 1,
+    "cc_pages": 2,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Trailblazer": {
-    "cc_pages": 83,
+    "cc_pages": 38,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Rage": {
-    "cc_pages": 0,
+    "cc_pages": 5,
     "cc_exact": true,
-    "total_pages": 33,
+    "total_pages": 34,
     "total_source": "sitemap"
   },
   "Falcon": {
-    "cc_pages": 2,
+    "cc_pages": 1,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -266,11 +266,11 @@
   "Karafka": {
     "cc_pages": 1,
     "cc_exact": true,
-    "total_pages": null,
-    "total_source": null
+    "total_pages": 209,
+    "total_source": "sitemap"
   },
   "RubyLLM": {
-    "cc_pages": 11,
+    "cc_pages": 15,
     "cc_exact": true,
     "total_pages": 23,
     "total_source": "sitemap"
@@ -282,31 +282,31 @@
     "total_source": null
   },
   "imgproxy": {
-    "cc_pages": 168,
+    "cc_pages": 191,
     "cc_exact": true,
     "total_pages": 529,
     "total_source": "sitemap"
   },
   "Vite Ruby": {
-    "cc_pages": 6,
+    "cc_pages": 1,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Flipper": {
-    "cc_pages": 35,
+    "cc_pages": 32,
     "cc_exact": true,
     "total_pages": 70,
     "total_source": "sitemap-index"
   },
   "GoRails": {
-    "cc_pages": 1516,
+    "cc_pages": 2027,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Drifting Ruby": {
-    "cc_pages": 2,
+    "cc_pages": 1,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -314,37 +314,37 @@
   "RubyEvents": {
     "cc_pages": 1,
     "cc_exact": true,
-    "total_pages": 15775,
+    "total_pages": 16328,
     "total_source": "sitemap"
   },
   "Rails at Scale (Shopify)": {
-    "cc_pages": 28,
+    "cc_pages": 21,
     "cc_exact": true,
     "total_pages": 114,
     "total_source": "sitemap"
   },
   "Ruby Weekly": {
-    "cc_pages": 281,
+    "cc_pages": 301,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Short Ruby": {
-    "cc_pages": 211,
+    "cc_pages": 228,
     "cc_exact": true,
     "total_pages": 293,
     "total_source": "sitemap"
   },
   "This Week in Rails": {
-    "cc_pages": 26,
+    "cc_pages": 30,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Evil Martians": {
-    "cc_pages": 161,
+    "cc_pages": 132,
     "cc_exact": true,
-    "total_pages": 1007,
+    "total_pages": 1016,
     "total_source": "sitemap-index"
   },
   "Hotwire Weekly": {
@@ -360,39 +360,39 @@
     "total_source": null
   },
   "Thoughtbot": {
-    "cc_pages": 1050,
+    "cc_pages": 1161,
     "cc_exact": true,
     "total_pages": 198,
     "total_source": "sitemap"
   },
   "AppSignal Blog": {
-    "cc_pages": 333,
+    "cc_pages": 283,
     "cc_exact": true,
-    "total_pages": 1063,
+    "total_pages": 1068,
     "total_source": "sitemap"
   },
   "Riding Rails": {
-    "cc_pages": 58,
+    "cc_pages": 51,
     "cc_exact": true,
-    "total_pages": 2293,
+    "total_pages": 2321,
     "total_source": "sitemap"
   },
   "Joe Masilotti": {
-    "cc_pages": 2,
+    "cc_pages": 1,
     "cc_exact": true,
     "total_pages": 134,
     "total_source": "sitemap"
   },
   "Code with Jason": {
-    "cc_pages": 138,
+    "cc_pages": 765,
     "cc_exact": true,
     "total_pages": 532,
     "total_source": "sitemap-index"
   },
   "Maintainable": {
-    "cc_pages": 74,
+    "cc_pages": 60,
     "cc_exact": true,
-    "total_pages": 241,
+    "total_pages": 480,
     "total_source": "sitemap"
   },
   "Ruby News": {
@@ -402,7 +402,7 @@
     "total_source": null
   },
   "Devise": {
-    "cc_pages": 2,
+    "cc_pages": 4,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -426,21 +426,21 @@
     "total_source": null
   },
   "Sentry": {
-    "cc_pages": 142,
+    "cc_pages": 63,
     "cc_exact": true,
-    "total_pages": 10062,
+    "total_pages": 10190,
     "total_source": "sitemap"
   },
   "AppSignal": {
-    "cc_pages": 15,
+    "cc_pages": 27,
     "cc_exact": true,
-    "total_pages": 436,
+    "total_pages": 450,
     "total_source": "sitemap"
   },
   "New Relic": {
-    "cc_pages": 19,
+    "cc_pages": 23,
     "cc_exact": true,
-    "total_pages": 45642,
+    "total_pages": 46554,
     "total_source": "sitemap-index"
   },
   "Datadog": {
@@ -450,9 +450,9 @@
     "total_source": null
   },
   "Honeybadger": {
-    "cc_pages": 16,
+    "cc_pages": 10,
     "cc_exact": true,
-    "total_pages": 284,
+    "total_pages": 421,
     "total_source": "sitemap-index"
   },
   "Rollbar": {
@@ -462,19 +462,19 @@
     "total_source": "sitemap"
   },
   "Bugsnag": {
-    "cc_pages": 8,
+    "cc_pages": 7,
     "cc_exact": true,
     "total_pages": 1046,
     "total_source": "sitemap"
   },
   "Scout APM": {
-    "cc_pages": 1,
+    "cc_pages": 2,
     "cc_exact": true,
     "total_pages": 3,
     "total_source": "sitemap-index"
   },
   "Skylight": {
-    "cc_pages": 69,
+    "cc_pages": 23,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -482,13 +482,13 @@
   "Better Stack": {
     "cc_pages": 1,
     "cc_exact": true,
-    "total_pages": 90,
+    "total_pages": 116,
     "total_source": "sitemap"
   },
   "Papertrail": {
     "cc_pages": 1,
     "cc_exact": true,
-    "total_pages": 7610,
+    "total_pages": 8072,
     "total_source": "sitemap"
   },
   "GitHub Actions": {
@@ -504,51 +504,51 @@
     "total_source": null
   },
   "Fly.io": {
-    "cc_pages": 30,
+    "cc_pages": 53,
     "cc_exact": true,
-    "total_pages": 1051,
+    "total_pages": 1078,
     "total_source": "sitemap-index"
   },
   "Render": {
     "cc_pages": 1,
     "cc_exact": true,
-    "total_pages": 744,
+    "total_pages": 769,
     "total_source": "sitemap-index"
   },
   "Railway": {
     "cc_pages": 1,
     "cc_exact": true,
-    "total_pages": 307,
+    "total_pages": 323,
     "total_source": "sitemap-index"
   },
   "DigitalOcean": {
     "cc_pages": 1,
     "cc_exact": true,
-    "total_pages": 4327,
+    "total_pages": 4417,
     "total_source": "sitemap"
   },
   "AWS Elastic Beanstalk": {
-    "cc_pages": 66,
+    "cc_pages": 38,
     "cc_exact": true,
-    "total_pages": 1970,
+    "total_pages": 1791,
     "total_source": "sitemap-index"
   },
   "PlanetScale": {
     "cc_pages": 1,
     "cc_exact": true,
-    "total_pages": 1175,
+    "total_pages": 1228,
     "total_source": "sitemap-index"
   },
   "Supabase": {
     "cc_pages": 1,
     "cc_exact": true,
-    "total_pages": 3220,
+    "total_pages": 3321,
     "total_source": "sitemap-index"
   },
   "Neon": {
     "cc_pages": 1,
     "cc_exact": true,
-    "total_pages": 2027,
+    "total_pages": 2274,
     "total_source": "sitemap-index"
   }
 }

@@ -97,22 +97,37 @@ end
 
 def cc_count(scope, index_id)
   query = "url=#{scope}/*&output=json&fl=url&limit=#{HOST_CAP}"
-  body, ok = curl(["#{CDX_HOST}/#{index_id}-index?#{query}"], timeout: 60)
+  # Capture the HTTP status: a soft rate-limit (503) returns a non-empty HTML error page,
+  # which must NOT be read as "zero records" or we publish a false exact 0.
+  body, ok = curl(["-w", "\n__HTTP__%{http_code}", "#{CDX_HOST}/#{index_id}-index?#{query}"], timeout: 60)
   return [nil, false] unless ok
-  # A 404/empty result-set body means "reachable, zero records"; a transport failure is `ok=false`.
-  return [0, body.include?("First Page") ? false : true] if body.strip.empty?
+
+  code = body[/\n__HTTP__(\d+)\z/, 1]
+  body = body.sub(/\n__HTTP__\d+\z/, "")
+
+  # 404 with "No Captures found" is the CDX way of saying "reachable, genuinely zero records".
+  return [0, true] if code == "404" && body.include?("No Captures")
+  # Any other non-200 (503 rate-limit, 5xx outage) is "not sampled", never 0.
+  return [nil, false] unless code == "200"
+  # A truly empty 200 body is a real zero.
+  return [0, true] if body.strip.empty?
 
   urls = Set.new
+  parsed = false
   body.each_line do |line|
     line = line.strip
     next if line.empty?
 
     begin
       urls << JSON.parse(line)["url"]
+      parsed = true
     rescue StandardError
       next
     end
   end
+  # A non-empty 200 body that yielded no parseable JSON records is an error page, not a zero.
+  return [nil, false] unless parsed
+
   capped = urls.size >= HOST_CAP
   [urls.size, !capped] # second value = "exact" (false when we hit the cap)
 end
