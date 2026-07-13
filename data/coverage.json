@@ -48,7 +48,7 @@
     "total_source": null
   },
   "Stimulus": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -158,7 +158,7 @@
   "RuboCop": {
     "cc_pages": 486,
     "cc_exact": true,
-    "total_pages": 1583,
+    "total_pages": 1588,
     "total_source": "sitemap-index"
   },
   "RSpec": {
@@ -228,7 +228,7 @@
     "total_source": "sitemap"
   },
   "Faraday": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -258,7 +258,7 @@
     "total_source": "sitemap"
   },
   "Falcon": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -276,7 +276,7 @@
     "total_source": "sitemap"
   },
   "Brakeman": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -288,7 +288,7 @@
     "total_source": "sitemap"
   },
   "Vite Ruby": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -306,7 +306,7 @@
     "total_source": null
   },
   "Drifting Ruby": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -326,8 +326,8 @@
   "Ruby Weekly": {
     "cc_pages": 301,
     "cc_exact": true,
-    "total_pages": null,
-    "total_source": null
+    "total_pages": 621,
+    "total_source": "sitemap"
   },
   "Short Ruby": {
     "cc_pages": 228,
@@ -348,7 +348,7 @@
     "total_source": "sitemap-index"
   },
   "Hotwire Weekly": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -408,19 +408,19 @@
     "total_source": null
   },
   "Pundit": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "CanCanCan": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Standard": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -444,7 +444,7 @@
     "total_source": "sitemap-index"
   },
   "Datadog": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -456,7 +456,7 @@
     "total_source": "sitemap-index"
   },
   "Rollbar": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": 413,
     "total_source": "sitemap"
@@ -480,7 +480,7 @@
     "total_source": null
   },
   "Better Stack": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": 116,
     "total_source": "sitemap"
@@ -492,13 +492,13 @@
     "total_source": "sitemap"
   },
   "GitHub Actions": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Heroku": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -510,19 +510,19 @@
     "total_source": "sitemap-index"
   },
   "Render": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": 769,
     "total_source": "sitemap-index"
   },
   "Railway": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": 323,
     "total_source": "sitemap-index"
   },
   "DigitalOcean": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": 4417,
     "total_source": "sitemap"
@@ -534,19 +534,19 @@
     "total_source": "sitemap-index"
   },
   "PlanetScale": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": 1228,
     "total_source": "sitemap-index"
   },
   "Supabase": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": 3321,
     "total_source": "sitemap-index"
   },
   "Neon": {
-    "cc_pages": 1,
+    "cc_pages": 0,
     "cc_exact": true,
     "total_pages": 2274,
     "total_source": "sitemap-index"
