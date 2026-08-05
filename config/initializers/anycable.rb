@@ -21,6 +21,7 @@ Rails.application.configure do
   # Serve from one host; allow it explicitly rather than disabling origin checks.
   config.action_cable.allowed_request_origins = [
     %r{https://ruby\.evilmartians\.com},
+    %r{https://ruby-scorecard\.fly\.dev},   # the app answers on both hostnames; test on either
     %r{https?://localhost:\d+},
     %r{https?://127\.0\.0\.1:\d+}
   ]

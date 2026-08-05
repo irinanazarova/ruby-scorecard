@@ -6,13 +6,24 @@ primary_region = "ams"
 
 [env]
   RAILS_ENV = "production"
+  # Thruster listens here instead of on its default port 80. The image runs as USER 1000, and Fly's
+  # init does not grant unprivileged binding below 1024 the way plain Docker does, so port 80 fails
+  # with "listen tcp :80: bind: permission denied" after Rails has otherwise booted cleanly. Puma
+  # stays on Thruster's default TARGET_PORT (3000) behind it. Keep this in sync with internal_port.
+  HTTP_PORT = "8080"
+  # Runs the Solid Queue supervisor inside Puma (config/puma.rb starts the plugin only when this is
+  # set). production.rb sets the solid_queue adapter, so without this there is no worker anywhere and
+  # every analysis sits at "Queued..." forever while the web server happily serves pages. One machine
+  # runs both because the work is a handful of HTTP and LLM calls; split it into a [processes] block
+  # if the queue ever needs to scale separately from the web.
+  SOLID_QUEUE_IN_PUMA = "true"
   # config/database.yml reads this; the volume is what makes Solid Queue jobs and the Solid Cache
   # warm-up survive a deploy. Losing the cache is not merely slow — the pre-warmed analyses are what
   # make the demo instant, and a cold Common Crawl lookup takes up to 40s.
   DATABASE_DIR = "/data"
 
 [http_service]
-  internal_port = 80
+  internal_port = 8080
   force_https = true
   # Keep one machine always warm so ruby.evilmartians.com never cold-starts (no scale-to-zero latency).
   # Extra machines spun up under load can still auto-stop; the floor of 1 stays up.
