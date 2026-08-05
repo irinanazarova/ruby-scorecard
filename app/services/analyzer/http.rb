@@ -46,6 +46,16 @@ module Analyzer
     # regex here is UTF-8, so matching one against the other raises Encoding::CompatibilityError and
     # the rescue in `get` turns a perfectly good page into "could not fetch". scrub drops the bytes
     # that are not valid UTF-8 rather than raising on them.
+    # The GitHub auth header, in one place. Every caller needs it: unauthenticated GitHub allows 60
+    # requests/hour PER IP, and one Fly machine shares that across all visitors. When only SOME call
+    # sites sent the token the failure was invisible and confusing, because Http.json swallows a 403
+    # into nil: the code-channel card rendered fine while passage selection quietly found no repo
+    # and reported "no testable prose found" about a repo full of prose.
+    def github_headers
+      t = AnalyzerConfig.github_token.to_s
+      t.empty? ? {} : { "Authorization" => "Bearer #{t}" }
+    end
+
     def utf8(body)
       return nil if body.nil?
 

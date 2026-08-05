@@ -86,12 +86,7 @@ module Analyzer
 
     private
 
-    # Unauthenticated GitHub allows 60 requests/hour, which a single busy demo can exhaust; a token
-    # raises that to 5000. Optional, so the analyzer still works without one.
-    def gh_headers
-      t = AnalyzerConfig.github_token.to_s
-      t.empty? ? {} : { "Authorization" => "Bearer #{t}" }
-    end
+    def gh_headers = Http.github_headers
 
     def parse(res)
       return nil unless res[:ok]

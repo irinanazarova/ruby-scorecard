@@ -178,10 +178,7 @@ module Analyzer
       registrable if registrable.present? && !KNOWN_SUBDOMAINS.include?(registrable)
     end
 
-    def gh_headers
-      t = AnalyzerConfig.github_token.to_s
-      t.empty? ? {} : { "Authorization" => "Bearer #{t}" }
-    end
+    def gh_headers = Http.github_headers
 
     def memorization_payload(repo)
       passages = build_passages(repo)
@@ -214,7 +211,7 @@ module Analyzer
     def build_passages(repo)
       return Passage.candidates_from_url(@target.url) if @target.url
 
-      return [] unless repo && (info = Http.json("https://api.github.com/repos/#{repo}"))
+      return [] unless repo && (info = Http.json("https://api.github.com/repos/#{repo}", headers: gh_headers))
 
       branch = info["default_branch"]
 
@@ -248,7 +245,8 @@ module Analyzer
     # The largest hand-written source file, which is the closest thing to "the file this project is
     # actually known for" that a tree listing can tell us.
     def code_file(repo, branch)
-      tree = Http.json("https://api.github.com/repos/#{repo}/git/trees/#{branch}?recursive=1")
+      tree = Http.json("https://api.github.com/repos/#{repo}/git/trees/#{branch}?recursive=1",
+                       headers: gh_headers)
       return nil unless tree && tree["tree"]
 
       tree["tree"]
@@ -262,7 +260,8 @@ module Analyzer
     # Pick the most prose-heavy markdown under docs/, matching how the research probe chose passages:
     # size alone selects tables of config flags, which nobody could continue from memory.
     def docs_file(repo, branch)
-      tree = Http.json("https://api.github.com/repos/#{repo}/git/trees/#{branch}?recursive=1")
+      tree = Http.json("https://api.github.com/repos/#{repo}/git/trees/#{branch}?recursive=1",
+                       headers: gh_headers)
       return nil unless tree && tree["tree"]
 
       md = tree["tree"].select do |n|

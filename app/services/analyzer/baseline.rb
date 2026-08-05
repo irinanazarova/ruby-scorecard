@@ -35,7 +35,7 @@ module Analyzer
       private
 
       def measure
-        info = Http.json("https://api.github.com/repos/#{config[:repo]}")
+        info = Http.json("https://api.github.com/repos/#{config[:repo]}", headers: Http.github_headers)
         return { error: "baseline repo unavailable" } unless info
 
         passages = Passage.candidates_from_repo_file(config[:repo], info["default_branch"], config[:path])
