@@ -29,6 +29,10 @@ lead << lines.shift while lines.first && !lines.first.strip.empty?
 lead = lead.strip
 body_md = lines.join
 
+# The header date comes from the document's own "Last updated" footer. Hardcoding it here meant
+# the header and the footer drifted apart the first time the doc was revised.
+updated = raw[/_Last updated (\d{4}-\d{2}-\d{2})/, 1] || Time.now.strftime("%Y-%m-%d")
+
 # Table of contents from the H2 headings.
 toc = body_md.scan(/^##\s+(.+)$/).flatten.map do |h|
   plain = h.gsub(/`/, "")
@@ -139,7 +143,7 @@ html = <<~HTML
       <p class="kicker">Evil Martians &middot; Ruby &middot; LLM discoverability</p>
       <h1>#{title}</h1>
       <div class="lead">#{lead_html.sub(/\A<p>/, "").sub(/<\/p>\s*\z/, "")}</div>
-      <p class="meta">Research note &middot; last updated 2026-06-21 &middot; every major fact links a primary source</p>
+      <p class="meta">Research note &middot; last updated #{updated} &middot; every major fact links a primary source</p>
       <nav class="toc">
         <p class="toc-title">Contents</p>
         <ol>#{toc}</ol>
