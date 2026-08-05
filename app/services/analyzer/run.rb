@@ -222,9 +222,16 @@ module Analyzer
       # code: basecamp/fizzy has no prose file big enough to probe, and answering "no prose found"
       # to someone asking whether their CODE reached a corpus is refusing the actual question. Code
       # is what The Stack is mostly made of, so fall through and test it directly.
+      # Falling through on an UNUSABLE docs file matters as much as on a missing one. fizzy has
+      # docs/, but the largest file there is API reference: endpoint tables and status codes, which
+      # the prose filter rejects and nobody could continue from memory. Testing "is there a docs
+      # file" rather than "did it yield a testable span" left that repo untestable.
       if (path = docs_file(repo, branch))
-        Passage.candidates_from_repo_file(repo, branch, path)
-      elsif (path = code_file(repo, branch))
+        prose = Passage.candidates_from_repo_file(repo, branch, path)
+        return prose if prose.any?(&:ok)
+      end
+
+      if (path = code_file(repo, branch))
         Passage.candidates_from_repo_file(repo, branch, path, prose: false)
       else
         []

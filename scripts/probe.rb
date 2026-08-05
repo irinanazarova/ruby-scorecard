@@ -68,6 +68,8 @@ RESOURCES = [
   ["Drifting Ruby", "community & resources", "https://www.driftingruby.com/"],
   ["RubyEvents", "community & resources", "https://www.rubyevents.org/"],
   ["Rails at Scale (Shopify)", "community & resources", "https://railsatscale.com/"],
+  ["Fizzy (37signals)", "community & resources", "https://github.com/basecamp/fizzy"],
+  ["SF Ruby", "community & resources", "https://sfruby.com/"],
 
   # --- Blogs & newsletters (Rails Developer Survey 2024 top blogs) ---
   ["Ruby Weekly", "community & resources", "https://rubyweekly.com/"],
