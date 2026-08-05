@@ -31,3 +31,7 @@ data/*.bak.json
 # Never. Rails' encrypted credentials are committed; the key that opens them is not.
 /config/master.key
 /config/credentials/*.key
+
+# Ignore key files for decrypting credentials and more.
+/config/credentials/*.key
+
