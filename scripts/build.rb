@@ -24,6 +24,8 @@ qs_path = File.join(ROOT, "data", "quality_sample.json")
 quality_sample = File.exist?(qs_path) ? JSON.parse(File.read(qs_path)) : {}
 repos_path = File.join(ROOT, "data", "repos.json")
 repos = File.exist?(repos_path) ? JSON.parse(File.read(repos_path)) : {}
+swh_path = File.join(ROOT, "data", "swh.json")
+swh = File.exist?(swh_path) ? JSON.parse(File.read(swh_path)) : {}
 
 # Evil Martians favicon set (+ the martian used as the footer lurker), self-hosted at the site root.
 DIST = File.join(ROOT, "dist")
@@ -112,6 +114,20 @@ def cell_code(rp)
 end
 def code_in_stack?(rp) = rp && rp["docs_in_stack"] == "yes"
 
+# Code channel, collection step: The Stack is built from the Software Heritage archive, so a
+# permissive docs repo only reaches the code corpus if SWH has actually collected it.
+def cell_swh(sw, rp)
+  return %(<span class="cc-na" title="no public docs repo found">&mdash;</span>) unless rp && rp["docs_repo"]
+  return %(<span class="cc-na" title="not checked yet">&mdash;</span>) if sw.nil? || sw["archived"].nil?
+
+  slug = esc(sw["repo"])
+  if sw["archived"]
+    %(<span class="ok" title="github.com/#{slug} is in the Software Heritage archive, the source The Stack is built from">&#10003;</span>)
+  else
+    %(<span class="bad" title="Software Heritage has no record of github.com/#{slug}; request archival at archive.softwareheritage.org/save/">&#10007;</span><span class="sub">not collected</span>)
+  end
+end
+
 # Web channel, Gate 2: best of up to 5 sampled pages (FineWeb-Edu; keeps int_score >= 3, raw >= 2.5).
 def cell_quality(qs)
   return %(<span class="cc-na" title="no extractable text">&mdash;</span>) unless qs && qs["ok"] && qs["best"]
@@ -172,20 +188,25 @@ blocked     = rows.select { |r| r["robots_ai"] == "block" || r["bot_fetch"] == "
 present_cats = CAT_ORDER.select { |c| rows.any? { |r| r["category"] == c } }
 trows = []
 present_cats.each do |cat|
-  trows << %(<tr class="grp" data-grp="#{slug(cat)}"><td colspan="10">#{esc(CAT_LABEL[cat])}</td></tr>)
+  trows << %(<tr class="grp" data-grp="#{slug(cat)}"><td colspan="11">#{esc(CAT_LABEL[cat])}</td></tr>)
   rows.select { |r| r["category"] == cat }.each do |r|
     c = coverage[r["name"]]
     rp = repos[r["name"]]
+    sw = swh[r["name"]]
     qs = quality_sample[r["name"]]
-    # When the docs already reach The Stack via a permissive repo, the web gates are secondary: mute them.
-    mute = code_in_stack?(rp) ? " muted" : ""
-    muted_tip = code_in_stack?(rp) ? %( title="already eligible via the code corpus; the web gates are secondary here") : ""
+    # When the docs already reach The Stack via a permissive repo, the web gates are secondary: mute
+    # them. A repo Software Heritage has verifiably not collected is not in The Stack, so it keeps
+    # the web gates live.
+    in_code = code_in_stack?(rp) && !(sw && sw["archived"] == false)
+    mute = in_code ? " muted" : ""
+    muted_tip = in_code ? %( title="already eligible via the code corpus; the web gates are secondary here") : ""
     trows << %(<tr data-cat="#{slug(cat)}" data-name="#{esc(r["name"].downcase)}" data-cc="#{cov_sortkey(c)}">) \
       "<td class=\"res\"><a href=\"#{esc(r["docs"])}\">#{esc(r["name"])}</a></td>" \
       "<td>#{cell_robots(r)}</td><td>#{cell_bot(r)}</td>" \
       "<td>#{mark(r["sitemap"])}</td><td>#{mark(r["llms_txt"])}</td>" \
       "<td>#{mark(r["content_neg"])}</td><td>#{mark(r["md_route"])}</td>" \
       "<td class=\"train train--code\">#{cell_code(rp)}</td>" \
+      "<td class=\"train\">#{cell_swh(sw, rp)}</td>" \
       "<td class=\"train cc#{mute}\"#{muted_tip}>#{cov_cell(c, scoped: !r["cc_scope"].to_s.empty?)}</td>" \
       "<td class=\"train#{mute}\"#{muted_tip}>#{cell_quality(qs)}</td></tr>"
   end
@@ -330,7 +351,9 @@ PAGE = <<HTML
 (<span class="ok">&#10003;</span> good, <span class="bad">&#10007;</span> missing). Columns split into two
 questions: <strong>Retrieval</strong>, can an agent find the docs at request time, and
 <strong>Training</strong>, would they reach a model's corpus, either through the <strong>code corpus</strong>
-(docs in a public repo whose license is not copyleft, which skips the web filters) or the <strong>web corpus</strong>
+(docs in a public repo whose license is not copyleft, <em>and</em> which
+<a href="https://www.softwareheritage.org/">Software Heritage</a> has collected; The Stack is built from
+that archive, skipping the web filters) or the <strong>web corpus</strong>
 (Common Crawl coverage, then best-of-5 FineWeb-Edu quality). Where the code corpus already qualifies, the
 web cells are <span style="opacity:.45">dimmed</span> as secondary. Click any heading to sort;
 <a href="/guide">what each column means &rarr;</a></p>
@@ -349,7 +372,7 @@ web cells are <span style="opacity:.45">dimmed</span> as secondary. Click any he
     <tr class="grouprow">
       <th class="res sortable" rowspan="2" data-col="0">Resource (docs) <span class="arrow">&#9650;</span></th>
       <th class="grouphead" colspan="6">Retrieval <span class="grouphead__sub">can an agent find it at request time</span></th>
-      <th class="grouphead grouphead--train" colspan="3">Training <span class="grouphead__sub">would it reach the corpus</span></th>
+      <th class="grouphead grouphead--train" colspan="4">Training <span class="grouphead__sub">would it reach the corpus</span></th>
     </tr>
     <tr class="colrow">
       <th class="sortable" data-col="1">robots<br>allows AI <span class="arrow">&#9650;</span></th>
@@ -359,8 +382,9 @@ web cells are <span style="opacity:.45">dimmed</span> as secondary. Click any he
       <th class="sortable" data-col="5">content<br>negotiation <span class="arrow">&#9650;</span></th>
       <th class="sortable" data-col="6">.md<br>routes <span class="arrow">&#9650;</span></th>
       <th class="sortable train" data-col="7">code corpus<br><span class="th-sub">docs repo license</span> <span class="arrow">&#9650;</span></th>
-      <th class="sortable train" data-col="8">Common<br>Crawl <span class="arrow">&#9650;</span></th>
-      <th class="sortable train" data-col="9">quality<br><span class="th-sub">best of 5, &ge;3</span> <span class="arrow">&#9650;</span></th>
+      <th class="sortable train" data-col="8">Software<br>Heritage <span class="th-sub">repo collected</span> <span class="arrow">&#9650;</span></th>
+      <th class="sortable train" data-col="9">Common<br>Crawl <span class="arrow">&#9650;</span></th>
+      <th class="sortable train" data-col="10">quality<br><span class="th-sub">best of 5, &ge;3</span> <span class="arrow">&#9650;</span></th>
     </tr></thead>
     <tbody>
 #{TABLE}
@@ -467,6 +491,9 @@ shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; 
 robots.txt parsed for AI user-agents (CCBot, GPTBot, ClaudeBot, Google-Extended) with
 <code>Disallow: /</code>; crawlability tested by fetching as CCBot (to catch Cloudflare/WAF blocks); content
 negotiation via <code>Accept: text/markdown</code>; <code>.md</code> routes and llms.txt checked for a 200.
+Software Heritage collection checked per docs repo via the archive's public
+<a href="https://archive.softwareheritage.org/api/">origin API</a>; a missing repo can be submitted at
+<a href="https://archive.softwareheritage.org/save/">Save Code Now</a>.
 The language-choice figure is from the open whichlang benchmark (13 models, 1,267 classified solutions, 0
 Ruby; <a href="https://github.com/chad/whichlang">github.com/chad/whichlang</a>). That the same models write
 Rails competently when instructed is our own informal observation.</p>

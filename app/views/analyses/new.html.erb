@@ -33,8 +33,10 @@
 <section class="examples">
   <h2>Or start with one of these</h2>
   <p class="note">
-    Two real cases. Every result is shown against docs that <em>are</em> in the training data, so a
-    null answer means something.
+    <%= AnalyzerConfig::EXAMPLES.size %> real cases with measured results, including one page that
+    two frontier models reproduce word for word. Every result is shown against docs that
+    <em>are</em> in the training data, so a null answer means something. These four are free to run
+    and never use up a check.
   </p>
   <ul class="examples__list">
     <% AnalyzerConfig::EXAMPLES.each do |example| %>
