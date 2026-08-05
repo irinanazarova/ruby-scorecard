@@ -39,14 +39,24 @@ module Analyzer
       return { ok: false, status: nil, type: nil, body: nil } unless res
 
       { ok: res.is_a?(Net::HTTPSuccess), status: res.code.to_i,
-        type: res["content-type"].to_s.split(";").first, body: res.body }
+        type: res["content-type"].to_s.split(";").first, body: utf8(res.body) }
+    end
+
+    # Net::HTTP hands back ASCII-8BIT whenever the response omits a charset, and every downstream
+    # regex here is UTF-8, so matching one against the other raises Encoding::CompatibilityError and
+    # the rescue in `get` turns a perfectly good page into "could not fetch". scrub drops the bytes
+    # that are not valid UTF-8 rather than raising on them.
+    def utf8(body)
+      return nil if body.nil?
+
+      body.dup.force_encoding(Encoding::UTF_8).scrub("")
     end
 
     def json(url, headers: {}, timeout: 20)
       res = get(url, headers:, timeout:)
       return nil unless res.is_a?(Net::HTTPSuccess)
 
-      JSON.parse(res.body)
+      JSON.parse(utf8(res.body))
     rescue JSON::ParserError
       nil
     end
@@ -60,7 +70,7 @@ module Analyzer
       req.body = payload.to_json
       res = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https",
                             open_timeout: timeout, read_timeout: timeout) { |h| h.request(req) }
-      res.is_a?(Net::HTTPSuccess) ? JSON.parse(res.body) : nil
+      res.is_a?(Net::HTTPSuccess) ? JSON.parse(utf8(res.body)) : nil
     rescue StandardError
       nil
     end

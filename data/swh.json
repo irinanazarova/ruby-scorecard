@@ -1,0 +1,352 @@
+{
+  "Ruby (language)": {
+    "repo": "ruby/ruby",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Rails Guides": {
+    "repo": "rails/rails",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Rails API": {
+    "repo": "rails/rails",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "RubyGems Guides": {
+    "repo": "rubygems/guides",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Bundler": {
+    "repo": "rubygems/bundler-site",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Hotwire": {
+    "repo": "hotwired/hotwire-site",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Turbo": {
+    "repo": "hotwired/turbo-site",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Stimulus": {
+    "repo": "hotwired/stimulus-site",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "ViewComponent": {
+    "repo": "ViewComponent/view_component",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Phlex": {
+    "repo": "yippee-fun/phlex.fun",
+    "archived": false,
+    "checked": "2026-08"
+  },
+  "Ruby UI": {
+    "repo": "ruby-ui/ruby_ui",
+    "archived": false,
+    "checked": "2026-08"
+  },
+  "Inertia Rails": {
+    "repo": "inertiajs/inertia-rails",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Lookbook": {
+    "repo": "lookbook-hq/lookbook",
+    "archived": false,
+    "checked": "2026-08"
+  },
+  "Roda": {
+    "repo": "jeremyevans/roda",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Sinatra": {
+    "repo": "sinatra/sinatra.github.com",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Hanami": {
+    "repo": "hanami/guides",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Bridgetown": {
+    "repo": "bridgetownrb/bridgetown",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Jekyll": {
+    "repo": "jekyll/jekyll",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Sequel": {
+    "repo": "jeremyevans/sequel",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "ROM": {
+    "repo": "rom-rb/rom-rb.org",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "dry-rb": {
+    "repo": "dry-rb/dry-rb.org",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Sidekiq": {
+    "repo": "sidekiq/sidekiq",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "AnyCable": {
+    "repo": "anycable/docs.anycable.io",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Kamal": {
+    "repo": "basecamp/kamal-site",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Sorbet": {
+    "repo": "sorbet/sorbet",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "RuboCop": {
+    "repo": "rubocop/rubocop",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "RSpec": {
+    "repo": "rspec/rspec.github.io",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "TestProf": {
+    "repo": "test-prof/test-prof",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "GraphQL Ruby": {
+    "repo": "rmosolgo/graphql-ruby",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Rodauth": {
+    "repo": "jeremyevans/rodauth",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Action Policy": {
+    "repo": "palkan/action_policy",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Shrine": {
+    "repo": "shrinerb/shrine",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Avo": {
+    "repo": "avo-hq/docs.avohq.io",
+    "archived": false,
+    "checked": "2026-08"
+  },
+  "ActiveAdmin": {
+    "repo": "activeadmin/activeadmin",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Ransack": {
+    "repo": "activerecord-hackery/ransack",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Pagy": {
+    "repo": "ddnexus/pagy",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Nokogiri": {
+    "repo": "sparklemotion/nokogiri.org",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Faraday": {
+    "repo": "lostisland/faraday",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Capistrano": {
+    "repo": "capistrano/capistrano",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Pry": {
+    "repo": "pry/pry.github.io",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Trailblazer": {
+    "repo": "trailblazer/website",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Rage": {
+    "repo": "rage-rb/website",
+    "archived": false,
+    "checked": "2026-08"
+  },
+  "Falcon": {
+    "repo": "socketry/falcon",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Karafka": {
+    "repo": "karafka/wiki",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "RubyLLM": {
+    "repo": "crmne/ruby_llm",
+    "archived": false,
+    "checked": "2026-08"
+  },
+  "Brakeman": {
+    "repo": "presidentbeef/brakeman-site",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "imgproxy": {
+    "repo": "imgproxy/imgproxy-docs",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Vite Ruby": {
+    "repo": "ElMassimo/vite_ruby",
+    "archived": false,
+    "checked": "2026-08"
+  },
+  "Flipper": {
+    "repo": "flippercloud/flipper",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "RubyEvents": {
+    "repo": "rubyevents/rubyevents",
+    "archived": false,
+    "checked": "2026-08"
+  },
+  "Riding Rails": {
+    "repo": "rails/website",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Joe Masilotti": {
+    "repo": "joemasilotti/masilotti.com-bridgetown",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Ruby News": {
+    "repo": "ruby/www.ruby-lang.org",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Devise": {
+    "repo": "heartcombo/devise",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Pundit": {
+    "repo": "varvet/pundit",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "CanCanCan": {
+    "repo": "CanCanCommunity/cancancan",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Standard": {
+    "repo": "standardrb/standard",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Sentry": {
+    "repo": "getsentry/sentry-docs",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "New Relic": {
+    "repo": "newrelic/docs-website",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Datadog": {
+    "repo": "DataDog/documentation",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Rollbar": {
+    "repo": "rollbar/docs",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Scout APM": {
+    "repo": "scoutapp/scout_help_sphinx",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Skylight": {
+    "repo": "skylightio/skylight-docs",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "GitHub Actions": {
+    "repo": "github/docs",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Fly.io": {
+    "repo": "superfly/docs",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Railway": {
+    "repo": "railwayapp/docs",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "AWS Elastic Beanstalk": {
+    "repo": "awsdocs/aws-elastic-beanstalk-developer-guide",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "PlanetScale": {
+    "repo": "planetscale/docs",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Supabase": {
+    "repo": "supabase/supabase",
+    "archived": true,
+    "checked": "2026-08"
+  },
+  "Neon": {
+    "repo": "neondatabase/website",
+    "archived": true,
+    "checked": "2026-08"
+  }
+}

@@ -61,6 +61,18 @@ CC recommends the columnar index via Amazon Athena (needs AWS; not wired up here
 (`0/210`, `0/30` Opus 4.8, `4.2/5`) are **constants in `scripts/build.rb`** ("What we cannot find" and the
 "final boss" callout); update them there when the source benchmark is re-run.
 
+### Refresh the Software Heritage column
+```bash
+ruby scripts/swh_check.rb     # SWH origin lookups per docs repo -> data/swh.json
+ruby scripts/build.rb         # re-render (no asset rebuild needed)
+```
+For each resource with a `docs_repo` in `data/repos.json`, this asks the Software Heritage archive
+whether the repo is collected (The Stack is built from that archive, so an uncollected repo never
+reaches the code corpus, whatever its license). Serial, ~1.2s between calls, one lookup per unique
+repo; the anonymous API allows ~120 requests/hour, so the full run fits. On a 429 it stops and keeps
+known answers; unknown values render as "not checked". A repo verifiably absent from SWH also keeps
+that row's web-gate cells live (unmuted) even when the license would qualify it for The Stack.
+
 ### Update the benchmark figures
 The model benchmark and capability numbers come from the `whichlang` project. When it is re-run on new
 models, update the constants in `scripts/build.rb` (search for `4.2`, `0/210`, `0/30`, and the CC sample

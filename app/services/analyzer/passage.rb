@@ -21,6 +21,10 @@ module Analyzer
     # genuinely short, and those two cases deserve different answers.
     CLIENT_RENDERED_BYTES = 10_000
 
+    # Share of a span that must be plain words for it to count as prose. Real documentation sits
+    # near 0.9; SVG path data and minified JS sit near 0.
+    PROSE_RATIO = 0.65
+
     Result = Struct.new(:ok, :error, :prefix, :truth, :source_label, :total_words, :offset,
                         keyword_init: true)
 
@@ -45,20 +49,45 @@ module Analyzer
     # that are demonstrably in training data. Testing a single span therefore reports "not
     # memorized" for plenty of pages that are, which is the most misleading answer this tool could
     # give. Spreading the attempts is the difference between a coin flip and a fair test.
-    def self.candidates(text, label, count: 3)
+    def self.candidates(text, label, count: 3, prose: true)
       words = text.split
-      return [build(text, label)] if words.length < MIN_WORDS + 200
+      return [build(text, label, prose:)] if words.length < MIN_WORDS + 200
 
       span = SEED_WORDS + TRUTH_WORDS
       usable = words.length - span - 10
-      count.times.filter_map do |i|
-        offset = (200 + (i * (usable - 200) / [count, 1].max.to_f)).to_i
-        next if offset.negative? || offset + span > words.length
+      taken = []
 
+      results = count.times.filter_map do |i|
+        wanted = (200 + (i * (usable - 200) / [count, 1].max.to_f)).to_i
+        offset = prose ? nearest_prose_offset(words, wanted, span, taken) : wanted
+        next if offset.nil? || offset.negative? || offset + span > words.length
+
+        taken << offset
         Result.new(ok: true, source_label: label, total_words: words.length, offset: offset,
                    prefix: words[offset, SEED_WORDS].join(" "),
                    truth: words[offset + SEED_WORDS, TRUTH_WORDS].join(" "))
-      end.presence || [build(text, label)]
+      end
+
+      return results if results.any?
+      return [build(text, label, prose:)] unless prose
+
+      [Result.new(ok: false, source_label: label, total_words: words.length,
+                  error: "No prose found to test. This source is mostly markup, code or data, and " \
+                         "a span of that measures nothing about whether a model read it.")]
+    end
+
+    # Walk outward from the span we wanted until we find one that reads like prose, so a page with
+    # a block of SVG or a config table in the middle still gets tested on its actual sentences
+    # instead of being scored on punctuation.
+    def self.nearest_prose_offset(words, wanted, span, taken, step: 25, reach: 60)
+      reach.times do |i|
+        [wanted + (i * step), wanted - (i * step)].each do |offset|
+          next if offset.negative? || offset + span > words.length
+          next if taken.any? { |t| (t - offset).abs < span }
+          return offset if prose?(words[offset, span])
+        end
+      end
+      nil
     end
 
     def self.candidates_from_url(url, count: 3)
@@ -105,15 +134,25 @@ module Analyzer
       nil
     end
 
-    def self.candidates_from_repo_file(repo, branch, path, count: 3)
+    # prose: false is the code path. Source files are not stripped as markdown (that would eat the
+    # code) and skip the prose filter, because the whole point there is to test the code itself.
+    def self.candidates_from_repo_file(repo, branch, path, count: 3, prose: true)
       res = Http.probe("https://raw.githubusercontent.com/#{repo}/#{branch}/#{path}", timeout: 15)
       return [Result.new(ok: false, error: "Could not fetch #{path}")] unless res[:ok]
 
-      candidates(strip_markdown(res[:body]), "#{repo}/#{path}", count:)
+      text = prose ? strip_markdown(res[:body]) : res[:body].to_s.gsub(/\s+/, " ").strip
+      candidates(text, "#{repo}/#{path}", count:, prose:)
     end
 
-    def self.build(text, label)
+    def self.build(text, label, prose: true)
       words = text.split
+      if prose && words.length >= MIN_WORDS && !prose?(words[0, MIN_WORDS])
+        return Result.new(ok: false, source_label: label, total_words: words.length,
+                          error: "No prose found to test. This source is mostly markup, code or " \
+                                 "data, and a span of that measures nothing about whether a model " \
+                                 "read it.")
+      end
+
       if words.length < MIN_WORDS
         return Result.new(ok: false, source_label: label, total_words: words.length,
                           error: "Only #{words.length} words of prose here; the probe needs #{MIN_WORDS}. " \
@@ -128,18 +167,37 @@ module Analyzer
 
     def self.extract_html(html)
       doc = Nokogiri::HTML(html.to_s)
-      doc.css("script, style, nav, header, footer, aside, noscript, pre, code, table").remove
+      doc.css("script, style, svg, nav, header, footer, aside, noscript, pre, code, table").remove
       main = doc.at("main") || doc.at("article") || doc.at('[role="main"]') || doc.at("body")
       main.to_s.then { |h| Nokogiri::HTML(h).text }.gsub(/\s+/, " ").strip
     end
 
     def self.strip_markdown(md)
       md.to_s
-        .sub(/\A---\n.*?\n---\n/m, "")          # front matter
+        .sub(/\A---\n.*?\n---\n/m, "")           # front matter
         .gsub(/```.*?```/m, " ")                 # fenced code
+        .gsub(%r{<svg\b.*?</svg>}mi, " ")        # inline SVG, path data and all
+        .gsub(%r{<(script|style)\b.*?</\1>}mi, " ")
+        .gsub(/<[^>]{1,400}>/m, " ")             # remaining HTML and JSX tags
         .gsub(/^\s*[|>#!].*$/, " ")              # tables, quotes, headings, images
         .gsub(/\[([^\]]*)\]\([^)]*\)/, '\1')     # link text, drop URLs
         .gsub(/\s+/, " ").strip
+    end
+
+    # Is this span actually prose, or markup that survived stripping?
+    #
+    # Resend's docs are Mintlify and its markdown twin embeds inline SVG. Stripping missed it, and
+    # the probe happily tested `d="M15.145 19.8191..."` against a model: 55 words of path
+    # coordinates, which measures nothing about whether anyone read the page. A model continuing
+    # SVG numerals is doing arithmetic-shaped autocomplete, not recall.
+    #
+    # Checking the span rather than only the source is what makes this hold: it catches SVG, base64,
+    # minified JS, config tables and hashes without needing a rule for each.
+    def self.prose?(words)
+      return false if words.blank?
+
+      wordlike = words.count { |w| w.match?(/\A[A-Za-z][A-Za-z'’-]*[.,;:!?)]?\z/) }
+      wordlike.fdiv(words.length) >= PROSE_RATIO
     end
   end
 end

@@ -216,8 +216,40 @@ module Analyzer
 
       return [] unless repo && (info = Http.json("https://api.github.com/repos/#{repo}"))
 
-      path = docs_file(repo, info["default_branch"])
-      path ? Passage.candidates_from_repo_file(repo, info["default_branch"], path) : []
+      branch = info["default_branch"]
+
+      # Prose first, because a docs repo should be judged on its docs. But plenty of repos are all
+      # code: basecamp/fizzy has no prose file big enough to probe, and answering "no prose found"
+      # to someone asking whether their CODE reached a corpus is refusing the actual question. Code
+      # is what The Stack is mostly made of, so fall through and test it directly.
+      if (path = docs_file(repo, branch))
+        Passage.candidates_from_repo_file(repo, branch, path)
+      elsif (path = code_file(repo, branch))
+        Passage.candidates_from_repo_file(repo, branch, path, prose: false)
+      else
+        []
+      end
+    end
+
+    CODE_EXT = /\.(rb|js|jsx|ts|tsx|py|go|rs|java|kt|swift|c|cc|cpp|h|hpp|cs|php|ex|exs|scala|sh|sql)\z/i
+
+    # Vendored, generated and minified files are duplicated across thousands of repos, so a model
+    # continuing one says nothing about THIS project. Fixtures and lockfiles are the same problem.
+    SKIP_PATH = %r{(^|/)(vendor|node_modules|dist|build|tmp|coverage|\.github)/|
+                   fixtures?/|\.min\.|-lock\.|_pb\.|\.generated\.}xi
+
+    # The largest hand-written source file, which is the closest thing to "the file this project is
+    # actually known for" that a tree listing can tell us.
+    def code_file(repo, branch)
+      tree = Http.json("https://api.github.com/repos/#{repo}/git/trees/#{branch}?recursive=1")
+      return nil unless tree && tree["tree"]
+
+      tree["tree"]
+        .select do |n|
+          n["type"] == "blob" && n["path"].match?(CODE_EXT) && !n["path"].match?(SKIP_PATH) &&
+            n["size"].to_i.between?(2_000, 60_000)
+        end
+        .max_by { |n| n["size"].to_i }&.fetch("path", nil)
     end
 
     # Pick the most prose-heavy markdown under docs/, matching how the research probe chose passages:

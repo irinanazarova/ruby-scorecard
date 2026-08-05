@@ -74,8 +74,7 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
   # of three spans. Sparsity is the whole reason multiple spans exist.
 
   test "produces several spans spread across a long document" do
-    text = (1..2000).map { |i| "word#{i}" }.join(" ")
-    spans = Analyzer::Passage.candidates(text, "t", count: 3)
+    spans = Analyzer::Passage.candidates(prose_text, "t", count: 3)
     assert_equal 3, spans.size
     assert spans.all?(&:ok)
     assert_equal spans.map(&:offset), spans.map(&:offset).uniq, "spans must not overlap identically"
@@ -83,11 +82,16 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
   end
 
   test "prefix and truth do not overlap" do
-    text = (1..2000).map { |i| "word#{i}" }.join(" ")
-    s = Analyzer::Passage.candidates(text, "t", count: 1).first
+    s = Analyzer::Passage.candidates(prose_text, "t", count: 1).first
     assert_equal Analyzer::Passage::SEED_WORDS, s.prefix.split.size
     assert_equal Analyzer::Passage::TRUTH_WORDS, s.truth.split.size
-    assert (s.prefix.split & s.truth.split).empty?, "the model must not be shown the answer"
+    # Disjoint SPANS, which is the actual property. Comparing word sets only worked on a fixture of
+    # 2000 unique tokens; in real prose the same words recur in both halves without the model ever
+    # having been shown the answer.
+    words = prose_text.split
+    assert_equal words[s.offset, Analyzer::Passage::SEED_WORDS].join(" "), s.prefix
+    assert_equal words[s.offset + Analyzer::Passage::SEED_WORDS, Analyzer::Passage::TRUTH_WORDS].join(" "),
+                 s.truth, "truth must start exactly where the prefix ends"
   end
 
   test "refuses a page with too little prose instead of guessing" do
@@ -208,5 +212,58 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
       end
     end
     assert_equal 1, solid, "a settled answer should still cache"
+  end
+
+  # --- prose filtering --------------------------------------------------------------------------
+  # Resend's markdown twin embeds inline SVG. Stripping missed it and the probe tested
+  # `d="M15.145 19.8191..."` against a model: 55 words of path coordinates measure nothing.
+
+  SVG_BLOB = ('<path d="M34.4522 33.2528C34.4522 33.2528 35.7597 34.2935 33.0122 35.0986C27.7878 ' \
+              '36.6275 11.2676 37.0892 6.67835 35.1596Z" strokeWidth="0.2" strokeLinejoin="round" /> ' * 40)
+
+  test "SVG path data is not prose" do
+    assert_not Analyzer::Passage.prose?(SVG_BLOB.split)
+    assert Analyzer::Passage.prose?(prose_text.split.first(120))
+  end
+
+  test "strip_markdown removes inline SVG and JSX tags" do
+    md = "Real sentences here. #{SVG_BLOB} More real sentences follow."
+    out = Analyzer::Passage.strip_markdown(md)
+    assert_not out.include?("strokeWidth"), "SVG attributes survived stripping"
+    assert out.include?("Real sentences here.")
+  end
+
+  test "a span lands on prose even when markup sits where we wanted to sample" do
+    words = prose_text.split
+    contaminated = (words.first(250) + SVG_BLOB.split + words.drop(250)).join(" ")
+    span = Analyzer::Passage.candidates(contaminated, "t", count: 1).first
+    assert span.ok, "should have found prose elsewhere rather than giving up"
+    assert Analyzer::Passage.prose?(span.prefix.split), "picked a span that is not prose"
+  end
+
+  test "a source that is entirely markup is refused rather than scored" do
+    span = Analyzer::Passage.candidates(SVG_BLOB * 4, "t").first
+    assert_not span.ok
+    assert_match(/no prose/i, span.error)
+  end
+
+  # Repo mode must be able to answer "is my CODE in the training set". Refusing because code is not
+  # prose is refusing the question the user asked.
+  test "code spans skip the prose filter" do
+    code = (1..400).map { |i| "def method_#{i}(arg); @cache[arg] ||= compute(arg); end" }.join(" ")
+    span = Analyzer::Passage.candidates(code, "repo/file.rb", count: 1, prose: false).first
+    assert span.ok, "code should be testable when prose: false"
+    assert_equal Analyzer::Passage::SEED_WORDS, span.prefix.split.size
+  end
+
+  private
+
+  # Realistic prose: the filter exists precisely to reject synthetic token soup like "word1 word2",
+  # so a fixture made of that would be refused, correctly.
+  def prose_text
+    sentence = "The crawler fetches a page and stores the response body for later analysis, " \
+               "and the classifier then scores that text for educational value before any of it " \
+               "reaches a training corpus at all."
+    ([sentence] * 60).join(" ")
   end
 end
