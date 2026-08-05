@@ -1,0 +1,30 @@
+<% content_for :title, "#{@analysis.status == 'done' ? 'Results for' : 'Analyzing'} #{@analysis.input}" %>
+<%= turbo_stream_from @analysis %>
+
+<section class="result">
+  <p class="result__back"><%= link_to "&larr; Check another".html_safe, test_path %></p>
+  <h1 class="result__target"><%= @analysis.input %></h1>
+
+  <div id="analysis_status"><%= render "analyses/status", analysis: @analysis %></div>
+
+  <%# Order is the argument, not just the loading order: can an agent read it, could it ever be
+      trained on, and did that actually happen. Each box fills as its check lands.
+
+      A step that has already answered renders from the stored results, so a reload or a shared
+      permalink shows the finished analysis. Only steps still in flight render the placeholder and
+      wait for their broadcast. Finished steps render the partial bare: it carries the step id
+      itself, which is what the broadcast replaces, so wrapping it would nest the same id twice. %>
+  <% stored = @analysis.step_payloads %>
+  <div class="steps">
+    <% Analysis::STEPS.each do |step, title, hint| %>
+      <% if (payload = stored[step]) %>
+        <%= render "analyses/step", step: step, payload: payload, analysis: @analysis,
+                   repo_source: payload[:repo_source] %>
+      <% else %>
+        <%= tag.div id: "step_#{step}" do %>
+          <%= render "analyses/pending", title: title, hint: hint %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+</section>

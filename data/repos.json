@@ -226,7 +226,7 @@
     "code_channel": "copyleft",
     "docs_repo": "sidekiq/sidekiq",
     "docs_location": "wiki",
-    "docs_license": null,
+    "docs_license": "LGPL-3.0",
     "docs_in_stack": "no"
   },
   "AnyCable": {

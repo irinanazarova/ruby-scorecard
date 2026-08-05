@@ -1,0 +1,50 @@
+<%# The comparison that makes a null result readable.
+    Shown only once the memorization step has answered, so it lands as a comparison rather than as
+    a spoiler sitting above an empty page. %>
+<% b = Analyzer::Baseline.summary %>
+<% if b && b[:summary] %>
+  <section class="baseline">
+    <h2>Compared with docs that <em>are</em> in the training data</h2>
+
+    <div class="baseline__grid">
+      <div class="baseline__col">
+        <p class="baseline__who">This page</p>
+        <p class="baseline__verdict baseline__verdict--<%= mine[:verdict] %>">
+          <% if mine[:verdict] == "none" %>
+            not reproduced
+          <% else %>
+            <%= mine[:best_run] %> words reproduced
+          <% end %>
+        </p>
+        <p class="baseline__meta">
+          <%= mine[:spans_tested] %> passages tested across <%= mine[:probes] %> probes
+        </p>
+      </div>
+
+      <div class="baseline__col baseline__col--ref">
+        <p class="baseline__who"><%= b[:label] %></p>
+        <p class="baseline__verdict baseline__verdict--<%= b.dig(:summary, :verdict) %>">
+          <%= b.dig(:summary, :best_run) %> words reproduced
+        </p>
+        <p class="baseline__meta">
+          <%= b[:stars] %> stars, license: <%= b[:license] %>,
+          fired for <%= b.dig(:summary, :models_fired).to_a.to_sentence %>
+        </p>
+      </div>
+    </div>
+
+    <p class="baseline__note">
+      <% if mine[:verdict] == "none" %>
+        A null result is <strong>weak evidence</strong>: models memorize only a fraction of what
+        they read, so this does not prove your page is absent from any corpus. The comparison shows
+        what a positive looks like under the identical probe.
+      <% else %>
+        Both pages were reproduced verbatim. Reproducing text you have never seen is not possible,
+        so this is strong evidence both reached a training corpus.
+      <% end %>
+      Note the reference repo has <strong><%= b[:stars] %> stars and no permissive license</strong>,
+      and is still more memorized than repos with a thousand times the stars. Popularity is not what
+      gets you in. <a href="/guide">What does &rarr;</a>
+    </p>
+  </section>
+<% end %>

@@ -1,0 +1,130 @@
+{
+  "note": "Per-vendor memorization probes behind the Agent Night talk (WorkOS, Vercel, Netlify).",
+  "date": "2026-07-26",
+  "runs": {
+    "workos": [
+      {
+        "name": "MIT License (control+)",
+        "kind": "control",
+        "run": 31,
+        "overlap": 1.0,
+        "verdict": "STRONG memorization",
+        "stop": "max_tokens",
+        "truth": "Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.",
+        "out": "Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT H"
+      },
+      {
+        "name": "Dickens opening (control+)",
+        "kind": "control",
+        "run": 15,
+        "overlap": 1.0,
+        "verdict": "STRONG memorization",
+        "stop": "end_turn",
+        "truth": "was the winter of despair, we had everything before us, we had nothing before us.",
+        "out": "was the winter of despair, we had everything before us, we had nothing before us, we were all going direct to Heaven, we were all going direct the other way—in short, the period was so far like the present period, that some of its noisiest authorities insisted on its being received, for good or for evil, in the superlative degree of comparison only.\n\nThere were a king with a large jaw and a queen with a plain face, on the throne of England; there were a king with a large jaw and a queen with a fair face, on the throne of France. In both countries it was clearer than crystal to the lords of the State preserves of loaves and fishes, that things in general were settled for ever."
+      },
+      {
+        "name": "Fabricated text (control-)",
+        "kind": "null",
+        "run": 1,
+        "overlap": 0.0,
+        "verdict": "no verbatim recall",
+        "stop": "end_turn",
+        "truth": "could explain why the persimmon auditors kept rotating the lighthouse on alternate Tuesdays. The committee adjourned to a meadow of recursive umbrellas, where the velvet subsidy was quietly reinstated under a new name that rhymed with neither thunder nor arithmetic, and the librarian, satisfied, filed the entire affair under a heading that the harbor master would later describe, without irony,",
+        "out": "I'm unable to continue this text as if quoting from an original source, because it isn't from a real published work—it appears to be randomly generated or invented prose with no verbatim continuation to recall.\n\nIf you'd like, I can:\n- Continue it in the same whimsical, surreal style as a creative writing exercise, or\n- Help with a genuine passage if you can identify the actual source.\n\nJust let me know which you'd prefer."
+      },
+      {
+        "name": "WorkOS\n  audit-logs",
+        "kind": "test",
+        "run": 3,
+        "overlap": 0.0,
+        "verdict": "no verbatim recall",
+        "stop": "end_turn",
+        "truth": "for action, team for targets, and click “Save event”. Get an Organization ID All events are scoped to an Organization, so you will need the ID of an Organization in order to emit events. Emit Events Using the ID from the Organization, emit an Audit Log Event with the action and targets previously configured. Emit eventJavaScript.NETGoJavaJavaScriptLaravelPHPPythonRubyimport { WorkOS } from",
+        "out": "as your first event schema. This will create a new event schema that you can use to emit events of this type.\n\nOnce you’ve created the event schema, you can add additional metadata to it. This metadata will be used to validate the events you emit, ensuring that they conform to the schema you’ve defined."
+      },
+      {
+        "name": "WorkOS verifying-tokens",
+        "kind": "test",
+        "run": 2,
+        "overlap": 0.0,
+        "verdict": "no verbatim recall",
+        "stop": "end_turn",
+        "truth": "} from 'openid-client/passport'; import * as passport from 'passport'; const config = await client.discovery( 'https://authkit_domain', process.env.OAUTH_APP_CLIENT_ID, process.env.OAUTH_APP_CLIENT_SECRET, ); passport.use( new OidcStrategy( { config, scope: 'openid profile email offline_access', }, (_tokenset, _userinfo, _done) => { // Your code to persist tokenset and retrieve user info }, ), );require \"omniauth\" use OmniAuth::Builder do provider :openid_connect, { name: :your_app, scope: %i[openid profile email",
+        "out": "I'm unable to continue this text exactly as it appears in the original, as I don't have this specific source memorized and reproducing it verbatim isn't something I can do reliably here.\n\nIf you can paste the surrounding text or let me know the documentation source (this appears to be OAuth/OpenID Connect integration docs), I'm happy to help you understand or complete the code in a way that's technically correct."
+      }
+    ],
+    "vercel_netlify": [
+      {
+        "name": "MIT License (control+)",
+        "kind": "control",
+        "run": 31,
+        "overlap": 1.0,
+        "verdict": "STRONG memorization",
+        "stop": "max_tokens",
+        "truth": "Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.",
+        "out": "Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT H"
+      },
+      {
+        "name": "Dickens opening (control+)",
+        "kind": "control",
+        "run": 15,
+        "overlap": 1.0,
+        "verdict": "STRONG memorization",
+        "stop": "end_turn",
+        "truth": "was the winter of despair, we had everything before us, we had nothing before us.",
+        "out": "was the winter of despair, we had everything before us, we had nothing before us, we were all going direct to Heaven, we were all going direct the other way—in short, the period was so far like the present period, that some of its noisiest authorities insisted on its being received, for good or for evil, in the superlative degree of comparison only.\n\nThere were a king with a large jaw and a queen with a plain face, on the throne of England; there were a king with a large jaw and a queen with a fair face, on the throne of France. In both countries it was clearer than crystal to the lords of the State preserves of loaves and fishes, that things in general were settled for ever."
+      },
+      {
+        "name": "Fabricated text (control-)",
+        "kind": "null",
+        "run": 1,
+        "overlap": 0.0,
+        "verdict": "no verbatim recall",
+        "stop": "end_turn",
+        "truth": "could explain why the persimmon auditors kept rotating the lighthouse on alternate Tuesdays. The committee adjourned to a meadow of recursive umbrellas, where the velvet subsidy was quietly reinstated under a new name that rhymed with neither thunder nor arithmetic, and the librarian, satisfied, filed the entire affair under a heading that the harbor master would later describe, without irony,",
+        "out": "I don't recognize this text as being from a known published source. It appears to be a randomly generated or fabricated passage rather than an excerpt from an actual book, article, or other original work.\n\nBecause I don't have access to any genuine source for this text, I can't reproduce a verbatim continuation of it—there's nothing authentic to continue from. Fabricating a continuation would just be inventing new content, which wouldn't match any \"original\" the way your instructions intend.\n\nIf you'd like, I can:\n- Help you write a creative continuation in the same whimsical style, or\n- Identify the source if you can share more context, or\n- Assist with something else entirely.\n\nJust let me know how you'd like to proceed."
+      },
+      {
+        "name": "Vercel python\n  runtime",
+        "kind": "test",
+        "run": 2,
+        "overlap": 0.0,
+        "verdict": "no verbatim recall",
+        "stop": "end_turn",
+        "truth": "build time. There is no automatic tree-shaking for Python. During deployment builds, Vercel automatically compiles Python source files into bytecode and includes the resulting .pyc files in the function bundle when space allows. This reduces initialization time and requires no configuration. Make sure your pyproject.toml or requirements.txt only lists packages necessary at runtime. Explicitly exclude files you don't need to",
+        "out": "build time. This can increase the size of your deployment and slow down builds.\n\nI don't have the original source text memorized, so I can't reliably reproduce the exact verbatim continuation. Providing a fabricated continuation would risk being inaccurate.\n\nIf you can share more of the surrounding text or the specific documentation source, I'd be happy to help you work with it."
+      },
+      {
+        "name": "Vercel speed\n  insights",
+        "kind": "test",
+        "run": 3,
+        "overlap": 0.0,
+        "verdict": "no verbatim recall",
+        "stop": "end_turn",
+        "truth": "down to the Countries section. The map is colored based on the experience metric per country. Click on a country to view more detailed data. Geographic map of the P75 score where the color intensity indicates the relative amount of data points per country Disabling Speed Insights You may want to disable Speed Insights in your project if you find",
+        "out": "down to the map at the bottom of the page.\n\nI don't have access to the original source text you're referencing, so I can't verify or reproduce the exact verbatim continuation. Providing invented text would risk misrepresenting the original document.\n\nIf you can share more of the surrounding context or identify the specific source (e.g., official documentation, a particular guide), I'd be happy to help in another way—such as summarizing, explaining, or helping you draft similar content."
+      },
+      {
+        "name": "Netlify request\n  chain",
+        "kind": "test",
+        "run": 1,
+        "overlap": 0.0,
+        "verdict": "no verbatim recall",
+        "stop": "end_turn",
+        "truth": "will be validated at this point. Unauthorized requests will be blocked and the request chain will stop.Otherwise, the request continues on. Edge Functions By default, Edge Functions are evaluated immediately after a request has passed the security checks and is matched against the request based on their their path and method configuration. By acting as the the entry point to",
+        "out": "is protected by an interstitial login page. Visitors who successfully authenticate are granted access to the site, and their session is maintained through a cookie so they don't have to log in again on subsequent visits.\n\nPassword Protection is useful for staging environments, internal tools, or any site that should not be publicly accessible."
+      },
+      {
+        "name": "Netlify custom\n  actions",
+        "kind": "test",
+        "run": 2,
+        "overlap": 0.0,
+        "verdict": "no verbatim recall",
+        "stop": "end_turn",
+        "truth": "is presented. When defined, it will always appear near the title in page and content editing modes. If using inline editing and if a proper data-sb-object-id annotation has been provided, the triggers will also be available in the toolbar when highlighting the document. Model actions are configured directly on the model definition. (When using a headless CMS, the model definition",
+        "out": "is available, such as the document editor. Below is an example of a document action that clears specific fields:\n\n```ts\nimport {defineDocumentAction} from 'sanity'\n\nexport const clearFieldsAction = defineDocumentAction({\n```\n\nWait, I don't have the exact continuation of this text from its original source. I should not fabricate content that I cannot verify.\n\nI can only reproduce text verbatim if I actually recognize the specific source and its exact wording. I don't have reliable knowledge of this particular passage's continuation."
+      }
+    ]
+  }
+}

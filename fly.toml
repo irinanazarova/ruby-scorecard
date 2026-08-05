@@ -2,6 +2,14 @@ app = "ruby-scorecard"
 primary_region = "ams"
 
 [build]
+  dockerfile = "Dockerfile.rails"
+
+[env]
+  RAILS_ENV = "production"
+  # config/database.yml reads this; the volume is what makes Solid Queue jobs and the Solid Cache
+  # warm-up survive a deploy. Losing the cache is not merely slow — the pre-warmed analyses are what
+  # make the demo instant, and a cold Common Crawl lookup takes up to 40s.
+  DATABASE_DIR = "/data"
 
 [http_service]
   internal_port = 80
@@ -12,6 +20,21 @@ primary_region = "ams"
   auto_start_machines = true
   min_machines_running = 1
 
+[[mounts]]
+  source = "scorecard_data"
+  destination = "/data"
+
 [[vm]]
   size = "shared-cpu-1x"
-  memory = "256mb"
+  # 256mb was sized for nginx serving static files. This now runs Rails plus Solid Queue and the
+  # analyzer's parallel HTTP checks; 1gb leaves headroom for a few concurrent analyses.
+  memory = "1gb"
+
+# AnyCable broadcasts are queued on a background thread and flushed asynchronously. A hard kill
+# mid-analysis drops whatever is still queued, so give the process time to drain on SIGTERM.
+[deploy]
+  strategy = "rolling"
+
+[experimental]
+  # Seconds to wait after SIGTERM before SIGKILL.
+  kill_timeout = 30

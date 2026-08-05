@@ -1,0 +1,62 @@
+<% content_for :title, "Is your documentation in the training data?" %>
+
+<section class="probe-hero">
+  <h1>Is your documentation in the training data?</h1>
+  <p class="probe-hero__lead">
+    Paste a documentation URL or a GitHub repo. We check whether agents can retrieve it today,
+    whether it could reach a training corpus at all, and whether frontier models already reproduce
+    it word for word. Every step shows its working.
+  </p>
+
+  <%= form_with url: analyses_path, method: :post, class: "probe-form" do |f| %>
+    <%= f.text_field :input,
+          placeholder: "https://yourcompany.com/docs/getting-started  or  owner/repo",
+          autofocus: true, autocomplete: "off", spellcheck: "false",
+          "aria-label": "Documentation URL or GitHub repo" %>
+    <%= f.submit "Analyze" %>
+  <% end %>
+
+  <p class="probe-form__quota">
+    <% if signed_in? %>
+      Signed in as <strong><%= current_user.login %></strong>.
+      $<%= current_user.spent_dollars %> of $<%= current_user.budget_dollars %> used.
+    <% else %>
+      <strong><%= free_remaining %></strong> of
+      <%= AnalyzerConfig::FREE_ANALYSES_PER_SESSION %> free checks left.
+      Re-running a link you already checked is free and never uses one up.
+      <%= button_to "Sign in with GitHub", "/auth/github", method: :post, class: "analyzer__linkbtn",
+                    data: { turbo: false } %>
+    <% end %>
+  </p>
+</section>
+
+<section class="examples">
+  <h2>Or start with one of these</h2>
+  <p class="note">
+    Two real cases. Every result is shown against docs that <em>are</em> in the training data, so a
+    null answer means something.
+  </p>
+  <ul class="examples__list">
+    <li>
+      <%= button_to "workos.com/docs/authkit/sessions", analyses_path,
+            params: { input: "https://workos.com/docs/authkit/sessions" }, class: "examples__btn" %>
+      <span>MIT licensed and eligible, yet never collected. Not reproduced by any model.</span>
+    </li>
+    <li>
+      <%= button_to "docs.anycable.io/anycable-go/reliable_streams", analyses_path,
+            params: { input: "https://docs.anycable.io/anycable-go/reliable_streams" }, class: "examples__btn" %>
+      <span>Our own docs, included so this is not only other people's bad news.</span>
+    </li>
+  </ul>
+</section>
+
+<% if @recent.any? %>
+  <section class="recent">
+    <h2>Your recent checks</h2>
+    <ul>
+      <% @recent.each do |a| %>
+        <li><%= link_to a.input, analysis_path(a) %> <small><%= time_ago_in_words(a.created_at) %> ago</small></li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>

@@ -1,9 +1,57 @@
-# nginx image needs only dist/ + deploy/; the Fly fetch image (fetch/Dockerfile) also
-# needs scripts/ + data/; the check service (web/check.Dockerfile) needs scripts/ + web/.
-*
-!dist
-!deploy
-!scripts
-!data
-!fetch
-!web
+# See https://docs.docker.com/engine/reference/builder/#dockerignore-file for more about ignoring files.
+
+# Ignore git directory.
+/.git/
+/.gitignore
+
+# Ignore bundler config.
+/.bundle
+
+# Ignore all environment files.
+/.env*
+
+# Ignore all default key files.
+/config/master.key
+/config/credentials/*.key
+
+# Ignore all logfiles and tempfiles.
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+
+# Ignore pidfiles, but keep the directory.
+/tmp/pids/*
+!/tmp/pids/.keep
+
+# Ignore storage (uploaded files in development and any SQLite databases).
+/storage/*
+!/storage/.keep
+/tmp/storage/*
+!/tmp/storage/.keep
+
+# Ignore assets.
+/node_modules/
+/app/assets/builds/*
+!/app/assets/builds/.keep
+
+# NOTE: /public/assets is deliberately NOT ignored.
+#
+# The Rails default excludes it because propshaft regenerates it in-image. Here public/ also holds
+# the STATIC site: scorecard.html, guide.html, contributors.html and their design-system CSS,
+# Martian fonts and nanotags bundle, published from dist/ by build.sh. Excluding public/assets
+# ships a scorecard with no styles and no fonts.
+#
+# The two coexist: propshaft writes digest-named files, the static build writes styles.css /
+# app.js / fonts/, so nothing collides.
+
+# Ignore Kamal files.
+/config/deploy*.yml
+/.kamal
+
+# Ignore development files
+/.devcontainer
+
+# Ignore Docker-related files
+/.dockerignore
+/Dockerfile*

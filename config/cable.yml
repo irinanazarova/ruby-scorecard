@@ -1,0 +1,15 @@
+# Action Cable adapters.
+#
+# development: `async` keeps rehearsal self-contained — the broadcast never leaves the Rails
+#   process, so /test streams work with no external service and no credentials. Set
+#   CABLE_ADAPTER=any_cable to rehearse the production path against hosted AnyCable.
+# production: hosted AnyCable. Rails HTTP-POSTs each broadcast to the AnyCable server, which fans
+#   it out to subscribers. Nothing is polled, and no cable database or Fly volume is required.
+development:
+  adapter: <%= ENV.fetch("CABLE_ADAPTER", "async") %>
+
+test:
+  adapter: test
+
+production:
+  adapter: any_cable

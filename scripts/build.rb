@@ -92,9 +92,10 @@ def cov_cell(c, scoped: false)
 end
 
 # ---- Training-channel helpers ----
-# Code channel: are the docs in a public, permissively-licensed (or unlicensed) repo? That puts the
-# Markdown in The Stack and bypasses the web quality filter. For GitHub-hosted docs we only check the
-# license; the web gates (Common Crawl, quality) are then secondary and shown muted.
+# Code channel: are the docs in a public repo whose license does not exclude them? That puts the
+# Markdown in The Stack and bypasses the web quality filter. The Stack v2/v3 keep `permissive` AND
+# `no_license` files and drop only `non_permissive` (copyleft, proprietary), so an absent license is
+# not a disqualifier; v1 was stricter. The web gates (Common Crawl, quality) are then secondary and muted.
 def cell_code(rp)
   return %(<span class="cc-na" title="no public docs repo found">&mdash;</span>) unless rp && rp["docs_repo"]
 
@@ -265,9 +266,11 @@ filter (kept at score&nbsp;&ge;&nbsp;3). Even counting each resource's <em>best<
 <strong>#{keep_res} of #{total_res}</strong> clear the bar (top: #{top}); for <strong>#{best_below2}</strong>
 the best of five scores below&nbsp;2. The filter rewards educational prose and penalizes reference and code,
 exactly the docs developers need.</p>
-<p class="note">There is a way around it. Docs in a <strong>public, permissively-licensed repo</strong> reach
+<p class="note">There is a way around it. Docs in a <strong>public repo</strong> reach
 the code corpus (<a href="https://huggingface.co/datasets/bigcode/the-stack-v2">The Stack</a>) and
-<strong>skip the quality filter entirely</strong>, the Training column shows which resources qualify. And
+<strong>skip the quality filter entirely</strong>, the Training column shows which resources qualify. A
+permissive license is the safe choice, and a <em>missing</em> one is no barrier: The Stack v2 and v3 keep
+unlicensed files and drop only copyleft and proprietary ones. And
 once a snippet is in public code and copied widely, models reproduce it verbatim: Supabase Auth and
 Resend's quickstart both <em>fail</em> this filter yet Claude recites them from memory.
 <a href="/guide">Read the full guide &rarr;</a></p>
@@ -327,7 +330,7 @@ PAGE = <<HTML
 (<span class="ok">&#10003;</span> good, <span class="bad">&#10007;</span> missing). Columns split into two
 questions: <strong>Retrieval</strong>, can an agent find the docs at request time, and
 <strong>Training</strong>, would they reach a model's corpus, either through the <strong>code corpus</strong>
-(docs in a public, permissively-licensed repo, which skips the web filters) or the <strong>web corpus</strong>
+(docs in a public repo whose license is not copyleft, which skips the web filters) or the <strong>web corpus</strong>
 (Common Crawl coverage, then best-of-5 FineWeb-Edu quality). Where the code corpus already qualifies, the
 web cells are <span style="opacity:.45">dimmed</span> as secondary. Click any heading to sort;
 <a href="/guide">what each column means &rarr;</a></p>

@@ -1,0 +1,116 @@
+<%# One completed check. `payload` carries :result, :cache_hit, :cached_at, :took_ms. %>
+<% result = payload[:result] || {} %>
+<% titles = { retrieval: "Can agents retrieve it today?",
+              code_channel: "Could it reach a corpus through code?",
+              web_channel: "Could it reach a corpus through the web?",
+              memorization: "Do models already reproduce it?",
+              target: "Target" } %>
+
+<article class="step step--done" id="step_<%= step %>">
+  <header class="step__head">
+    <h2><%= titles[step.to_sym] || step %></h2>
+    <span class="step__meta">
+      <% if payload[:cache_hit] %>
+        <span class="tag tag--cached" title="Served from a previous run, not measured again just now">
+          cached <%= time_ago_in_words(payload[:cached_at]) rescue "" %> ago
+        </span>
+      <% elsif payload[:took_ms] %>
+        <span class="tag">measured live in <%= (payload[:took_ms] / 1000.0).round(1) %>s</span>
+      <% end %>
+    </span>
+  </header>
+
+  <% if result[:error].present? %>
+    <p class="step__error"><%= result[:error] %></p>
+
+  <% elsif step.to_sym == :memorization %>
+    <% summary = result[:summary] %>
+    <% if summary.blank? %>
+      <p class="step__error">Could not test this page.</p>
+    <% else %>
+      <p class="verdict verdict--<%= summary[:verdict] %>">
+        <% if summary[:verdict] == "none" %>
+          No model reproduced this text.
+          <small>Tested <%= summary[:spans_tested] %> passages across <%= summary[:probes] %> probes.
+          A negative is weak evidence: models memorize only a fraction of what they read.</small>
+        <% else %>
+          <%= summary[:models_fired].to_a.to_sentence %> reproduced it,
+          <strong><%= summary[:best_run] %> consecutive words</strong> verbatim.
+          <small>You cannot reproduce text you have never seen. This is strong evidence it was trained on.</small>
+        <% end %>
+      </p>
+
+      <details class="step__detail" <%= "open" if summary[:verdict] != "none" %>>
+        <summary>Show exactly what we tested</summary>
+        <% Array(result[:probes]).group_by { |p| p[:offset] }.each do |offset, probes| %>
+          <div class="probe">
+            <p class="probe__label">Passage at word <%= offset %> of
+              <%= result.dig(:passages, 0, :total_words) %></p>
+            <p class="probe__prefix"><em>We showed the model:</em> &ldquo;&hellip;<%= probes.first[:prefix] %>&rdquo;</p>
+            <p class="probe__truth"><em>What actually follows:</em> &ldquo;<%= probes.first[:truth] %>&hellip;&rdquo;</p>
+            <table class="probe__models">
+              <% probes.each do |p| %>
+                <tr class="probe__row probe__row--<%= p[:verdict] %>">
+                  <th><%= p[:provider] %></th>
+                  <td><%= p[:run] %> words</td>
+                  <td><%= p[:verdict] %></td>
+                  <td class="probe__matched">
+                    <%= p[:matched].present? ? "“#{p[:matched]}”" : "—" %>
+                  </td>
+                </tr>
+              <% end %>
+            </table>
+          </div>
+        <% end %>
+
+        <p class="probe__controls" id="controls">
+          <strong>Controls:</strong>
+          <% Array(result[:controls]).each do |c| %>
+            <span class="tag tag--<%= c[:verdict] == "strong" ? "ok" : "muted" %>">
+              <%= c[:provider] %> <%= c[:kind] == "control+" ? "MIT" : "fabricated" %>: <%= c[:verdict] %>
+            </span>
+          <% end %>
+          <small>The MIT license must fire and the invented passage must not. If they misbehave,
+          nothing above is interpretable.</small>
+        </p>
+      </details>
+
+      <%= render "analyses/baseline", mine: summary %>
+    <% end %>
+
+  <% elsif step.to_sym == :code_channel && result[:present] == false %>
+    <p class="step__note"><%= result[:reason] %></p>
+
+  <% else %>
+    <ul class="checks">
+      <% Array(result[:checks]).each do |c| %>
+        <li class="check check--<%= c[:pass].nil? ? 'unknown' : (c[:pass] ? 'pass' : 'fail') %><%= ' check--info' if c[:informational] %>">
+          <span class="check__mark" aria-hidden="true"><%= c[:pass].nil? ? "?" : (c[:pass] ? "✓" : "✗") %></span>
+          <span class="check__body">
+            <strong><%= c[:name] %></strong>
+            <span class="check__detail"><%= c[:detail] %></span>
+            <% if c[:why].present? %><span class="check__why"><%= c[:why] %></span><% end %>
+            <% if c[:subjective].present? %>
+              <span class="check__why check__why--caveat"><%= c[:subjective] %></span>
+            <% end %>
+          </span>
+        </li>
+      <% end %>
+    </ul>
+
+    <% if step.to_sym == :code_channel && result[:repo].present? %>
+      <p class="step__note">
+        Repo: <a href="https://github.com/<%= result[:repo] %>"><%= result[:repo] %></a>
+        <% if defined?(repo_source) && repo_source.present? %>
+          <small>(found via <%= repo_source %>)</small>
+        <% end %>
+        <% if result[:github_mislabels] %>
+          <br><strong>Note:</strong> GitHub reports this license as
+          &ldquo;<%= result[:github_spdx] %>&rdquo;. Reading the license text shows it is actually
+          <%= result[:license_label] || result[:license_class].to_s.tr("_", " ") %>. Every
+          source-available license looks identical in GitHub's metadata.
+        <% end %>
+      </p>
+    <% end %>
+  <% end %>
+</article>

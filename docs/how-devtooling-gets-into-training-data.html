@@ -1,400 +1,1465 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>How devtooling resources get into LLM training data</title>
-  <style>:root {
-  --ink: #1a1420; --muted: #5f5763; --accent: #ff533e; --accent-ink: #c5341f;
-  --bg: #fffdfa; --panel: #fbf6ee; --line: #e9e0d4; --code-bg: #f3ece2;
-  --measure: 46rem;
-}
-* { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
-body {
-  margin: 0; color: var(--ink); background: var(--bg);
-  font: 18px/1.7 "Charter", "Bitstream Charter", "Iowan Old Style", "Georgia", serif;
-  font-feature-settings: "kern", "liga"; text-rendering: optimizeLegibility;
-}
-.wrap { max-width: var(--measure); margin: 0 auto; padding: 4rem 1.5rem 6rem; }
-h1, h2, h3, h4, .kicker, .toc-title, code, th {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-}
-.kicker {
-  font-size: .72rem; letter-spacing: .14em; text-transform: uppercase;
-  color: var(--accent-ink); font-weight: 600; margin: 0 0 1rem;
-}
-h1 { font-size: 2.5rem; line-height: 1.1; letter-spacing: -.02em; margin: 0 0 1rem; font-weight: 800; }
-.lead { font-size: 1.18rem; color: var(--muted); line-height: 1.6; margin: 0 0 1.5rem; }
-.meta { font-size: .8rem; color: var(--muted); font-family: "Inter", sans-serif;
-        border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: .75rem 0; margin-bottom: 2.5rem; }
-h2 { font-size: 1.6rem; line-height: 1.2; letter-spacing: -.01em; font-weight: 750;
-     margin: 3rem 0 1rem; padding-top: 1.25rem; border-top: 3px solid var(--accent); }
-h3 { font-size: 1.18rem; font-weight: 700; margin: 2rem 0 .6rem; }
-p, li { overflow-wrap: break-word; }
-p { margin: 0 0 1.1rem; }
-a { color: var(--accent-ink); text-underline-offset: 2px; text-decoration-thickness: .06em; }
-a:hover { color: var(--accent); }
-strong { font-weight: 700; }
-ul, ol { padding-left: 1.3rem; margin: 0 0 1.2rem; }
-li { margin: .35rem 0; }
-code { font-size: .86em; background: var(--code-bg); padding: .12em .38em; border-radius: 4px;
-       border: 1px solid var(--line); }
-pre { background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
-      padding: 1rem 1.1rem; overflow-x: auto; margin: 0 0 1.3rem; line-height: 1.5; }
-pre code { background: none; border: none; padding: 0; font-size: .82rem; }
-blockquote { margin: 0 0 1.3rem; padding: .4rem 0 .4rem 1.2rem; border-left: 4px solid var(--accent);
-             color: var(--muted); font-style: italic; }
-hr { border: none; border-top: 1px solid var(--line); margin: 2.5rem 0; }
-table { width: 100%; border-collapse: collapse; margin: 0 0 1.4rem; font-size: .9rem;
-        font-family: "Inter", sans-serif; }
-th, td { text-align: left; padding: .55rem .7rem; border: 1px solid var(--line); vertical-align: top; }
-th { background: var(--panel); font-weight: 600; font-size: .8rem; letter-spacing: .01em; }
-tbody tr:nth-child(even) { background: #fdfaf5; }
-td code, th code { font-size: .82em; }
-.toc { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
-       padding: 1.1rem 1.4rem; margin: 0 0 2.5rem; font-family: "Inter", sans-serif; }
-.toc-title { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
-             margin: 0 0 .6rem; font-weight: 600; }
-.toc ol { margin: 0; padding-left: 1.1rem; columns: 2; column-gap: 2rem; font-size: .9rem; }
-.toc li { margin: .25rem 0; }
-.toc a { color: var(--ink); text-decoration: none; }
-.toc a:hover { color: var(--accent-ink); text-decoration: underline; }
-footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line);
-         font-size: .8rem; color: var(--muted); font-family: "Inter", sans-serif; }
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>How devtooling resources get into LLM training data</title>
+        <style>
+            :root {
+                --ink: #1a1420;
+                --muted: #5f5763;
+                --accent: #ff533e;
+                --accent-ink: #c5341f;
+                --bg: #fffdfa;
+                --panel: #fbf6ee;
+                --line: #e9e0d4;
+                --code-bg: #f3ece2;
+                --measure: 46rem;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                -webkit-text-size-adjust: 100%;
+            }
+            body {
+                margin: 0;
+                color: var(--ink);
+                background: var(--bg);
+                font:
+                    18px/1.7 "Charter",
+                    "Bitstream Charter",
+                    "Iowan Old Style",
+                    "Georgia",
+                    serif;
+                font-feature-settings: "kern", "liga";
+                text-rendering: optimizeLegibility;
+            }
+            .wrap {
+                max-width: var(--measure);
+                margin: 0 auto;
+                padding: 4rem 1.5rem 6rem;
+            }
+            h1,
+            h2,
+            h3,
+            h4,
+            .kicker,
+            .toc-title,
+            code,
+            th {
+                font-family:
+                    "Inter",
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    "Segoe UI",
+                    Helvetica,
+                    Arial,
+                    sans-serif;
+            }
+            .kicker {
+                font-size: 0.72rem;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+                color: var(--accent-ink);
+                font-weight: 600;
+                margin: 0 0 1rem;
+            }
+            h1 {
+                font-size: 2.5rem;
+                line-height: 1.1;
+                letter-spacing: -0.02em;
+                margin: 0 0 1rem;
+                font-weight: 800;
+            }
+            .lead {
+                font-size: 1.18rem;
+                color: var(--muted);
+                line-height: 1.6;
+                margin: 0 0 1.5rem;
+            }
+            .meta {
+                font-size: 0.8rem;
+                color: var(--muted);
+                font-family: "Inter", sans-serif;
+                border-top: 1px solid var(--line);
+                border-bottom: 1px solid var(--line);
+                padding: 0.75rem 0;
+                margin-bottom: 2.5rem;
+            }
+            h2 {
+                font-size: 1.6rem;
+                line-height: 1.2;
+                letter-spacing: -0.01em;
+                font-weight: 750;
+                margin: 3rem 0 1rem;
+                padding-top: 1.25rem;
+                border-top: 3px solid var(--accent);
+            }
+            h3 {
+                font-size: 1.18rem;
+                font-weight: 700;
+                margin: 2rem 0 0.6rem;
+            }
+            p,
+            li {
+                overflow-wrap: break-word;
+            }
+            p {
+                margin: 0 0 1.1rem;
+            }
+            a {
+                color: var(--accent-ink);
+                text-underline-offset: 2px;
+                text-decoration-thickness: 0.06em;
+            }
+            a:hover {
+                color: var(--accent);
+            }
+            strong {
+                font-weight: 700;
+            }
+            ul,
+            ol {
+                padding-left: 1.3rem;
+                margin: 0 0 1.2rem;
+            }
+            li {
+                margin: 0.35rem 0;
+            }
+            code {
+                font-size: 0.86em;
+                background: var(--code-bg);
+                padding: 0.12em 0.38em;
+                border-radius: 4px;
+                border: 1px solid var(--line);
+            }
+            pre {
+                background: var(--panel);
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                padding: 1rem 1.1rem;
+                overflow-x: auto;
+                margin: 0 0 1.3rem;
+                line-height: 1.5;
+            }
+            pre code {
+                background: none;
+                border: none;
+                padding: 0;
+                font-size: 0.82rem;
+            }
+            blockquote {
+                margin: 0 0 1.3rem;
+                padding: 0.4rem 0 0.4rem 1.2rem;
+                border-left: 4px solid var(--accent);
+                color: var(--muted);
+                font-style: italic;
+            }
+            hr {
+                border: none;
+                border-top: 1px solid var(--line);
+                margin: 2.5rem 0;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 0 0 1.4rem;
+                font-size: 0.9rem;
+                font-family: "Inter", sans-serif;
+            }
+            th,
+            td {
+                text-align: left;
+                padding: 0.55rem 0.7rem;
+                border: 1px solid var(--line);
+                vertical-align: top;
+            }
+            th {
+                background: var(--panel);
+                font-weight: 600;
+                font-size: 0.8rem;
+                letter-spacing: 0.01em;
+            }
+            tbody tr:nth-child(even) {
+                background: #fdfaf5;
+            }
+            td code,
+            th code {
+                font-size: 0.82em;
+            }
+            .toc {
+                background: var(--panel);
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                padding: 1.1rem 1.4rem;
+                margin: 0 0 2.5rem;
+                font-family: "Inter", sans-serif;
+            }
+            .toc-title {
+                font-size: 0.72rem;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: var(--muted);
+                margin: 0 0 0.6rem;
+                font-weight: 600;
+            }
+            .toc ol {
+                margin: 0;
+                padding-left: 1.1rem;
+                columns: 2;
+                column-gap: 2rem;
+                font-size: 0.9rem;
+            }
+            .toc li {
+                margin: 0.25rem 0;
+            }
+            .toc a {
+                color: var(--ink);
+                text-decoration: none;
+            }
+            .toc a:hover {
+                color: var(--accent-ink);
+                text-decoration: underline;
+            }
+            footer {
+                margin-top: 3rem;
+                padding-top: 1.2rem;
+                border-top: 1px solid var(--line);
+                font-size: 0.8rem;
+                color: var(--muted);
+                font-family: "Inter", sans-serif;
+            }
 
-@media (max-width: 560px) { .toc ol { columns: 1; } h1 { font-size: 2rem; } body { font-size: 17px; } }
+            @media (max-width: 560px) {
+                .toc ol {
+                    columns: 1;
+                }
+                h1 {
+                    font-size: 2rem;
+                }
+                body {
+                    font-size: 17px;
+                }
+            }
 
-@media print {
-  :root { --bg: #fff; }
-  @page { margin: 18mm 16mm; }
-  body { font-size: 10.5pt; line-height: 1.5; }
-  .wrap { max-width: none; padding: 0; }
-  a { color: var(--accent-ink); }
-  h1 { font-size: 22pt; }
-  h2 { font-size: 15pt; margin-top: 1.4rem; break-after: avoid; }
-  h3 { break-after: avoid; }
-  pre, table, blockquote, tr, img { break-inside: avoid; }
-  .toc { break-inside: avoid; }
-  footer { break-before: avoid; }
-}
-</style>
-</head>
-<body>
-  <article class="wrap">
-    <p class="kicker">Evil Martians &middot; Ruby &middot; LLM discoverability</p>
-    <h1>How devtooling resources get into LLM training data</h1>
-    <div class="lead">To be trained on, your content has to clear <strong>two gates</strong>: get collected (a web crawl or public code
-hosting), then survive the corpus builder&#39;s quality filter. Crawlable does not mean trained on. Here is
-what to do about it, then how it works.</div>
-    <p class="meta">Research note &middot; last updated 2026-06-21 &middot; every major fact links a primary source</p>
-    <nav class="toc">
-      <p class="toc-title">Contents</p>
-      <ol><li><a href="#do-and-dont">DO and DON'T</a></li>
-<li><a href="#how-it-works-the-short-version">How it works (the short version)</a></li>
-<li><a href="#what-the-corpus-builders-say">What the corpus builders say</a></li>
-<li><a href="#worked-example-memorized-despite-failing-the-quality-gate">Worked example: memorized despite failing the quality gate</a></li>
-<li><a href="#key-terms">Key terms</a></li>
-<li><a href="#how-to-check">How to check</a></li>
-<li><a href="#caveats-and-what-is-contested">Caveats and what is contested</a></li>
-<li><a href="#sources">Sources</a></li></ol>
-    </nav>
-    <hr>
-<h2 id="do-and-dont">DO and DON&#39;T</h2>
+            @media print {
+                :root {
+                    --bg: #fff;
+                }
+                @page {
+                    margin: 18mm 16mm;
+                }
+                body {
+                    font-size: 10.5pt;
+                    line-height: 1.5;
+                }
+                .wrap {
+                    max-width: none;
+                    padding: 0;
+                }
+                a {
+                    color: var(--accent-ink);
+                }
+                h1 {
+                    font-size: 22pt;
+                }
+                h2 {
+                    font-size: 15pt;
+                    margin-top: 1.4rem;
+                    break-after: avoid;
+                }
+                h3 {
+                    break-after: avoid;
+                }
+                pre,
+                table,
+                blockquote,
+                tr,
+                img {
+                    break-inside: avoid;
+                }
+                .toc {
+                    break-inside: avoid;
+                }
+                footer {
+                    break-before: avoid;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <article class="wrap">
+            <p class="kicker">
+                Evil Martians &middot; Ruby &middot; LLM discoverability
+            </p>
+            <h1>How devtooling resources get into LLM training data</h1>
+            <div class="lead">
+                To be trained on, your content has to clear
+                <strong>two gates</strong>: get collected (a web crawl or public
+                code hosting), then survive the corpus builder&#39;s quality
+                filter. Crawlable does not mean trained on. Here is what to do
+                about it, then how it works.
+            </div>
+            <p class="meta">
+                Research note &middot; last updated 2026-06-21 &middot; every
+                major fact links a primary source
+            </p>
+            <nav class="toc">
+                <p class="toc-title">Contents</p>
+                <ol>
+                    <li><a href="#do-and-dont">DO and DON'T</a></li>
+                    <li>
+                        <a href="#how-it-works-the-short-version"
+                            >How it works (the short version)</a
+                        >
+                    </li>
+                    <li>
+                        <a href="#what-the-corpus-builders-say"
+                            >What the corpus builders say</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            href="#worked-example-memorized-despite-failing-the-quality-gate"
+                            >Worked example: memorized despite failing the
+                            quality gate</a
+                        >
+                    </li>
+                    <li>
+                        <a
+                            href="#controlled-study-what-actually-predicts-memorization"
+                            >Controlled study: what actually predicts
+                            memorization</a
+                        >
+                    </li>
+                    <li><a href="#key-terms">Key terms</a></li>
+                    <li><a href="#how-to-check">How to check</a></li>
+                    <li>
+                        <a href="#caveats-and-what-is-contested"
+                            >Caveats and what is contested</a
+                        >
+                    </li>
+                    <li><a href="#sources">Sources</a></li>
+                </ol>
+            </nav>
+            <hr />
+            <h2 id="do-and-dont">DO and DON&#39;T</h2>
 
-<p>The biggest lever first: <strong>a library is learned mostly from its public code, not its website.</strong> Code
-corpora skip the web quality filter entirely.</p>
-<h3 id="do">DO</h3>
+            <p>
+                The biggest lever first:
+                <strong
+                    >a library is learned mostly from its public code, not its
+                    website.</strong
+                >
+                Code corpora skip the web quality filter entirely.
+            </p>
+            <h3 id="do">DO</h3>
 
-<ul>
-<li><strong>Put code and docs in a public, permissively-licensed (MIT/Apache) GitHub repo.</strong> Code corpora
-(<a href="https://huggingface.co/datasets/bigcode/the-stack-v2" target="_blank" rel="noopener noreferrer">The Stack</a>) ingest it directly, no quality filter.</li>
-<li><strong>Invest in the README and a runnable <code>examples/</code> directory.</strong> The README is often the single
-most-trained piece of text about a library.</li>
-<li><strong>Keep docs <em>source</em> as full-prose Markdown in that public repo.</strong> The Markdown itself is trained on,
-regardless of whether the rendered site is crawled.</li>
-<li><strong>Write tutorial / explanatory blog posts</strong>, and <strong>lead the first ~380 words</strong> with what the reader will
-learn, defining key terms in plain sentences. Only the opening is scored, and this is the lever that
-clears the bar <strong>(measured: 2.43 → 3.19)</strong>.</li>
-<li><strong>Earn backlinks and internal links</strong> (newsletters, aggregators, cross-posts) so Common Crawl actually
-reaches new and deep pages.</li>
-<li><strong>Fix crawl hygiene:</strong> <code>sitemap.xml</code>, <code>301</code> redirects for moved URLs, expand thin pages, cut click-depth.</li>
-<li><strong>Verify</strong> (see <a href="#how-to-check" target="_blank" rel="noopener noreferrer">How to check</a>): is it in Common Crawl, does it clear the keep bar
-(int_score ≥ 3, i.e. raw ≥ 2.5), are crawlers unblocked.</li>
-</ul>
-<h3 id="dont">DON&#39;T</h3>
+            <ul>
+                <li>
+                    <strong>Put code and docs in a public GitHub repo.</strong>
+                    Code corpora (<a
+                        href="https://huggingface.co/datasets/bigcode/the-stack-v2"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >The Stack</a
+                    >) ingest it directly, no quality filter. A permissive
+                    license (MIT/Apache) is the safe choice, and
+                    <strong>a missing license is not a blocker either</strong>:
+                    The Stack v2 and v3 keep files labeled
+                    <code>no_license</code> and exclude only
+                    <code>non_permissive</code> ones. (This was different in v1,
+                    which dropped everything without a detected permissive
+                    license.)
+                </li>
+                <li>
+                    <strong
+                        >Invest in the README and a runnable
+                        <code>examples/</code> directory.</strong
+                    >
+                    The README is often the single most-trained piece of text
+                    about a library.
+                </li>
+                <li>
+                    <strong
+                        >Keep docs <em>source</em> as full-prose Markdown in
+                        that public repo.</strong
+                    >
+                    The Markdown itself is trained on, regardless of whether the
+                    rendered site is crawled.
+                </li>
+                <li>
+                    <strong>Write tutorial / explanatory blog posts</strong>,
+                    and <strong>lead the first ~380 words</strong> with what the
+                    reader will learn, defining key terms in plain sentences.
+                    Only the opening is scored, and this is the lever that
+                    clears the bar <strong>(measured: 2.43 → 3.19)</strong>.
+                </li>
+                <li>
+                    <strong>Earn backlinks and internal links</strong>
+                    (newsletters, aggregators, cross-posts) so Common Crawl
+                    actually reaches new and deep pages.
+                </li>
+                <li>
+                    <strong>Fix crawl hygiene:</strong>
+                    <code>sitemap.xml</code>, <code>301</code> redirects for
+                    moved URLs, expand thin pages, cut click-depth.
+                </li>
+                <li>
+                    <strong>Verify</strong> (see
+                    <a
+                        href="#how-to-check"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >How to check</a
+                    >): is it in Common Crawl, does it clear the keep bar
+                    (int_score ≥ 3, i.e. raw ≥ 2.5), are crawlers unblocked.
+                </li>
+            </ul>
+            <h3 id="dont">DON&#39;T</h3>
 
-<ul>
-<li><strong>Don&#39;t rely on the rendered docs site alone.</strong> Reference and config docs mostly fail the quality filter
-<strong>(measured: AnyCable guides cap ~1.7-2.0, below the keep bar even after a full rewrite)</strong>. Let the
-GitHub channel carry them.</li>
-<li><strong>Don&#39;t keep content in a private or unlicensed repo.</strong> It will not enter code corpora.</li>
-<li><strong>Don&#39;t lead posts with war-stories, anecdotes, or marketing.</strong> Benchmark and announcement genres cap
-below the keep bar <strong>(measured: 1.5-1.9, which rounds to 2)</strong> no matter how you edit them.</li>
-<li><strong>Don&#39;t bury the substance below the fold.</strong> The classifier reads only the first ~512 tokens.</li>
-<li><strong>Don&#39;t expect <code>llms.txt</code> to help.</strong> <a href="https://www.seroundtable.com/google-does-not-endorse-llms-txt-40789.html" target="_blank" rel="noopener noreferrer">No major AI system uses it</a>
-for training or inference.</li>
-<li><strong>Don&#39;t just strip boilerplate</strong> and expect a better score. It does not raise quality <strong>(measured: it can
-lower it)</strong>; rewrite the substance instead.</li>
-<li><strong>Don&#39;t block <code>CCBot</code>, <code>ClaudeBot</code>, <code>GPTBot</code></strong> in <code>robots.txt</code> if you want inclusion.</li>
-</ul>
+            <ul>
+                <li>
+                    <strong
+                        >Don&#39;t rely on the rendered docs site alone.</strong
+                    >
+                    Reference and config docs mostly fail the quality filter
+                    <strong
+                        >(measured: AnyCable guides cap ~1.7-2.0, below the keep
+                        bar even after a full rewrite)</strong
+                    >. Let the GitHub channel carry them.
+                </li>
+                <li>
+                    <strong
+                        >Don&#39;t keep content in a private repo, or under a
+                        copyleft/proprietary license.</strong
+                    >
+                    Private content never enters code corpora, and
+                    <code>non_permissive</code> files (GPL and friends,
+                    &quot;all rights reserved&quot;) are excluded by name. An
+                    <em>absent</em> license is fine for The Stack v2 and v3
+                    <strong
+                        >(corrected: we previously said unlicensed repos are
+                        excluded, which was true only of v1)</strong
+                    >.
+                </li>
+                <li>
+                    <strong>Don&#39;t count on stars.</strong> Star count is
+                    <strong>not</strong> an inclusion filter in any version of
+                    The Stack. It only decides whether a <em>fork</em> gets
+                    crawled (≥ 5 stars) and which copy survives deduplication.
+                </li>
+                <li>
+                    <strong
+                        >Don&#39;t lead posts with war-stories, anecdotes, or
+                        marketing.</strong
+                    >
+                    Benchmark and announcement genres cap below the keep bar
+                    <strong>(measured: 1.5-1.9, which rounds to 2)</strong> no
+                    matter how you edit them.
+                </li>
+                <li>
+                    <strong
+                        >Don&#39;t bury the substance below the fold.</strong
+                    >
+                    The classifier reads only the first ~512 tokens.
+                </li>
+                <li>
+                    <strong
+                        >Don&#39;t expect <code>llms.txt</code> to help.</strong
+                    >
+                    <a
+                        href="https://www.seroundtable.com/google-does-not-endorse-llms-txt-40789.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >No major AI system uses it</a
+                    >
+                    for training or inference.
+                </li>
+                <li>
+                    <strong>Don&#39;t just strip boilerplate</strong> and expect
+                    a better score. It does not raise quality
+                    <strong>(measured: it can lower it)</strong>; rewrite the
+                    substance instead.
+                </li>
+                <li>
+                    <strong
+                        >Don&#39;t block <code>CCBot</code>,
+                        <code>ClaudeBot</code>, <code>GPTBot</code></strong
+                    >
+                    in <code>robots.txt</code> if you want inclusion.
+                </li>
+            </ul>
 
-<hr>
-<h2 id="how-it-works-the-short-version">How it works (the short version)</h2>
-<h3 id="two-gates">Two gates</h3>
+            <hr />
+            <h2 id="how-it-works-the-short-version">
+                How it works (the short version)
+            </h2>
+            <h3 id="two-gates">Two gates</h3>
 
-<ol>
-<li><strong>Collection.</strong> A <a href="https://commoncrawl.org/" target="_blank" rel="noopener noreferrer">web crawl</a> (Common Crawl, or a lab&#39;s own crawler) or
-<a href="https://huggingface.co/datasets/bigcode/the-stack-v2" target="_blank" rel="noopener noreferrer">public code hosting</a> (GitHub).</li>
-<li><strong>Filtering.</strong> Builders drop most of what they collect. Modern web pipelines keep on the order of 10% of
-raw crawl (<a href="https://arxiv.org/abs/2306.01116" target="_blank" rel="noopener noreferrer">RefinedWeb removed ~90%</a>).</li>
-</ol>
-<h3 id="four-channels">Four channels</h3>
+            <ol>
+                <li>
+                    <strong>Collection.</strong> A
+                    <a
+                        href="https://commoncrawl.org/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >web crawl</a
+                    >
+                    (Common Crawl, or a lab&#39;s own crawler) or
+                    <a
+                        href="https://huggingface.co/datasets/bigcode/the-stack-v2"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >public code hosting</a
+                    >
+                    (GitHub).
+                </li>
+                <li>
+                    <strong>Filtering.</strong> Builders drop most of what they
+                    collect. Modern web pipelines keep on the order of 10% of
+                    raw crawl (<a
+                        href="https://arxiv.org/abs/2306.01116"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >RefinedWeb removed ~90%</a
+                    >).
+                </li>
+            </ol>
+            <h3 id="four-channels">Four channels</h3>
 
-<table><thead>
-<tr>
-<th>Channel</th>
-<th>Feeds</th>
-<th>Collected by</th>
-<th>Quality gate</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>Code + docs-in-repos</td>
-<td>Code corpora (The Stack)</td>
-<td>GitHub, <strong>public + permissive only</strong></td>
-<td><strong>none</strong> (license + dedup)</td>
-</tr>
-<tr>
-<td>Blog posts</td>
-<td>Web corpora</td>
-<td>Common Crawl</td>
-<td>rewards tutorial prose</td>
-</tr>
-<tr>
-<td>Documentation (rendered)</td>
-<td>Web corpora</td>
-<td>Common Crawl</td>
-<td>hostile to reference/code</td>
-</tr>
-<tr>
-<td>Content website</td>
-<td>Web corpora</td>
-<td>Common Crawl</td>
-<td>rewards little (marketing)</td>
-</tr>
-</tbody></table>
-<h3 id="why-most-devtooling-content-struggles">Why most devtooling content struggles</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Channel</th>
+                        <th>Feeds</th>
+                        <th>Collected by</th>
+                        <th>Quality gate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Code + docs-in-repos</td>
+                        <td>Code corpora (The Stack)</td>
+                        <td>
+                            GitHub,
+                            <strong>public; permissive or no license</strong>
+                        </td>
+                        <td><strong>none</strong> (license + dedup)</td>
+                    </tr>
+                    <tr>
+                        <td>Blog posts</td>
+                        <td>Web corpora</td>
+                        <td>Common Crawl</td>
+                        <td>rewards tutorial prose</td>
+                    </tr>
+                    <tr>
+                        <td>Documentation (rendered)</td>
+                        <td>Web corpora</td>
+                        <td>Common Crawl</td>
+                        <td>hostile to reference/code</td>
+                    </tr>
+                    <tr>
+                        <td>Content website</td>
+                        <td>Web corpora</td>
+                        <td>Common Crawl</td>
+                        <td>rewards little (marketing)</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3 id="why-most-devtooling-content-struggles">
+                Why most devtooling content struggles
+            </h3>
 
-<ul>
-<li><strong>Common Crawl is centrality-sampled, not complete.</strong> It ranks domains by
-<a href="https://www.mozillafoundation.org/en/research/library/generative-ai-training-data/common-crawl/" target="_blank" rel="noopener noreferrer">harmonic centrality</a>
-(how linked-to you are), gives higher-ranked domains a bigger crawl budget, and <strong>never copies a domain
-in full</strong> (<a href="https://dl.acm.org/doi/10.1145/3630106.3659033" target="_blank" rel="noopener noreferrer">FAccT&#39;24</a>). Hubs get in; deep, new, weakly
-linked pages mostly don&#39;t. <strong>(measured: evilmartians.com 37%, docs.anycable.io 27%; crawled and missing
-pages scored identically, so the gap is reach, not quality.)</strong></li>
-<li><strong>The quality filter rewards educational prose and penalizes reference, code, and marketing.</strong> The open
-<a href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier" target="_blank" rel="noopener noreferrer">FineWeb-Edu classifier</a> (keeps a document
-when its score rounds to ≥ 3, i.e. a raw score ≥ 2.5) was <a href="https://arxiv.org/abs/2406.17557" target="_blank" rel="noopener noreferrer">deliberately tuned toward school-level explanation and away from technical pages</a>.
-Its ancestor <a href="https://arxiv.org/abs/1910.10683" target="_blank" rel="noopener noreferrer">C4</a> was blunter still: it dropped <em>any whole page
-containing a curly brace</em> <code>{</code> (a 2019 rule; modern filters are softer). <strong>(measured: 5 of 598
-evilmartians.com pages and 0 of 117 AnyCable docs pages clear the bar.)</strong></li>
-<li><strong>Code corpora skip that filter.</strong> <a href="https://huggingface.co/datasets/bigcode/the-stack-v2" target="_blank" rel="noopener noreferrer">The Stack</a> takes
-permissively-licensed GitHub files (including <a href="https://huggingface.co/datasets/bigcode/the-stack" target="_blank" rel="noopener noreferrer">~254 GB of Markdown</a>)
-with no prose-quality classifier, which is why the public-repo path is the strongest one.</li>
-</ul>
+            <ul>
+                <li>
+                    <strong
+                        >Common Crawl is centrality-sampled, not
+                        complete.</strong
+                    >
+                    It ranks domains by
+                    <a
+                        href="https://www.mozillafoundation.org/en/research/library/generative-ai-training-data/common-crawl/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >harmonic centrality</a
+                    >
+                    (how linked-to you are), gives higher-ranked domains a
+                    bigger crawl budget, and
+                    <strong>never copies a domain in full</strong> (<a
+                        href="https://dl.acm.org/doi/10.1145/3630106.3659033"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >FAccT&#39;24</a
+                    >). Hubs get in; deep, new, weakly linked pages mostly
+                    don&#39;t.
+                    <strong
+                        >(measured: evilmartians.com 37%, docs.anycable.io 27%;
+                        crawled and missing pages scored identically, so the gap
+                        is reach, not quality.)</strong
+                    >
+                </li>
+                <li>
+                    <strong
+                        >The quality filter rewards educational prose and
+                        penalizes reference, code, and marketing.</strong
+                    >
+                    The open
+                    <a
+                        href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >FineWeb-Edu classifier</a
+                    >
+                    (keeps a document when its score rounds to ≥ 3, i.e. a raw
+                    score ≥ 2.5) was
+                    <a
+                        href="https://arxiv.org/abs/2406.17557"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >deliberately tuned toward school-level explanation and
+                        away from technical pages</a
+                    >. Its ancestor
+                    <a
+                        href="https://arxiv.org/abs/1910.10683"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >C4</a
+                    >
+                    was blunter still: it dropped
+                    <em>any whole page containing a curly brace</em>
+                    <code>{</code> (a 2019 rule; modern filters are softer).
+                    <strong
+                        >(measured: 5 of 598 evilmartians.com pages and 0 of 117
+                        AnyCable docs pages clear the bar.)</strong
+                    >
+                </li>
+                <li>
+                    <strong>Code corpora skip that filter.</strong>
+                    <a
+                        href="https://huggingface.co/datasets/bigcode/the-stack-v2"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >The Stack</a
+                    >
+                    takes GitHub files (including
+                    <a
+                        href="https://huggingface.co/datasets/bigcode/the-stack"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >~254 GB of Markdown</a
+                    >) with no prose-quality classifier, which is why the
+                    public-repo path is the strongest one. Each file is labeled
+                    <code>permissive</code>, <code>no_license</code>, or
+                    <code>non_permissive</code>, and
+                    <strong>only <code>non_permissive</code> is dropped</strong
+                    >.
+                </li>
+                <li>
+                    <strong
+                        >Collection is its own gate, before any license
+                        test.</strong
+                    >
+                    The Stack v2 and v3 are built from the
+                    <a
+                        href="https://archive.softwareheritage.org/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Software Heritage</a
+                    >
+                    archive, and archival there is neither guaranteed nor
+                    star-driven.
+                    <strong
+                        >(measured: <code>workos/authkit</code> (3.3k stars,
+                        MIT), <code>workos/workos-node</code> and
+                        <code>resend/resend-node</code> are absent from SWH,
+                        while <code>workos/dotnet-magic-link-example</code> is
+                        present.)</strong
+                    >
+                    A permissive license on an uncollected repo buys nothing.
+                </li>
+                <li>
+                    <strong
+                        >Deduplication collapses near-identical copies.</strong
+                    >
+                    MinHash-LSH clustering removed ~40% of permissively licensed
+                    files in v2, and v3 keeps a single representative per
+                    cluster (chosen by highest stars, then forks, then
+                    permissive license, then earliest repo creation). Mirroring
+                    your docs verbatim into other repos mostly feeds dedup;
+                    <strong>embedded reuse</strong>, your sentences quoted
+                    inside someone else&#39;s different document, is what
+                    survives as a distinct training example.
+                </li>
+            </ul>
 
-<p>And capability follows representation: models do well on high-resource languages and
-<a href="https://arxiv.org/abs/2308.09895" target="_blank" rel="noopener noreferrer">struggle on low-resource ones</a>, though
-<a href="https://arxiv.org/abs/2308.09895" target="_blank" rel="noopener noreferrer">synthetic/fine-tuning data</a> can close gaps, so data share is not destiny.</p>
+            <p>
+                And capability follows representation: models do well on
+                high-resource languages and
+                <a
+                    href="https://arxiv.org/abs/2308.09895"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >struggle on low-resource ones</a
+                >, though
+                <a
+                    href="https://arxiv.org/abs/2308.09895"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >synthetic/fine-tuning data</a
+                >
+                can close gaps, so data share is not destiny.
+            </p>
 
-<hr>
-<h2 id="what-the-corpus-builders-say">What the corpus builders say</h2>
+            <hr />
+            <h2 id="what-the-corpus-builders-say">
+                What the corpus builders say
+            </h2>
 
-<p>The pipelines above are documented in papers. Their creators have also described the mechanics in recent
-talks and interviews, and they converge on four points, each with a consequence for your content.</p>
+            <p>
+                The pipelines above are documented in papers. Their creators
+                have also described the mechanics in recent talks and
+                interviews, and they converge on four points, each with a
+                consequence for your content.
+            </p>
 
-<p><strong>Raw web text is mostly thrown away.</strong> Thomas Scialom, a Llama 3 lead at Meta, puts it plainly: the web
-is <a href="https://www.latent.space/p/llama-3" target="_blank" rel="noopener noreferrer">&quot;full of shit in terms of text, and training on those tokens is a waste of compute&quot;</a>.
-Andrej Karpathy, opening a real pretraining set, calls it <a href="https://www.dwarkesh.com/p/andrej-karpathy" target="_blank" rel="noopener noreferrer">&quot;total garbage&quot;</a>.
-Clearing the filter is the whole game.</p>
+            <p>
+                <strong>Raw web text is mostly thrown away.</strong> Thomas
+                Scialom, a Llama 3 lead at Meta, puts it plainly: the web is
+                <a
+                    href="https://www.latent.space/p/llama-3"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >&quot;full of shit in terms of text, and training on those
+                    tokens is a waste of compute&quot;</a
+                >. Andrej Karpathy, opening a real pretraining set, calls it
+                <a
+                    href="https://www.dwarkesh.com/p/andrej-karpathy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >&quot;total garbage&quot;</a
+                >. Clearing the filter is the whole game.
+            </p>
 
-<p><strong>A learned quality classifier is the decisive filter, and humans cannot predict it.</strong> In his
-<a href="https://www.youtube.com/watch?v=IsNqSmTPiWQ" target="_blank" rel="noopener noreferrer">DCLM keynote</a>, Ludwig Schmidt reports that model-based
-filtering was the single most important step, and that the collaborators who hand-labeled documents
-&quot;can&#39;t really tell apart&quot; the best classifier variants. Ari Morcos
-<a href="https://www.youtube.com/watch?v=yXPPcBlcF8U" target="_blank" rel="noopener noreferrer">says the same</a>: NLP graduate students &quot;could not predict
-what the DCLM classifiers would say above chance.&quot; FineWeb-Edu&#39;s creator, Loubna Ben Allal,
-<a href="https://www.latent.space/p/2024-syndata-smolmodels" target="_blank" rel="noopener noreferrer">describes the mechanism</a>: &quot;taking Llama3 and asking
-it to rate the educational content of web pages from zero to five,&quot; then training &quot;a BERT model&quot; to imitate
-it, which cuts 15T tokens to 1.5T at score &gt; 3. You cannot eyeball whether a page clears this. Score it
-(see <a href="#how-to-check" target="_blank" rel="noopener noreferrer">How to check</a>).</p>
+            <p>
+                <strong
+                    >A learned quality classifier is the decisive filter, and
+                    humans cannot predict it.</strong
+                >
+                In his
+                <a
+                    href="https://www.youtube.com/watch?v=IsNqSmTPiWQ"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >DCLM keynote</a
+                >, Ludwig Schmidt reports that model-based filtering was the
+                single most important step, and that the collaborators who
+                hand-labeled documents &quot;can&#39;t really tell apart&quot;
+                the best classifier variants. Ari Morcos
+                <a
+                    href="https://www.youtube.com/watch?v=yXPPcBlcF8U"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >says the same</a
+                >: NLP graduate students &quot;could not predict what the DCLM
+                classifiers would say above chance.&quot; FineWeb-Edu&#39;s
+                creator, Loubna Ben Allal,
+                <a
+                    href="https://www.latent.space/p/2024-syndata-smolmodels"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >describes the mechanism</a
+                >: &quot;taking Llama3 and asking it to rate the educational
+                content of web pages from zero to five,&quot; then training
+                &quot;a BERT model&quot; to imitate it, which cuts 15T tokens to
+                1.5T at score &gt; 3. You cannot eyeball whether a page clears
+                this. Score it (see
+                <a
+                    href="#how-to-check"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >How to check</a
+                >).
+            </p>
 
-<p><strong>More filtering is not always better.</strong> Over-aggressive deduplication keeps the worst material: strip too
-hard and <a href="https://www.youtube.com/watch?v=5mCjNAQPSLw" target="_blank" rel="noopener noreferrer">&quot;you&#39;ll just be upsampling the worst-quality stuff&quot;</a>
-(Guilherme Penedo, FineWeb). Stacking more &quot;high-quality&quot; sources can also hurt, and Schmidt found that
-adding Wikipedia and arXiv on top of already-filtered web made results worse. The educational gate keeps
-documents at score ≥ 3, and pushing the threshold higher trims general-knowledge performance. Aim to clear
-the bar, not to maximize the score.</p>
+            <p>
+                <strong>More filtering is not always better.</strong>
+                Over-aggressive deduplication keeps the worst material: strip
+                too hard and
+                <a
+                    href="https://www.youtube.com/watch?v=5mCjNAQPSLw"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >&quot;you&#39;ll just be upsampling the worst-quality
+                    stuff&quot;</a
+                >
+                (Guilherme Penedo, FineWeb). Stacking more
+                &quot;high-quality&quot; sources can also hurt, and Schmidt
+                found that adding Wikipedia and arXiv on top of already-filtered
+                web made results worse. The educational gate keeps documents at
+                score ≥ 3, and pushing the threshold higher trims
+                general-knowledge performance. Aim to clear the bar, not to
+                maximize the score.
+            </p>
 
-<p><strong>Educational prose helps smaller models most, and code and math are the reasoning levers.</strong> Penedo notes
-that heavy educational filtering <a href="https://www.youtube.com/watch?v=5mCjNAQPSLw" target="_blank" rel="noopener noreferrer">&quot;is really important for very small models&quot;</a>,
-with larger models wanting more diversity later in training. Code and math are deliberately upweighted across
-labs for reasoning (<a href="https://www.dwarkesh.com/p/jeff-dean-and-noam-shazeer" target="_blank" rel="noopener noreferrer">Jeff Dean</a>, Scialom). Technical
-tutorial writing is exactly what the filter rewards, and the public-code channel
-(<a href="https://huggingface.co/datasets/bigcode/the-stack-v2" target="_blank" rel="noopener noreferrer">The Stack</a>) is stronger still.</p>
+            <p>
+                <strong
+                    >Educational prose helps smaller models most, and code and
+                    math are the reasoning levers.</strong
+                >
+                Penedo notes that heavy educational filtering
+                <a
+                    href="https://www.youtube.com/watch?v=5mCjNAQPSLw"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >&quot;is really important for very small models&quot;</a
+                >, with larger models wanting more diversity later in training.
+                Code and math are deliberately upweighted across labs for
+                reasoning (<a
+                    href="https://www.dwarkesh.com/p/jeff-dean-and-noam-shazeer"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >Jeff Dean</a
+                >, Scialom). Technical tutorial writing is exactly what the
+                filter rewards, and the public-code channel (<a
+                    href="https://huggingface.co/datasets/bigcode/the-stack-v2"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >The Stack</a
+                >) is stronger still.
+            </p>
 
-<p>And the gate is tightening. As labs report exhausting fresh human text (Ilya Sutskever: the field has
-<a href="https://www.youtube.com/watch?v=1yvBqasHLZs" target="_blank" rel="noopener noreferrer">&quot;reached peak data&quot;</a>), quality filtering and synthetic data
-carry more weight, so clearing the bar matters more over time.</p>
+            <p>
+                And the gate is tightening. As labs report exhausting fresh
+                human text (Ilya Sutskever: the field has
+                <a
+                    href="https://www.youtube.com/watch?v=1yvBqasHLZs"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >&quot;reached peak data&quot;</a
+                >), quality filtering and synthetic data carry more weight, so
+                clearing the bar matters more over time.
+            </p>
 
-<hr>
-<h2 id="worked-example-memorized-despite-failing-the-quality-gate">Worked example: memorized despite failing the quality gate</h2>
+            <hr />
+            <h2 id="worked-example-memorized-despite-failing-the-quality-gate">
+                Worked example: memorized despite failing the quality gate
+            </h2>
 
-<p>We measured this directly. <strong>(measured)</strong> Supabase and Resend are tools the agentic-coding wave made
-ubiquitous, and both teams believe their docs are in training. We tested two of their stable, popular
-pages two ways: the FineWeb-Edu quality score, and a tools-off verbatim-recall probe against Claude Opus
-(give the model a page&#39;s opening and measure the longest exact continuation it reproduces; validated with
-known-memorized positive controls and a fabricated negative control, see <code>scripts/memorization_probe.rb</code>).</p>
+            <p>
+                We measured this directly. <strong>(measured)</strong> Supabase
+                and Resend are tools the agentic-coding wave made ubiquitous,
+                and both teams believe their docs are in training. We tested two
+                of their stable, popular pages two ways: the FineWeb-Edu quality
+                score, and a tools-off verbatim-recall probe against Claude Opus
+                (give the model a page&#39;s opening and measure the longest
+                exact continuation it reproduces; validated with known-memorized
+                positive controls and a fabricated negative control, see
+                <code>scripts/memorization_probe.rb</code>).
+            </p>
 
-<table><thead>
-<tr>
-<th>page</th>
-<th style="text-align: right">quality score</th>
-<th style="text-align: center">would the filter keep it?</th>
-<th style="text-align: center">verbatim recall by Opus</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>Supabase Auth guide</td>
-<td style="text-align: right">1.43</td>
-<td style="text-align: center">no</td>
-<td style="text-align: center">yes (23-word exact run)</td>
-</tr>
-<tr>
-<td>Resend Node.js quickstart</td>
-<td style="text-align: right">1.68</td>
-<td style="text-align: center">no</td>
-<td style="text-align: center">yes (15-word exact run)</td>
-</tr>
-</tbody></table>
+            <table>
+                <thead>
+                    <tr>
+                        <th>page</th>
+                        <th style="text-align: right">quality score</th>
+                        <th style="text-align: center">
+                            would the filter keep it?
+                        </th>
+                        <th style="text-align: center">
+                            verbatim recall by Opus
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Supabase Auth guide</td>
+                        <td style="text-align: right">1.43</td>
+                        <td style="text-align: center">no</td>
+                        <td style="text-align: center">
+                            yes (23-word exact run)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Resend Node.js quickstart</td>
+                        <td style="text-align: right">1.68</td>
+                        <td style="text-align: center">no</td>
+                        <td style="text-align: center">
+                            yes (15-word exact run)
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
-<p>Both pages <strong>fail the quality gate</strong> (short, code-snippet quickstarts are exactly what the classifier
-scores low), yet Opus reproduces them verbatim. They reached training through the <strong>code channel</strong>, not
-the web one: Supabase&#39;s docs live in <a href="https://github.com/supabase/supabase" target="_blank" rel="noopener noreferrer"><code>supabase/supabase</code></a> (Apache-2.0,
-so the Markdown is in The Stack), and Resend&#39;s quickstart is the canonical snippet from its MIT-licensed
-<a href="https://github.com/resend/resend-node" target="_blank" rel="noopener noreferrer"><code>resend-node</code></a> and <code>resend-examples</code> repos, copied into ~1,840
-GitHub repositories. The permissive public code bypasses the quality filter entirely, then sheer
-duplication tips it from &quot;in the corpus&quot; to &quot;reproduced from memory.&quot;</p>
+            <p>
+                Both pages <strong>fail the quality gate</strong> (short,
+                code-snippet quickstarts are exactly what the classifier scores
+                low), yet Opus reproduces them verbatim. They reached training
+                through the <strong>code channel</strong>, not the web one:
+                Supabase&#39;s docs live in
+                <a
+                    href="https://github.com/supabase/supabase"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    ><code>supabase/supabase</code></a
+                >
+                (Apache-2.0, so the Markdown is in The Stack), and Resend&#39;s
+                quickstart is the canonical snippet from its MIT-licensed
+                <a
+                    href="https://github.com/resend/resend-node"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    ><code>resend-node</code></a
+                >
+                and <code>resend-examples</code> repos, copied into ~1,840
+                GitHub repositories. The permissive public code bypasses the
+                quality filter entirely, then sheer duplication tips it from
+                &quot;in the corpus&quot; to &quot;reproduced from memory.&quot;
+            </p>
 
-<p>The control sharpens it: Supabase&#39;s Row Level Security guide sits in the <strong>same</strong> Apache repo yet showed
-<strong>no</strong> verbatim recall, because it is prose that gets paraphrased rather than a snippet that gets copied.
-The lesson: eligibility comes from a permissive public repo; memorization comes from being the canonical
-artifact everyone duplicates. Being in the repo is necessary; being copied is what makes a model know it
-by heart.</p>
+            <p>
+                The control sharpens it: Supabase&#39;s Row Level Security guide
+                sits in the <strong>same</strong> Apache repo yet showed
+                <strong>no</strong> verbatim recall, because it is prose that
+                gets paraphrased rather than a snippet that gets copied. The
+                lesson: eligibility comes from a public repo; memorization comes
+                from being the canonical artifact everyone duplicates. Being in
+                the repo is necessary; being copied is what makes a model know
+                it by heart.
+            </p>
 
-<hr>
-<h2 id="key-terms">Key terms</h2>
+            <hr />
+            <h2 id="controlled-study-what-actually-predicts-memorization">
+                Controlled study: what actually predicts memorization
+            </h2>
 
-<ul>
-<li><strong>Centrality (harmonic centrality):</strong> a link-popularity score; the more pages link to you, directly or via
-short chains, the higher it is. Crawlers use it to decide what to fetch. <em>Raise it with backlinks.</em></li>
-<li><strong>Crawl budget:</strong> the capped number of URLs a crawler fetches from one domain; higher centrality buys more.</li>
-<li><strong>Recall (coverage):</strong> the share of a site&#39;s real pages actually crawled (we measured 27-37%).</li>
-<li><strong>Corpus:</strong> a curated dataset a model trains on (C4, FineWeb, The Stack).</li>
-<li><strong>Quality classifier:</strong> a small model that scores &quot;educational value&quot; and drops low scorers (FineWeb-Edu
-keeps int_score ≥ 3, i.e. a raw score ≥ 2.5).</li>
-<li><strong>Token:</strong> the unit a model reads, roughly ¾ of a word; only the first ~512 (~380 words) get scored.</li>
-<li><strong>Permissive vs. copyleft license:</strong> permissive (MIT, Apache) is kept by code corpora; copyleft (GPL) is
-largely excluded.</li>
-<li><strong>The Stack:</strong> a large public dataset of GitHub code and docs used to train code models; bypasses the web
-quality filter.</li>
-<li><strong>Pretraining vs. fine-tuning:</strong> pretraining is where a model learns whether it &quot;knows&quot; Ruby; that is the
-target here. Fine-tuning shapes later behavior.</li>
-<li><strong>RAG / MCP / llms.txt:</strong> inference-time retrieval, they affect what a model looks up at runtime, not what
-it was trained on.</li>
-</ul>
+            <p>
+                The worked example above is two cases. To test which repo
+                property matters, we ran the probe over
+                <strong>38 passages from 15 repositories</strong> (3 passages
+                each), holding content type constant (documentation prose inside
+                a public repo), selecting passages deterministically to avoid
+                cherry-picking, and varying stars across five orders of
+                magnitude (10 to 141,000) and license across MIT, Apache-2.0,
+                and none. See <code>scripts/repo_probe.rb</code>. The unit of
+                analysis is a repo&#39;s hit rate across its passages, not a
+                single coin flip.
+            </p>
 
-<hr>
-<h2 id="how-to-check">How to check</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Predictor</th>
+                        <th style="text-align: right">
+                            Spearman ρ vs hit rate
+                        </th>
+                        <th style="text-align: right">p (permutation, 200k)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Independent public copies</td>
+                        <td style="text-align: right">
+                            <strong>+0.70</strong>
+                        </td>
+                        <td style="text-align: right">
+                            <strong>0.005</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Forks</td>
+                        <td style="text-align: right">+0.47</td>
+                        <td style="text-align: right">0.077</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Stars</strong></td>
+                        <td style="text-align: right">
+                            <strong>+0.28</strong>
+                        </td>
+                        <td style="text-align: right">
+                            <strong>0.31 (not significant)</strong>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
-<table><thead>
-<tr>
-<th>Question</th>
-<th>How</th>
-<th>Tool</th>
-</tr>
-</thead><tbody>
-<tr>
-<td>Is it in Common Crawl?</td>
-<td>CDX query <code>url=domain/*</code> per crawl</td>
-<td><a href="https://index.commoncrawl.org/" target="_blank" rel="noopener noreferrer">index.commoncrawl.org</a>, <code>scripts/coverage_details.rb</code></td>
-</tr>
-<tr>
-<td>Would the filter keep it?</td>
-<td>Score with FineWeb-Edu (int_score ≥ 3, i.e. raw ≥ 2.5); only ~512 tokens are read</td>
-<td><a href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier" target="_blank" rel="noopener noreferrer">classifier</a>, <code>scripts/quality_core.rb</code>, the <code>/check</code> page</td>
-</tr>
-<tr>
-<td>Is the code in The Stack?</td>
-<td>Repo public + permissive license?</td>
-<td><a href="https://huggingface.co/spaces/bigcode/in-the-stack" target="_blank" rel="noopener noreferrer">&quot;Am I in the Stack?&quot;</a></td>
-</tr>
-<tr>
-<td>Are crawlers allowed?</td>
-<td><code>robots.txt</code> for <code>CCBot</code>/<code>ClaudeBot</code>/<code>GPTBot</code></td>
-<td>server logs, <code>robots.txt</code></td>
-</tr>
-</tbody></table>
+            <p>
+                <strong>Stars do not predict memorization; copies do.</strong>
+                The clearest single case:
+                <code>tailwindlabs/tailwindcss.com</code> has
+                <strong>137 stars, no license, and 68 independent copies</strong
+                >, and it was the most-memorized repo in the sample.
+                <code>vercel/next.js</code> has
+                <strong>141,147 stars</strong> and produced one marginal hit.
+                Stars measure how many people liked a project. Copies measure
+                how many times its sentences exist in the world, and only the
+                second is what a corpus counts.
+            </p>
 
-<hr>
-<h2 id="caveats-and-what-is-contested">Caveats and what is contested</h2>
+            <p>
+                <strong
+                    >A missing license did not suppress memorization.</strong
+                >
+                Unlicensed repos were hit at 3/6 versus 3/32 for permissive ones
+                (Fisher exact p = 0.039). We do <em>not</em> claim a missing
+                license helps: both unlicensed repos in the sample are
+                high-prominence docs sites, so prominence is confounded with
+                license. The safe reading is that there is no evidence a missing
+                license suppresses anything, which matches the documented v2/v3
+                policy.
+            </p>
 
-<ul>
-<li><strong>Proxies, not ground truth.</strong> FineWeb-Edu and C4 are <em>open, documented</em> filters. Frontier labs
-(Anthropic, OpenAI, Google) do not disclose theirs, so our scores show what representative open pipelines
-do, not what Claude&#39;s filter does. The one lever you control for Anthropic is <code>robots.txt</code>
-(<a href="https://www.searchengineland.com/anthropic-claude-bots-470171" target="_blank" rel="noopener noreferrer">blocking <code>ClaudeBot</code> excludes future content from training</a>).</li>
-<li><strong>Single-sample, lead-only.</strong> Our quality numbers are single runs; differences within ±0.3 are noise, and
-only the first ~512 tokens are scored.</li>
-<li><strong>Era matters.</strong> C4&#39;s curly-brace rule is from 2019; modern corpora filter differently.</li>
-<li><strong>Inclusion ≠ influence.</strong> Trained-on content is still deduplicated and weighted; presence is not learning.</li>
-</ul>
+            <p>
+                <strong>It replicates across model families.</strong> Re-running
+                the same passages against a second frontier model from a
+                different lab gives <strong>ρ = +0.68 (p = 0.0065)</strong> on
+                per-repo maximum recall. The same repos rank as memorized for
+                both, which makes this a property of what is on the internet
+                rather than of one lab&#39;s pipeline. Absolute hit rates are
+                <em>not</em> comparable between the two runs (different output
+                lengths); the ranking is.
+            </p>
 
-<hr>
-<h2 id="sources">Sources</h2>
+            <p>
+                One honest limit: <code>rails/rails</code> shows only 2 GitHub
+                copies yet produced a 30-word exact run, because Rails Guides
+                are duplicated heavily <em>on the web</em> rather than in repos.
+                GitHub code search sees one slice of duplication, so treat the
+                copy count as a proxy for total duplication, not a census.
+            </p>
 
-<ul>
-<li>Common Crawl: <a href="https://dl.acm.org/doi/10.1145/3630106.3659033" target="_blank" rel="noopener noreferrer">Baack, FAccT&#39;24</a> ·
-<a href="https://www.mozillafoundation.org/en/research/library/generative-ai-training-data/common-crawl/" target="_blank" rel="noopener noreferrer">Mozilla</a> ·
-<a href="https://index.commoncrawl.org/" target="_blank" rel="noopener noreferrer">CC index</a></li>
-<li>Web filters: <a href="https://arxiv.org/abs/1910.10683" target="_blank" rel="noopener noreferrer">C4 / T5 (Raffel et al.)</a> ·
-<a href="https://aclanthology.org/2021.naacl-main.41.pdf" target="_blank" rel="noopener noreferrer">Documenting C4 (Dodge et al.)</a> ·
-<a href="https://arxiv.org/abs/2306.01116" target="_blank" rel="noopener noreferrer">RefinedWeb</a> ·
-<a href="https://arxiv.org/abs/2406.17557" target="_blank" rel="noopener noreferrer">FineWeb / FineWeb-Edu</a> ·
-<a href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier" target="_blank" rel="noopener noreferrer">classifier</a></li>
-<li>Code corpora: <a href="https://arxiv.org/abs/2402.19173" target="_blank" rel="noopener noreferrer">StarCoder2 / The Stack v2</a> ·
-<a href="https://huggingface.co/datasets/bigcode/the-stack" target="_blank" rel="noopener noreferrer">The Stack v1</a> ·
-<a href="https://huggingface.co/spaces/bigcode/in-the-stack" target="_blank" rel="noopener noreferrer">Am I in the Stack?</a></li>
-<li>Representation: <a href="https://par.nsf.gov/biblio/10416465" target="_blank" rel="noopener noreferrer">MultiPL-E</a> ·
-<a href="https://arxiv.org/abs/2308.09895" target="_blank" rel="noopener noreferrer">low-resource / MultiPL-T</a></li>
-<li>Anthropic &amp; llms.txt: <a href="https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler" target="_blank" rel="noopener noreferrer">ClaudeBot docs</a> ·
-<a href="https://www.seroundtable.com/google-does-not-endorse-llms-txt-40789.html" target="_blank" rel="noopener noreferrer">Google on llms.txt</a></li>
-<li>Talks &amp; interviews (primary, spoken): <a href="https://www.youtube.com/watch?v=5mCjNAQPSLw" target="_blank" rel="noopener noreferrer">Penedo / FineWeb, GOSIM 2025</a> ·
-<a href="https://www.latent.space/p/2024-syndata-smolmodels" target="_blank" rel="noopener noreferrer">Ben Allal / FineWeb-Edu, Latent Space @ NeurIPS 2024</a> ·
-<a href="https://www.youtube.com/watch?v=2-SPH9hIKT8" target="_blank" rel="noopener noreferrer">Wolf / building LLMs in 2024</a> ·
-<a href="https://www.youtube.com/watch?v=IsNqSmTPiWQ" target="_blank" rel="noopener noreferrer">Schmidt / DCLM keynote 2025</a> ·
-<a href="https://www.youtube.com/watch?v=yXPPcBlcF8U" target="_blank" rel="noopener noreferrer">Morcos / data curation, Latent Space 2025</a> ·
-<a href="https://www.latent.space/p/llama-3" target="_blank" rel="noopener noreferrer">Scialom / Llama 3, Latent Space 2024</a> ·
-<a href="https://www.dwarkesh.com/p/andrej-karpathy" target="_blank" rel="noopener noreferrer">Karpathy, Dwarkesh 2025</a> ·
-<a href="https://www.youtube.com/watch?v=1yvBqasHLZs" target="_blank" rel="noopener noreferrer">Sutskever / &quot;peak data&quot;, NeurIPS 2024</a></li>
-</ul>
+            <hr />
+            <h2 id="key-terms">Key terms</h2>
 
-<p><u>Last updated 2026-06-21. Measured findings are reproducible via <code>scripts/quality_core.rb</code> and
-<code>scripts/coverage_details.rb</code> in this repo.</u></p>
+            <ul>
+                <li>
+                    <strong>Centrality (harmonic centrality):</strong> a
+                    link-popularity score; the more pages link to you, directly
+                    or via short chains, the higher it is. Crawlers use it to
+                    decide what to fetch. <em>Raise it with backlinks.</em>
+                </li>
+                <li>
+                    <strong>Crawl budget:</strong> the capped number of URLs a
+                    crawler fetches from one domain; higher centrality buys
+                    more.
+                </li>
+                <li>
+                    <strong>Recall (coverage):</strong> the share of a
+                    site&#39;s real pages actually crawled (we measured 27-37%).
+                </li>
+                <li>
+                    <strong>Corpus:</strong> a curated dataset a model trains on
+                    (C4, FineWeb, The Stack).
+                </li>
+                <li>
+                    <strong>Quality classifier:</strong> a small model that
+                    scores &quot;educational value&quot; and drops low scorers
+                    (FineWeb-Edu keeps int_score ≥ 3, i.e. a raw score ≥ 2.5).
+                </li>
+                <li>
+                    <strong>Token:</strong> the unit a model reads, roughly ¾ of
+                    a word; only the first ~512 (~380 words) get scored.
+                </li>
+                <li>
+                    <strong>Permissive vs. copyleft license:</strong> code
+                    corpora label each file <code>permissive</code> (MIT,
+                    Apache), <code>no_license</code>, or
+                    <code>non_permissive</code> (GPL and friends). The first two
+                    are kept; only <code>non_permissive</code> is dropped.
+                </li>
+                <li>
+                    <strong>Near-deduplication:</strong> clustering
+                    near-identical files (MinHash-LSH) and keeping one
+                    representative, so wholesale copies of your docs collapse
+                    into a single training example.
+                </li>
+                <li>
+                    <strong>The Stack:</strong> a large public dataset of GitHub
+                    code and docs used to train code models; bypasses the web
+                    quality filter.
+                </li>
+                <li>
+                    <strong>Pretraining vs. fine-tuning:</strong> pretraining is
+                    where a model learns whether it &quot;knows&quot; Ruby; that
+                    is the target here. Fine-tuning shapes later behavior.
+                </li>
+                <li>
+                    <strong>RAG / MCP / llms.txt:</strong> inference-time
+                    retrieval, they affect what a model looks up at runtime, not
+                    what it was trained on.
+                </li>
+            </ul>
 
-    <footer>Generated from <code>how-devtooling-gets-into-training-data.md</code>. Findings marked &ldquo;(measured)&rdquo;
-    are reproducible via <code>scripts/quality_core.rb</code> and <code>scripts/coverage_details.rb</code> in this repo.</footer>
-  </article>
-</body>
+            <hr />
+            <h2 id="how-to-check">How to check</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Question</th>
+                        <th>How</th>
+                        <th>Tool</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Is it in Common Crawl?</td>
+                        <td>CDX query <code>url=domain/*</code> per crawl</td>
+                        <td>
+                            <a
+                                href="https://index.commoncrawl.org/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                >index.commoncrawl.org</a
+                            >, <code>scripts/coverage_details.rb</code>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Would the filter keep it?</td>
+                        <td>
+                            Score with FineWeb-Edu (int_score ≥ 3, i.e. raw ≥
+                            2.5); only ~512 tokens are read
+                        </td>
+                        <td>
+                            <a
+                                href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                >classifier</a
+                            >, <code>scripts/quality_core.rb</code>, the
+                            <code>/check</code> page
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Could the code be in The Stack?</td>
+                        <td>
+                            Repo public, license not copyleft,
+                            <strong>and archived by Software Heritage</strong>
+                        </td>
+                        <td>
+                            <a
+                                href="https://archive.softwareheritage.org/api/1/origin/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                >SWH API</a
+                            >
+                            <code
+                                >origin/https://github.com/&lt;owner&gt;/&lt;repo&gt;/visit/latest/</code
+                            >
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Is the text actually memorized?</td>
+                        <td>
+                            Tools-off verbatim-continuation probe, with positive
+                            and negative controls
+                        </td>
+                        <td>
+                            <code>scripts/memorization_probe.rb</code>,
+                            <code>scripts/repo_probe.rb</code>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Are crawlers allowed?</td>
+                        <td>
+                            <code>robots.txt</code> for
+                            <code>CCBot</code>/<code>ClaudeBot</code>/<code
+                                >GPTBot</code
+                            >
+                        </td>
+                        <td>server logs, <code>robots.txt</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <hr />
+            <h2 id="caveats-and-what-is-contested">
+                Caveats and what is contested
+            </h2>
+
+            <ul>
+                <li>
+                    <strong>Proxies, not ground truth.</strong> FineWeb-Edu and
+                    C4 are <em>open, documented</em> filters. Frontier labs
+                    (Anthropic, OpenAI, Google) do not disclose theirs, so our
+                    scores show what representative open pipelines do, not what
+                    Claude&#39;s filter does. The one lever you control for
+                    Anthropic is <code>robots.txt</code> (<a
+                        href="https://www.searchengineland.com/anthropic-claude-bots-470171"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >blocking <code>ClaudeBot</code> excludes future content
+                        from training</a
+                    >).
+                </li>
+                <li>
+                    <strong>Single-sample, lead-only.</strong> Our quality
+                    numbers are single runs; differences within ±0.3 are noise,
+                    and only the first ~512 tokens are scored.
+                </li>
+                <li>
+                    <strong>Era matters.</strong> C4&#39;s curly-brace rule is
+                    from 2019; modern corpora filter differently. The same
+                    applies to licensing: The Stack
+                    <strong>v1 excluded</strong> unlicensed repos,
+                    <strong>v2 and v3 include</strong> them. Any advice about
+                    licenses has to name the corpus version it describes.
+                </li>
+                <li>
+                    <strong>Inclusion ≠ influence.</strong> Trained-on content
+                    is still deduplicated and weighted; presence is not
+                    learning.
+                </li>
+                <li>
+                    <strong>Negative memorization results prove little.</strong>
+                    Models memorize a small fraction of what they train on, so
+                    &quot;no verbatim recall&quot; is only interpretable in
+                    aggregate and against controls. Positive results are strong;
+                    absences are weak.
+                </li>
+                <li>
+                    <strong
+                        >There is no working public Stack-membership
+                        oracle.</strong
+                    >
+                    The
+                    <a
+                        href="https://huggingface.co/spaces/bigcode/in-the-stack"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >&quot;Am I in the Stack?&quot;</a
+                    >
+                    space now answers &quot;No&quot; for every input, including
+                    <code>torvalds</code> and <code>rails</code>, since the
+                    dataset behind it became gated. We removed it from
+                    <em>How to check</em> for that reason. Do not trust it;
+                    check collection (Software Heritage) and license separately.
+                </li>
+                <li>
+                    <strong
+                        >Run memorization probes in an empty directory, with
+                        tools off.</strong
+                    >
+                    Agent-style CLIs can read their working directory. Our first
+                    cross-model run scored a perfect 1.0 n-gram overlap on a
+                    10-star repo because the agent found the probe&#39;s own
+                    output file, containing every expected answer, on disk. The
+                    same passage from an empty directory scored 0.0. Validate
+                    positive controls under your exact prompt and backend before
+                    believing any number, and treat a suspiciously perfect
+                    result as a bug report.
+                </li>
+            </ul>
+
+            <hr />
+            <h2 id="sources">Sources</h2>
+
+            <ul>
+                <li>
+                    Common Crawl:
+                    <a
+                        href="https://dl.acm.org/doi/10.1145/3630106.3659033"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Baack, FAccT&#39;24</a
+                    >
+                    ·
+                    <a
+                        href="https://www.mozillafoundation.org/en/research/library/generative-ai-training-data/common-crawl/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Mozilla</a
+                    >
+                    ·
+                    <a
+                        href="https://index.commoncrawl.org/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >CC index</a
+                    >
+                </li>
+                <li>
+                    Web filters:
+                    <a
+                        href="https://arxiv.org/abs/1910.10683"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >C4 / T5 (Raffel et al.)</a
+                    >
+                    ·
+                    <a
+                        href="https://aclanthology.org/2021.naacl-main.41.pdf"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Documenting C4 (Dodge et al.)</a
+                    >
+                    ·
+                    <a
+                        href="https://arxiv.org/abs/2306.01116"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >RefinedWeb</a
+                    >
+                    ·
+                    <a
+                        href="https://arxiv.org/abs/2406.17557"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >FineWeb / FineWeb-Edu</a
+                    >
+                    ·
+                    <a
+                        href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >classifier</a
+                    >
+                </li>
+                <li>
+                    Code corpora:
+                    <a
+                        href="https://arxiv.org/abs/2402.19173"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >StarCoder2 / The Stack v2</a
+                    >
+                    ·
+                    <a
+                        href="https://huggingface.co/datasets/bigcode/the-stack"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >The Stack v1</a
+                    >
+                    ·
+                    <a
+                        href="https://huggingface.co/datasets/bigcode/the-stack-v2"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >The Stack v2</a
+                    >
+                    ·
+                    <a
+                        href="https://huggingface.co/datasets/HuggingFaceCode/stack-v3-train"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >stack-v3-train</a
+                    >
+                    (license classes, dedup representative rule) ·
+                    <a
+                        href="https://archive.softwareheritage.org/api/1/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Software Heritage API</a
+                    >
+                </li>
+                <li>
+                    Representation:
+                    <a
+                        href="https://par.nsf.gov/biblio/10416465"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >MultiPL-E</a
+                    >
+                    ·
+                    <a
+                        href="https://arxiv.org/abs/2308.09895"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >low-resource / MultiPL-T</a
+                    >
+                </li>
+                <li>
+                    Anthropic &amp; llms.txt:
+                    <a
+                        href="https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >ClaudeBot docs</a
+                    >
+                    ·
+                    <a
+                        href="https://www.seroundtable.com/google-does-not-endorse-llms-txt-40789.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Google on llms.txt</a
+                    >
+                </li>
+                <li>
+                    Talks &amp; interviews (primary, spoken):
+                    <a
+                        href="https://www.youtube.com/watch?v=5mCjNAQPSLw"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Penedo / FineWeb, GOSIM 2025</a
+                    >
+                    ·
+                    <a
+                        href="https://www.latent.space/p/2024-syndata-smolmodels"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Ben Allal / FineWeb-Edu, Latent Space @ NeurIPS 2024</a
+                    >
+                    ·
+                    <a
+                        href="https://www.youtube.com/watch?v=2-SPH9hIKT8"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Wolf / building LLMs in 2024</a
+                    >
+                    ·
+                    <a
+                        href="https://www.youtube.com/watch?v=IsNqSmTPiWQ"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Schmidt / DCLM keynote 2025</a
+                    >
+                    ·
+                    <a
+                        href="https://www.youtube.com/watch?v=yXPPcBlcF8U"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Morcos / data curation, Latent Space 2025</a
+                    >
+                    ·
+                    <a
+                        href="https://www.latent.space/p/llama-3"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Scialom / Llama 3, Latent Space 2024</a
+                    >
+                    ·
+                    <a
+                        href="https://www.dwarkesh.com/p/andrej-karpathy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Karpathy, Dwarkesh 2025</a
+                    >
+                    ·
+                    <a
+                        href="https://www.youtube.com/watch?v=1yvBqasHLZs"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Sutskever / &quot;peak data&quot;, NeurIPS 2024</a
+                    >
+                </li>
+            </ul>
+
+            <p>
+                <u
+                    >Last updated 2026-06-21. Measured findings are reproducible
+                    via <code>scripts/quality_core.rb</code> and
+                    <code>scripts/coverage_details.rb</code> in this repo.</u
+                >
+            </p>
+
+            <footer>
+                Generated from
+                <code>how-devtooling-gets-into-training-data.md</code>. Findings
+                marked &ldquo;(measured)&rdquo; are reproducible via
+                <code>scripts/quality_core.rb</code> and
+                <code>scripts/coverage_details.rb</code> in this repo.
+            </footer>
+        </article>
+    </body>
 </html>

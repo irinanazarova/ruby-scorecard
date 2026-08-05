@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# Build the scorecard into dist/ : pre-rendered HTML (build.py) + bundled assets (esbuild).
-# Deploy = copy the whole dist/ folder to ruby.evilmartians.com.
+# Build the static half of ruby.evilmartians.com into dist/, then publish it into the Rails app's
+# public/ so one server hosts both the generated pages and the live /test analyzer.
+#
+# The generators are unchanged: the scorecard, guide and contributors report are still fully
+# server-rendered HTML that works with JavaScript off. Rails only hands the files back.
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -15,4 +18,9 @@ npm run build:assets
 ruby scripts/build.rb
 ruby scripts/build_contributors.rb
 
-echo "Built dist/ -> deploy with: rsync -a dist/ <host>"
+# Publish into public/. Copy rather than symlink so the Docker image is self-contained, and keep
+# Rails' own public/ files (404.html, icons, robots.txt) by copying dist over the top instead of
+# replacing the directory.
+mkdir -p public
+cp -R dist/. public/
+echo "Built dist/ and published to public/ -> run: bin/rails server   (or fly deploy)"

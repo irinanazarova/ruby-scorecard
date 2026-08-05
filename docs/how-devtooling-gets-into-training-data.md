@@ -13,8 +13,11 @@ corpora skip the web quality filter entirely.
 
 ### DO
 
-- **Put code and docs in a public, permissively-licensed (MIT/Apache) GitHub repo.** Code corpora
+- **Put code and docs in a public GitHub repo.** Code corpora
   ([The Stack](https://huggingface.co/datasets/bigcode/the-stack-v2)) ingest it directly, no quality filter.
+  A permissive license (MIT/Apache) is the safe choice, and **a missing license is not a blocker either**:
+  The Stack v2 and v3 keep files labeled `no_license` and exclude only `non_permissive` ones. (This was
+  different in v1, which dropped everything without a detected permissive license.)
 - **Invest in the README and a runnable `examples/` directory.** The README is often the single
   most-trained piece of text about a library.
 - **Keep docs *source* as full-prose Markdown in that public repo.** The Markdown itself is trained on,
@@ -33,7 +36,12 @@ corpora skip the web quality filter entirely.
 - **Don't rely on the rendered docs site alone.** Reference and config docs mostly fail the quality filter
   **(measured: AnyCable guides cap ~1.7-2.0, below the keep bar even after a full rewrite)**. Let the
   GitHub channel carry them.
-- **Don't keep content in a private or unlicensed repo.** It will not enter code corpora.
+- **Don't keep content in a private repo, or under a copyleft/proprietary license.** Private content never
+  enters code corpora, and `non_permissive` files (GPL and friends, "all rights reserved") are excluded by
+  name. An *absent* license is fine for The Stack v2 and v3 **(corrected: we previously said unlicensed
+  repos are excluded, which was true only of v1)**.
+- **Don't count on stars.** Star count is **not** an inclusion filter in any version of The Stack. It only
+  decides whether a *fork* gets crawled (≥ 5 stars) and which copy survives deduplication.
 - **Don't lead posts with war-stories, anecdotes, or marketing.** Benchmark and announcement genres cap
   below the keep bar **(measured: 1.5-1.9, which rounds to 2)** no matter how you edit them.
 - **Don't bury the substance below the fold.** The classifier reads only the first ~512 tokens.
@@ -58,7 +66,7 @@ corpora skip the web quality filter entirely.
 
 | Channel | Feeds | Collected by | Quality gate |
 | --- | --- | --- | --- |
-| Code + docs-in-repos | Code corpora (The Stack) | GitHub, **public + permissive only** | **none** (license + dedup) |
+| Code + docs-in-repos | Code corpora (The Stack) | GitHub, **public; permissive or no license** | **none** (license + dedup) |
 | Blog posts | Web corpora | Common Crawl | rewards tutorial prose |
 | Documentation (rendered) | Web corpora | Common Crawl | hostile to reference/code |
 | Content website | Web corpora | Common Crawl | rewards little (marketing) |
@@ -78,8 +86,19 @@ corpora skip the web quality filter entirely.
   containing a curly brace* `{` (a 2019 rule; modern filters are softer). **(measured: 5 of 598
   evilmartians.com pages and 0 of 117 AnyCable docs pages clear the bar.)**
 - **Code corpora skip that filter.** [The Stack](https://huggingface.co/datasets/bigcode/the-stack-v2) takes
-  permissively-licensed GitHub files (including [~254 GB of Markdown](https://huggingface.co/datasets/bigcode/the-stack))
-  with no prose-quality classifier, which is why the public-repo path is the strongest one.
+  GitHub files (including [~254 GB of Markdown](https://huggingface.co/datasets/bigcode/the-stack))
+  with no prose-quality classifier, which is why the public-repo path is the strongest one. Each file is
+  labeled `permissive`, `no_license`, or `non_permissive`, and **only `non_permissive` is dropped**.
+- **Collection is its own gate, before any license test.** The Stack v2 and v3 are built from the
+  [Software Heritage](https://archive.softwareheritage.org/) archive, and archival there is neither
+  guaranteed nor star-driven. **(measured: `workos/authkit` (3.3k stars, MIT), `workos/workos-node` and
+  `resend/resend-node` are absent from SWH, while `workos/dotnet-magic-link-example` is present.)** A
+  permissive license on an uncollected repo buys nothing.
+- **Deduplication collapses near-identical copies.** MinHash-LSH clustering removed ~40% of permissively
+  licensed files in v2, and v3 keeps a single representative per cluster (chosen by highest stars, then
+  forks, then permissive license, then earliest repo creation). Mirroring your docs verbatim into other
+  repos mostly feeds dedup; **embedded reuse**, your sentences quoted inside someone else's different
+  document, is what survives as a distinct training example.
 
 And capability follows representation: models do well on high-resource languages and
 [struggle on low-resource ones](https://arxiv.org/abs/2308.09895), though
@@ -151,9 +170,47 @@ duplication tips it from "in the corpus" to "reproduced from memory."
 
 The control sharpens it: Supabase's Row Level Security guide sits in the **same** Apache repo yet showed
 **no** verbatim recall, because it is prose that gets paraphrased rather than a snippet that gets copied.
-The lesson: eligibility comes from a permissive public repo; memorization comes from being the canonical
+The lesson: eligibility comes from a public repo; memorization comes from being the canonical
 artifact everyone duplicates. Being in the repo is necessary; being copied is what makes a model know it
 by heart.
+
+---
+
+## Controlled study: what actually predicts memorization
+
+The worked example above is two cases. To test which repo property matters, we ran the probe over
+**38 passages from 15 repositories** (3 passages each), holding content type constant (documentation prose
+inside a public repo), selecting passages deterministically to avoid cherry-picking, and varying stars
+across five orders of magnitude (10 to 141,000) and license across MIT, Apache-2.0, and none.
+See `scripts/repo_probe.rb`. The unit of analysis is a repo's hit rate across its passages, not a single
+coin flip.
+
+| Predictor | Spearman ρ vs hit rate | p (permutation, 200k) |
+| --- | ---: | ---: |
+| Independent public copies | **+0.70** | **0.005** |
+| Forks | +0.47 | 0.077 |
+| **Stars** | **+0.28** | **0.31 (not significant)** |
+
+**Stars do not predict memorization; copies do.** The clearest single case: `tailwindlabs/tailwindcss.com`
+has **137 stars, no license, and 68 independent copies**, and it was the most-memorized repo in the sample.
+`vercel/next.js` has **141,147 stars** and produced one marginal hit. Stars measure how many people liked
+a project. Copies measure how many times its sentences exist in the world, and only the second is what a
+corpus counts.
+
+**A missing license did not suppress memorization.** Unlicensed repos were hit at 3/6 versus 3/32 for
+permissive ones (Fisher exact p = 0.039). We do *not* claim a missing license helps: both unlicensed repos
+in the sample are high-prominence docs sites, so prominence is confounded with license. The safe reading is
+that there is no evidence a missing license suppresses anything, which matches the documented v2/v3 policy.
+
+**It replicates across model families.** Re-running the same passages against a second frontier model from
+a different lab gives **ρ = +0.68 (p = 0.0065)** on per-repo maximum recall. The same repos rank as
+memorized for both, which makes this a property of what is on the internet rather than of one lab's
+pipeline. Absolute hit rates are *not* comparable between the two runs (different output lengths); the
+ranking is.
+
+One honest limit: `rails/rails` shows only 2 GitHub copies yet produced a 30-word exact run, because Rails
+Guides are duplicated heavily *on the web* rather than in repos. GitHub code search sees one slice of
+duplication, so treat the copy count as a proxy for total duplication, not a census.
 
 ---
 
@@ -167,8 +224,10 @@ by heart.
 - **Quality classifier:** a small model that scores "educational value" and drops low scorers (FineWeb-Edu
   keeps int_score ≥ 3, i.e. a raw score ≥ 2.5).
 - **Token:** the unit a model reads, roughly ¾ of a word; only the first ~512 (~380 words) get scored.
-- **Permissive vs. copyleft license:** permissive (MIT, Apache) is kept by code corpora; copyleft (GPL) is
-  largely excluded.
+- **Permissive vs. copyleft license:** code corpora label each file `permissive` (MIT, Apache), `no_license`,
+  or `non_permissive` (GPL and friends). The first two are kept; only `non_permissive` is dropped.
+- **Near-deduplication:** clustering near-identical files (MinHash-LSH) and keeping one representative, so
+  wholesale copies of your docs collapse into a single training example.
 - **The Stack:** a large public dataset of GitHub code and docs used to train code models; bypasses the web
   quality filter.
 - **Pretraining vs. fine-tuning:** pretraining is where a model learns whether it "knows" Ruby; that is the
@@ -184,7 +243,8 @@ by heart.
 | --- | --- | --- |
 | Is it in Common Crawl? | CDX query `url=domain/*` per crawl | [index.commoncrawl.org](https://index.commoncrawl.org/), `scripts/coverage_details.rb` |
 | Would the filter keep it? | Score with FineWeb-Edu (int_score ≥ 3, i.e. raw ≥ 2.5); only ~512 tokens are read | [classifier](https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier), `scripts/quality_core.rb`, the `/check` page |
-| Is the code in The Stack? | Repo public + permissive license? | ["Am I in the Stack?"](https://huggingface.co/spaces/bigcode/in-the-stack) |
+| Could the code be in The Stack? | Repo public, license not copyleft, **and archived by Software Heritage** | [SWH API](https://archive.softwareheritage.org/api/1/origin/) `origin/https://github.com/<owner>/<repo>/visit/latest/` |
+| Is the text actually memorized? | Tools-off verbatim-continuation probe, with positive and negative controls | `scripts/memorization_probe.rb`, `scripts/repo_probe.rb` |
 | Are crawlers allowed? | `robots.txt` for `CCBot`/`ClaudeBot`/`GPTBot` | server logs, `robots.txt` |
 
 ---
@@ -197,8 +257,23 @@ by heart.
   ([blocking `ClaudeBot` excludes future content from training](https://www.searchengineland.com/anthropic-claude-bots-470171)).
 - **Single-sample, lead-only.** Our quality numbers are single runs; differences within ±0.3 are noise, and
   only the first ~512 tokens are scored.
-- **Era matters.** C4's curly-brace rule is from 2019; modern corpora filter differently.
+- **Era matters.** C4's curly-brace rule is from 2019; modern corpora filter differently. The same applies
+  to licensing: The Stack **v1 excluded** unlicensed repos, **v2 and v3 include** them. Any advice about
+  licenses has to name the corpus version it describes.
 - **Inclusion ≠ influence.** Trained-on content is still deduplicated and weighted; presence is not learning.
+- **Negative memorization results prove little.** Models memorize a small fraction of what they train on, so
+  "no verbatim recall" is only interpretable in aggregate and against controls. Positive results are strong;
+  absences are weak.
+- **There is no working public Stack-membership oracle.** The
+  ["Am I in the Stack?"](https://huggingface.co/spaces/bigcode/in-the-stack) space now answers "No" for
+  every input, including `torvalds` and `rails`, since the dataset behind it became gated. We removed it
+  from *How to check* for that reason. Do not trust it; check collection (Software Heritage) and license
+  separately.
+- **Run memorization probes in an empty directory, with tools off.** Agent-style CLIs can read their working
+  directory. Our first cross-model run scored a perfect 1.0 n-gram overlap on a 10-star repo because the
+  agent found the probe's own output file, containing every expected answer, on disk. The same passage from
+  an empty directory scored 0.0. Validate positive controls under your exact prompt and backend before
+  believing any number, and treat a suspiciously perfect result as a bug report.
 
 ---
 
@@ -214,7 +289,9 @@ by heart.
   [classifier](https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier)
 - Code corpora: [StarCoder2 / The Stack v2](https://arxiv.org/abs/2402.19173) ·
   [The Stack v1](https://huggingface.co/datasets/bigcode/the-stack) ·
-  [Am I in the Stack?](https://huggingface.co/spaces/bigcode/in-the-stack)
+  [The Stack v2](https://huggingface.co/datasets/bigcode/the-stack-v2) ·
+  [stack-v3-train](https://huggingface.co/datasets/HuggingFaceCode/stack-v3-train) (license classes,
+  dedup representative rule) · [Software Heritage API](https://archive.softwareheritage.org/api/1/)
 - Representation: [MultiPL-E](https://par.nsf.gov/biblio/10416465) ·
   [low-resource / MultiPL-T](https://arxiv.org/abs/2308.09895)
 - Anthropic & llms.txt: [ClaudeBot docs](https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler) ·

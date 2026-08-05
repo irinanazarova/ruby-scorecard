@@ -1,0 +1,187 @@
+/* /test — built on the design tokens the scorecard already ships (see /assets/styles.css).
+ *
+ * TOKENS ONLY, no hardcoded colours. Every colour here resolves through --bg / --surface / --text /
+ * --line / --link etc., which the design system redefines under [data-theme="dark"] and under
+ * prefers-color-scheme. Hardcoding #fff and #1d1116 (the previous version) produced a page that was
+ * light in one half and dark in the other and ignored the theme toggle entirely.
+ *
+ * There is deliberately no @media (prefers-color-scheme: dark) block: the tokens already handle it,
+ * and a second mechanism competing with them is what caused the mixed-theme rendering.
+ *
+ * Class names are prefixed. `.hero` belongs to the design system and is a DARK band by design
+ * (--hero-bg is near-black); reusing it gave the form an unintended dark hero with unreadable
+ * controls. Ours is .probe-hero.
+ */
+
+.analyzer {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-grotesk, system-ui, sans-serif);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.analyzer__header {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  flex-wrap: wrap;
+  max-width: var(--maxw, 1040px); margin: 0 auto; padding: 1.25rem var(--pad, 1.5rem);
+  border-bottom: 1px solid var(--line);
+}
+.analyzer__brand { font-weight: 700; text-decoration: none; color: inherit; }
+.analyzer__nav { display: flex; align-items: center; gap: 1rem; font-size: .9rem; }
+.analyzer__nav a { color: inherit; }
+.analyzer__nav a[aria-current] { color: var(--accent); font-weight: 600; }
+.analyzer__user { display: inline-flex; flex-direction: column; line-height: 1.2; }
+.analyzer__user small { color: var(--text-soft); font-variant-numeric: tabular-nums; }
+
+/* The design system styles .theme-toggle for the scorecard's DARK hero band, so it hardcodes
+   color: var(--hero-text) — cream. Our header sits on --bg, where cream on cream renders the
+   label invisible: the control looked like a stray red dot. Re-point it at the body text colour,
+   scoped to this header so the scorecard's own hero toggle is untouched. */
+.analyzer__header .theme-toggle {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--text) 32%, transparent);
+}
+.analyzer__header .theme-toggle:hover { border-color: var(--accent); }
+
+/* Explicit background + colour, never `inherit`. On a tinted panel an inherited colour can land
+   the same as the panel behind it — which is how the sign-in button ended up invisible. */
+.analyzer__linkbtn {
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--line-strong); border-radius: 999px;
+  padding: .35rem .85rem; font: inherit; font-size: .85rem; cursor: pointer;
+}
+.analyzer__linkbtn:hover { border-color: var(--accent); color: var(--accent); }
+
+.analyzer__main { max-width: var(--maxw, 1040px); margin: 0 auto; padding: 0 var(--pad, 1.5rem) 4rem; }
+.analyzer__footer { max-width: var(--measure, 68ch); margin: 0 auto;
+  padding: 2rem var(--pad, 1.5rem) 3rem; font-size: .85rem; color: var(--text-soft); }
+.analyzer__flash { max-width: var(--maxw, 1040px); margin: 1rem auto 0; padding: .7rem 1rem;
+  border-radius: var(--radius, 10px); background: var(--code-bg); color: var(--text); }
+.analyzer__flash--warn { border: 1px solid var(--bad); }
+
+/* --- input ------------------------------------------------------------------------------------ */
+.probe-hero { padding: 2.5rem 0 1rem; }
+.probe-hero h1 { font-family: var(--font-grotesk); font-weight: 720;
+  font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.1; margin: 0 0 .75rem; letter-spacing: -.02em; }
+.probe-hero__lead { max-width: var(--measure, 68ch); font-size: 1.05rem; color: var(--text-soft); }
+
+.probe-form { display: flex; gap: .5rem; margin: 1.5rem 0 .5rem; flex-wrap: wrap; }
+.probe-form input[type="text"] {
+  flex: 1 1 22rem; padding: .8rem 1rem; font: inherit; font-family: var(--font-mono, monospace);
+  font-size: .95rem; border: 2px solid var(--line-strong);
+  border-radius: var(--radius, 10px); background: var(--surface); color: var(--text);
+}
+.probe-form input[type="text"]:focus { outline: none; border-color: var(--accent); }
+.probe-form input[type="submit"] {
+  padding: .8rem 1.6rem; font: inherit; font-weight: 600; cursor: pointer; color: #fff;
+  background: var(--accent); border: 2px solid var(--accent); border-radius: var(--radius, 10px);
+}
+
+/* Inline, not flex. As a flex container the <strong> count became its own flex item and wrapped
+   onto its own line, rendering as a stray "4" above the sentence. */
+.probe-form__quota { font-size: .9rem; color: var(--text-soft); max-width: var(--measure, 68ch); }
+.probe-form__quota strong { color: var(--text); }
+.probe-form__quota form { display: inline; }
+.probe-form__quota .analyzer__linkbtn { margin-left: .4rem; vertical-align: baseline; }
+
+.examples { margin-top: 2.5rem; }
+.examples h2 { font-size: 1.1rem; margin-bottom: .25rem; }
+.examples .note { color: var(--text-soft); font-size: .9rem; margin-top: 0; }
+.examples__list { list-style: none; padding: 0; display: grid; gap: .75rem; }
+.examples__list li { display: flex; flex-direction: column; gap: .25rem;
+  border: 1px solid var(--line); border-radius: var(--radius, 10px); padding: .8rem 1rem;
+  background: var(--surface); }
+.examples__list span { font-size: .88rem; color: var(--text-soft); }
+.examples__btn { background: none; border: 0; padding: 0; font: inherit; font-weight: 600;
+  font-family: var(--font-mono, monospace); font-size: .9rem; color: var(--link); cursor: pointer;
+  text-align: left; }
+.examples__btn:hover { text-decoration: underline; }
+
+/* --- results ---------------------------------------------------------------------------------- */
+.result { padding-top: 2rem; }
+.result__back a { font-size: .9rem; }
+.result__target { font-family: var(--font-mono, monospace); font-size: 1.1rem; word-break: break-all;
+  margin: .25rem 0 1rem; }
+
+.status { padding: .6rem .9rem; border-radius: var(--radius, 10px);
+  background: var(--code-bg); color: var(--text); font-size: .9rem; }
+.status small { color: var(--text-soft); }
+
+.steps { display: grid; gap: 1rem; margin-top: 1.25rem; }
+.step { border: 1px solid var(--line); border-radius: var(--radius, 10px);
+  padding: 1rem 1.2rem; background: var(--surface); }
+.step--pending { opacity: .55; }
+.step__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  flex-wrap: wrap; }
+.step__head h2 { font-size: 1.05rem; margin: 0; }
+.step__hint, .step__note { font-size: .88rem; color: var(--text-soft); }
+.step__error { color: var(--bad); font-size: .92rem; }
+
+.tag { font-size: .75rem; padding: .15rem .55rem; border-radius: 999px;
+  border: 1px solid var(--line-strong); color: var(--text-soft); white-space: nowrap; }
+.tag--cached { background: var(--code-bg); }
+.tag--waiting { opacity: .7; }
+.tag--ok { border-color: var(--ok); color: var(--ok); }
+.tag--muted { opacity: .6; }
+
+.checks { list-style: none; padding: 0; margin: .75rem 0 0; display: grid; gap: .5rem; }
+.check { display: flex; gap: .6rem; align-items: flex-start; }
+.check__mark { font-weight: 700; width: 1.2rem; flex: none; }
+.check--pass .check__mark { color: var(--ok); }
+.check--fail .check__mark { color: var(--bad); }
+.check--unknown .check__mark { color: var(--text-soft); }
+.check--info { opacity: .8; }
+.check__body { display: flex; flex-direction: column; }
+.check__detail { font-size: .9rem; }
+.check__why { font-size: .82rem; color: var(--text-soft); }
+.check__why--caveat { font-style: italic; }
+
+/* --- the memorization probe ------------------------------------------------------------------- */
+.verdict { padding: .8rem 1rem; border-radius: var(--radius, 10px); margin: .75rem 0;
+  background: var(--code-bg); }
+.verdict small { display: block; margin-top: .35rem; font-size: .85rem; color: var(--text-soft); }
+.verdict--partial { border-left: 3px solid var(--warn); }
+.verdict--strong { border: 1px solid var(--ok); }
+
+.step__detail { margin-top: .5rem; font-size: .9rem; }
+.step__detail > summary { cursor: pointer; font-weight: 600; }
+.probe { border-top: 1px solid var(--line); padding: .8rem 0; }
+.probe__label { font-weight: 600; font-size: .85rem; margin: 0 0 .4rem; }
+.probe__prefix, .probe__truth { font-family: var(--font-mono, monospace); font-size: .78rem;
+  line-height: 1.5; background: var(--code-bg); padding: .5rem .7rem;
+  border-radius: 6px; margin: .3rem 0; }
+.probe__prefix em, .probe__truth em { font-family: var(--font-grotesk, sans-serif);
+  color: var(--text-soft); font-size: .8rem; display: block; }
+.probe__models { width: 100%; border-collapse: collapse; margin-top: .4rem; font-size: .85rem; }
+.probe__models th { text-align: left; font-weight: 600; padding: .25rem .5rem .25rem 0; }
+.probe__models td { padding: .25rem .5rem; }
+.probe__row--strong td, .probe__row--strong th { color: var(--ok); font-weight: 600; }
+.probe__row--partial td, .probe__row--partial th { color: var(--warn); }
+.probe__matched { font-family: var(--font-mono, monospace); font-size: .75rem; color: var(--text-soft); }
+.probe__controls { margin-top: .8rem; display: flex; gap: .4rem; flex-wrap: wrap; align-items: center; }
+.probe__controls small { flex-basis: 100%; color: var(--text-soft); font-size: .8rem; }
+
+.recent { margin-top: 2.5rem; font-size: .9rem; }
+.recent h2 { font-size: 1.1rem; }
+.recent ul { list-style: none; padding: 0; }
+.recent li { padding: .25rem 0; }
+.recent small { color: var(--text-soft); }
+
+/* --- side-by-side baseline -------------------------------------------------------------------- */
+.baseline { margin-top: 1.2rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+.baseline h2 { font-size: 1rem; margin: 0 0 .75rem; }
+.baseline__grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+@media (max-width: 34rem) { .baseline__grid { grid-template-columns: 1fr; } }
+.baseline__col { border: 1px solid var(--line); border-radius: var(--radius, 10px);
+  padding: .75rem .9rem; background: var(--surface); }
+.baseline__col--ref { border-color: var(--ok); }
+.baseline__who { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--text-soft); margin: 0 0 .3rem; }
+.baseline__verdict { font-size: 1.15rem; font-weight: 700; margin: 0 0 .25rem; }
+.baseline__verdict--none { color: var(--text-soft); font-weight: 600; }
+.baseline__verdict--strong { color: var(--ok); }
+.baseline__verdict--partial { color: var(--warn); }
+.baseline__meta { font-size: .82rem; color: var(--text-soft); margin: 0; }
+.baseline__note { font-size: .85rem; color: var(--text-soft); margin-top: .8rem;
+  max-width: var(--measure, 68ch); }

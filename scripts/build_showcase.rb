@@ -152,7 +152,8 @@ intro = <<~HTML
     post is the clearest case: written as flat courseware its opening scores 3.6, written like Evil Martians
     it scores 2.0, and the version below is the most voice we could keep while still clearing the bar. Where
     that trade costs too much to be worth shipping, the honest move is the code channel instead, a
-    permissively-licensed repo whose README and Markdown are trained on regardless of any prose score.</p>
+    public repo whose README and Markdown are trained on regardless of any prose score (a permissive
+    license is safest, and only copyleft and proprietary ones are actually excluded).</p>
   </div>
 HTML
 

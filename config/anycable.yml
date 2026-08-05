@@ -1,0 +1,43 @@
+# Hosted AnyCable (AnyCable Plus), RPC-less.
+#
+# AnyCable Plus issues exactly two secrets, and they map onto AnyCable's config like this:
+#
+#   application secret -> `secret`.       Signed stream names and JWTs are both derived from it.
+#                                         The gem falls back to `secret` for `streams_secret` and
+#                                         `jwt_secret`, so there is nothing else to set — and
+#                                         nothing else you COULD set, since Plus does not issue a
+#                                         separate streams secret.
+#   broadcast key      -> `broadcast_key`. Authenticates the HTTP broadcast requests Rails sends.
+#                                         Set it explicitly: left unset, the gem would derive a
+#                                         different key from the application secret and every
+#                                         broadcast would 401.
+#
+# Note `http_broadcast_secret` is DEPRECATED (silently aliased to `broadcast_key` with a warning).
+# Use `broadcast_key`.
+#
+# Why RPC-less: the usual setup has AnyCable call back into Rails to authenticate each connection,
+# which requires Rails to be publicly reachable from AnyCable. Instead the browser presents a JWT
+# signed with the application secret, and subscribes to stream names signed with the same secret.
+# Nothing calls back, so the same configuration works from a laptop and from production.
+#
+# Secrets live in Rails encrypted credentials; nothing sensitive belongs in this file.
+
+default: &default
+  broadcast_adapter: http
+
+  # The application secret. Signed streams and JWT verification both key off this.
+  secret: <%= Rails.application.credentials.dig(:anycable, :application_secret) %>
+
+  # Where Rails POSTs broadcasts, and the key that authenticates them.
+  http_broadcast_url: <%= Rails.application.credentials.dig(:anycable, :broadcast_url) %>
+  broadcast_key: <%= Rails.application.credentials.dig(:anycable, :broadcast_key) ||
+                     Rails.application.credentials.dig(:anycable, :broadcast_secret) %>
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default

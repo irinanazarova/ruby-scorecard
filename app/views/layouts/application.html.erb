@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= content_for(:title) || "Is your documentation in the training data?" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+    <%# Applies the saved theme BEFORE first paint, so a dark-theme visitor never sees a white
+        flash. Must stay inline and ahead of the stylesheet. Same key the scorecard uses, so the
+        theme carries across from the static pages to /test. %>
+    <script>(function(){try{var t=localStorage.getItem('rsc-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}})();</script>
+
+    <%# The design system from the static site: same tokens, fonts and colours as the scorecard,
+        so /test does not look like a different product bolted on. build.sh puts it in public/. %>
+    <link rel="stylesheet" href="/assets/styles.css">
+    <%= stylesheet_link_tag "analyzer", "data-turbo-track": "reload" %>
+
+    <%# Where to connect, and the JWT that gets us past AnyCable's connection check. Both are read
+        by app/javascript/cable.js. Without the URL the browser falls back to /cable, which nothing
+        serves in production; without the token AnyCable drops the socket as "unauthorized". Either
+        way the failure is silent — results simply never stream. %>
+    <%= action_cable_meta_tag %>
+    <% if anycable_token %>
+      <meta name="anycable-token" content="<%= anycable_token %>">
+    <% end %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="analyzer">
+    <header class="analyzer__header">
+      <a class="analyzer__brand" href="/">Ruby &amp; Rails LLM scorecard</a>
+      <nav class="analyzer__nav">
+        <a href="/guide">Guide</a>
+        <a href="<%= test_path %>" aria-current="page">Test a page</a>
+        <%# The scorecard's own toggle, driven by the nanotags bundle loaded at the end of <body>.
+            Without it /test was the one page on the site with no way to change theme. %>
+        <theme-toggle>
+          <button type="button" data-ref="button" class="theme-toggle" aria-pressed="false" aria-label="Toggle colour theme">
+            <span class="theme-toggle__dot"></span><span class="theme-toggle__label">Light</span>
+          </button>
+        </theme-toggle>
+        <% if signed_in? %>
+          <span class="analyzer__user">
+            <%= current_user.login %>
+            <small>$<%= current_user.spent_dollars %> / $<%= current_user.budget_dollars %></small>
+          </span>
+          <%= button_to "Sign out", sign_out_path, method: :delete, class: "analyzer__linkbtn" %>
+        <% end %>
+      </nav>
+    </header>
+
+    <% if flash[:alert] %><p class="analyzer__flash analyzer__flash--warn"><%= flash[:alert] %></p><% end %>
+    <% if flash[:notice] %><p class="analyzer__flash"><%= flash[:notice] %></p><% end %>
+
+    <main class="analyzer__main"><%= yield %></main>
+
+    <%# The scorecard's nanotags bundle: defines <theme-toggle> (and the table components the
+        static pages use). Separate from the importmap app, which carries Turbo and AnyCable. %>
+    <script type="module" src="/assets/app.js"></script>
+
+    <footer class="analyzer__footer">
+      <p>These are proxies, not ground truth. The quality gate is the open FineWeb-Edu classifier,
+      not any lab's actual filter, and a memorization probe can show a page <em>was</em> seen but
+      never prove it was not. <a href="/guide">How this works &rarr;</a></p>
+    </footer>
+  </body>
+</html>

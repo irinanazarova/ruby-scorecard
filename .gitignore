@@ -1,3 +1,33 @@
 node_modules/
 .DS_Store
 vendor/fwedu/
+vendor/bundle/
+scripts/__pycache__/
+
+# Rails runtime state
+/log/*
+/tmp/*
+/storage/*
+!/storage/.keep
+/db/*.sqlite3*
+
+# public/ is where ./build.sh publishes the generated static site (dist/ copied over the top), so
+# everything in it is derived except the handful of files Rails itself ships. Ignoring the derived
+# half keeps one copy of the site in the repo instead of two. Dockerfile.rails fails the build when
+# public/ is missing, so a deploy that skipped ./build.sh stops loudly rather than serving nothing.
+/public/*
+!/public/400.html
+!/public/404.html
+!/public/406-unsupported-browser.html
+!/public/422.html
+!/public/500.html
+!/public/icon.png
+!/public/icon.svg
+!/public/robots.txt
+
+# Working data for the memorization study: regenerable, and the .bak is a scratch file.
+data/*.bak.json
+
+# Never. Rails' encrypted credentials are committed; the key that opens them is not.
+/config/master.key
+/config/credentials/*.key
