@@ -67,10 +67,44 @@ module AnalyzerConfig
   # repo markdown the baseline measures. Both are correct — the rendered page carries less prose
   # than its source — but shown side by side it reads as a bug, and "why do those disagree?" is not
   # the question you want from the audience.
-  DEMO_TARGETS = [
-    "https://workos.com/docs/authkit/sessions",             # MIT, yet never collected by SWH
-    "https://docs.anycable.io/anycable-go/reliable_streams" # our own, the honest self-critique
+  # Every note below states a MEASURED result, not a guess. They are what these four actually
+  # produced, and they are ordered so the two positives come last: a visitor who clicks straight
+  # down the list sees "eligible but absent" twice, then sees what a hit looks like.
+  EXAMPLES = [
+    { url: "https://workos.com/docs/authkit/sessions",
+      label: "workos.com/docs/authkit/sessions",
+      note: "Permissive and archived, so the code path is open. Common Crawl still never fetched " \
+            "the page, and no model reproduces it." },
+
+    { url: "https://docs.anycable.io/anycable-go/reliable_streams",
+      label: "docs.anycable.io/anycable-go/reliable_streams",
+      note: "Our own docs, included so this is not only other people's bad news. Same outcome: " \
+            "eligible, uncrawled, unmemorized." },
+
+    # The study's headline in one page: 140 stars, no licence at all, below the quality bar, and
+    # still reproduced by two frontier models from different labs. Copies beat popularity.
+    { url: "https://tailwindcss.com/docs/hover-focus-and-other-states",
+      label: "tailwindcss.com/docs/hover-focus-and-other-states",
+      note: "No licence and 140 stars. Scores below the quality bar, yet Claude Opus and GPT-5.5 " \
+            "each reproduce 30 consecutive words." },
+
+    # Software Heritage as the gate people forget: the licence is fine and the repo is popular,
+    # and none of that matters because the archive never collected it.
+    { url: "https://resend.com/docs/send-with-nodejs",
+      label: "resend.com/docs/send-with-nodejs",
+      note: "Permissive and 187 stars, but Software Heritage never archived the linked repo. A " \
+            "licence on an uncollected repo buys nothing." }
   ].freeze
+
+  DEMO_TARGETS = EXAMPLES.map { |e| e[:url] }.freeze
+
+  # Clicking a listed example must never cost a visitor an allowance slot or trip the per-IP limit,
+  # however cold the cache happens to be. Compared ignoring a trailing slash, since that is the one
+  # difference a hand-typed URL reliably picks up.
+  def self.example?(url)
+    key = url.to_s.strip.chomp("/")
+    DEMO_TARGETS.any? { |t| t.chomp("/") == key }
+  end
 
   # Optional GitHub token. Unauthenticated the API allows 60 requests/hour, which one busy demo can
   # exhaust; with a token it is 5000.

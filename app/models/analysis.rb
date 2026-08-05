@@ -6,7 +6,12 @@ class Analysis < ApplicationRecord
   validates :input, :session_token, presence: true
 
   scope :recent, -> { order(created_at: :desc) }
-  scope :billable, -> { where(from_cache: false) }
+
+  # The listed examples are excluded by input rather than by faking from_cache on them, so
+  # from_cache keeps meaning "this run cost nothing" and stays usable for cost reporting. Clicking
+  # the examples is how a visitor learns what the tool does; charging an allowance slot for the
+  # tour is the wrong trade even on the one cold run that genuinely spends money.
+  scope :billable, -> { where(from_cache: false).where.not(input: AnalyzerConfig::DEMO_TARGETS) }
 
   # The four checks, in the order they are argued: can an agent read it, could it ever be trained
   # on, and did that actually happen.

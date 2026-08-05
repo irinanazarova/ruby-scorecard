@@ -37,16 +37,13 @@
     null answer means something.
   </p>
   <ul class="examples__list">
-    <li>
-      <%= button_to "workos.com/docs/authkit/sessions", analyses_path,
-            params: { input: "https://workos.com/docs/authkit/sessions" }, class: "examples__btn" %>
-      <span>MIT licensed and eligible, yet never collected. Not reproduced by any model.</span>
-    </li>
-    <li>
-      <%= button_to "docs.anycable.io/anycable-go/reliable_streams", analyses_path,
-            params: { input: "https://docs.anycable.io/anycable-go/reliable_streams" }, class: "examples__btn" %>
-      <span>Our own docs, included so this is not only other people's bad news.</span>
-    </li>
+    <% AnalyzerConfig::EXAMPLES.each do |example| %>
+      <li>
+        <%= button_to example[:label], analyses_path,
+              params: { input: example[:url] }, class: "examples__btn" %>
+        <span><%= example[:note] %></span>
+      </li>
+    <% end %>
   </ul>
 </section>
 

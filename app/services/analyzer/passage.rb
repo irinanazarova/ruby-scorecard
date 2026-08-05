@@ -17,6 +17,10 @@ module Analyzer
     TRUTH_WORDS = 60   # what we compare against, never shown to the model
     MIN_WORDS   = SEED_WORDS + TRUTH_WORDS + 40
 
+    # Above this much HTML, a page that still yields almost no prose is client-rendered rather than
+    # genuinely short, and those two cases deserve different answers.
+    CLIENT_RENDERED_BYTES = 10_000
+
     Result = Struct.new(:ok, :error, :prefix, :truth, :source_label, :total_words, :offset,
                         keyword_init: true)
 
@@ -68,6 +72,23 @@ module Analyzer
       # it, because that is the text an agent actually reads.
       if text.split.length < MIN_WORDS && (md = markdown_twin(url))
         return candidates(md, "#{url} (markdown twin)", count:)
+      end
+
+      # A page can miss the prose threshold two very different ways, and calling both of them
+      # "short" hides the one that matters. supabase.com/docs/reference/javascript/introduction
+      # returns 25 KB of HTML that is almost entirely sidebar navigation: the reference text is
+      # rendered in the browser and is absent from the source. CCBot receives that same 25 KB, so
+      # this is not a limit of our probe. It is the finding: a crawler cannot read the page either,
+      # and text a crawler never sees cannot reach a web corpus.
+      words = text.split.length
+      if words < MIN_WORDS && res[:body].to_s.bytesize >= CLIENT_RENDERED_BYTES
+        return [Result.new(ok: false, source_label: url, total_words: words,
+                           error: "This page returned #{(res[:body].to_s.bytesize / 1024.0).round} KB " \
+                                  "of HTML but only #{words} words of prose: the text is rendered in " \
+                                  "the browser and is not in the page source. A crawler fetching this " \
+                                  "URL gets the same thing, so the page cannot reach a web corpus " \
+                                  "either. Publish a markdown twin, or point us at the docs source " \
+                                  "in your repo.")]
       end
 
       candidates(text, url, count:)
