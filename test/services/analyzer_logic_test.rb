@@ -161,4 +161,52 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
     Analyzer::Cache.fetch(:unit_test, "k2", refresh: true, &block)
     assert_equal 2, calls
   end
+
+  # --- GitHub failures must not lie about the repo ------------------------------------------------
+  # Unauthenticated GitHub allows 60 requests/hour PER IP. One Fly machine shares that across every
+  # visitor, so it is routinely exhausted, and the old code reported the resulting 403 as
+  # "Repo not found or private" for repos that are public.
+  def reason_for(status, body = "")
+    Analyzer::CodeChannel.new("anycable/docs.anycable.io")
+                         .send(:failure_reason, { status: status, body: body })
+  end
+
+  test "a rate-limited GitHub response does not claim the repo is missing" do
+    reason = reason_for(403, '{"message":"API rate limit exceeded for 1.2.3.4."}')
+    assert_match(/rate limit/i, reason)
+    assert_no_match(/not found|private/i, reason)
+  end
+
+  test "a real 404 still says the repo is missing" do
+    assert_match(/not found or private/i, reason_for(404))
+  end
+
+  test "an unreachable GitHub blames the network rather than the repo" do
+    reason = reason_for(nil)
+    assert_match(/could not reach github/i, reason)
+    assert_no_match(/not found|private/i, reason)
+  end
+
+  # --- transient failures must not be cached ------------------------------------------------------
+  test "a transient result is not kept in the cache, a normal one is" do
+    Rails.cache.clear
+
+    calls = 0
+    2.times do
+      Analyzer::Cache.fetch(:code_channel, "https://example.com/transient") do
+        calls += 1
+        { present: false, reason: "GitHub rate limit reached", transient: true }
+      end
+    end
+    assert_equal 2, calls, "a transient failure must be re-run, never served from cache"
+
+    solid = 0
+    2.times do
+      Analyzer::Cache.fetch(:code_channel, "https://example.com/solid") do
+        solid += 1
+        { present: false, reason: "Repo not found or private: a/b" }
+      end
+    end
+    assert_equal 1, solid, "a settled answer should still cache"
+  end
 end

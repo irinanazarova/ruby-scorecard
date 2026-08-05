@@ -32,6 +32,10 @@ module Analyzer
       [:permissive,       /permission is hereby granted, free of charge|apache license|redistribution and use in source and binary forms|\bISC License\b|this is free and unencumbered software/i]
     ].freeze
 
+    RATE_LIMIT_REASON = "GitHub rate limit reached for this server, so the code channel could not " \
+                        "be checked. This says nothing about the repo. Unauthenticated GitHub " \
+                        "allows 60 requests/hour per IP; a token raises it to 5,000."
+
     KEPT_BY_STACK = { permissive: true, no_license: true, content: :depends,
                       copyleft: false, source_available: false, proprietary: false,
                       unknown: :unknown }.freeze
@@ -46,8 +50,13 @@ module Analyzer
     def call
       return { present: false, reason: "No public GitHub repo found for this page" } unless @repo
 
-      info = Http.json("https://api.github.com/repos/#{@repo}", headers: gh_headers)
-      return { present: false, reason: "Repo not found or private: #{@repo}" } unless info && info["full_name"]
+      res = Http.probe("https://api.github.com/repos/#{@repo}", headers: gh_headers, timeout: 20)
+      info = parse(res)
+      unless info && info["full_name"]
+        # 404 is a fact about the repo and caches fine. A rate limit or a network error is a fact
+        # about this server, so it must expire immediately rather than persist for the cache TTL.
+        return { present: false, reason: failure_reason(res), transient: res[:status] != 404 }
+      end
 
       branch = info["default_branch"]
       file, text = license_text(branch)
@@ -83,6 +92,31 @@ module Analyzer
       t = AnalyzerConfig.github_token.to_s
       t.empty? ? {} : { "Authorization" => "Bearer #{t}" }
     end
+
+    def parse(res)
+      return nil unless res[:ok]
+
+      JSON.parse(res[:body].to_s)
+    rescue JSON::ParserError
+      nil
+    end
+
+    # Every non-success used to print "Repo not found or private", including the one that actually
+    # happens in production: the 60 requests/hour unauthenticated limit is PER IP, and one Fly
+    # machine shares its egress IP with every visitor, so it is exhausted by a handful of analyses.
+    # Reporting a public repo as missing is the most misleading thing this page could say, because
+    # the code channel is the one the whole argument rests on.
+    def failure_reason(res)
+      case res[:status]
+      when 403, 429
+        rate_limited?(res) ? RATE_LIMIT_REASON : "GitHub refused the request for #{@repo} (403)."
+      when 404 then "Repo not found or private: #{@repo}"
+      when nil then "Could not reach GitHub. This is a network problem here, not a fact about #{@repo}."
+      else "GitHub returned #{res[:status]} for #{@repo}."
+      end
+    end
+
+    def rate_limited?(res) = res[:body].to_s.include?("rate limit")
 
     def license_text(branch)
       LICENSE_FILES.each do |f|

@@ -35,11 +35,20 @@ module Analyzer
             took_ms: ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - started) * 1000).round }
         end
 
+        # A check can mark its own result `transient: true` when the answer describes OUR situation
+        # rather than the target's: a GitHub rate limit, an unreachable host. Caching those for a
+        # week would turn a passing minute into a permanent wrong answer about someone's repo.
+        Rails.cache.delete(key) if !hit && transient?(payload[:result])
+
         payload.merge(cache_hit: hit, key: key)
       rescue StandardError => e
         # A cache backend problem must never take down a check: fall through to a live run.
         Rails.logger.warn("[analyzer] cache #{kind} failed: #{e.class} #{e.message}")
         { result: block.call, cached_at: Time.current, cache_hit: false, took_ms: nil, key: key }
+      end
+
+      def transient?(result)
+        result.is_a?(Hash) && (result[:transient] || result["transient"]) == true
       end
 
       def warm?(kind, target)
