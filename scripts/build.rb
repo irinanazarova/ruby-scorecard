@@ -26,6 +26,8 @@ repos_path = File.join(ROOT, "data", "repos.json")
 repos = File.exist?(repos_path) ? JSON.parse(File.read(repos_path)) : {}
 swh_path = File.join(ROOT, "data", "swh.json")
 swh = File.exist?(swh_path) ? JSON.parse(File.read(swh_path)) : {}
+ln_path = File.join(ROOT, "data", "license_notes.json")
+license_notes = File.exist?(ln_path) ? JSON.parse(File.read(ln_path)).reject { |k, _| k.start_with?("_") } : {}
 
 # Evil Martians favicon set (+ the martian used as the footer lurker), self-hosted at the site root.
 DIST = File.join(ROOT, "dist")
@@ -98,21 +100,49 @@ end
 # Markdown in The Stack and bypasses the web quality filter. The Stack v2/v3 keep `permissive` AND
 # `no_license` files and drop only `non_permissive` (copyleft, proprietary), so an absent license is
 # not a disqualifier; v1 was stricter. The web gates (Common Crawl, quality) are then secondary and muted.
-def cell_code(rp)
+#
+# The cell shows the license string GitHub's API actually returns, verbatim, because that string is
+# what most tooling reads and it is lossier than it looks: every license GitHub cannot identify comes
+# back as `NOASSERTION` ("Other"), so a bespoke permissive license and a source-available one that
+# forbids commercial hosting are indistinguishable in the metadata. Where we opened the license file
+# ourselves, data/license_notes.json carries the real terms and overrides the verdict.
+GH_META = { nil => "(no license file)", "NOASSERTION" => "NOASSERTION" }.freeze
+NOASSERT_TIP = "GitHub's API reports spdx_id NOASSERTION (name \"Other\") for every license it cannot " \
+               "identify, so custom, proprietary, and source-available licenses all look the same here"
+
+def cell_code(rp, note = nil)
   return %(<span class="cc-na" title="no public docs repo found">&mdash;</span>) unless rp && rp["docs_repo"]
 
-  lic = case rp["docs_license"]
-        when nil then "no license"
-        when "NOASSERTION" then "custom"
-        else rp["docs_license"]
-        end
-  if rp["docs_in_stack"] == "yes"
-    OK + %(<span class="sub" title="docs in #{esc(rp["docs_repo"])} (#{esc(lic)}) &rarr; in The Stack">#{esc(lic)}</span>)
-  else
-    BAD + %(<span class="sub" title="#{esc(rp["docs_repo"])} docs are #{esc(lic)}: excluded from The Stack">#{esc(lic)}</span>)
+  raw = rp["docs_license"]
+  label = GH_META.fetch(raw, raw)
+  repo = esc(rp["docs_repo"])
+  in_stack = code_in_stack?(rp, note)
+
+  if note
+    # Verified by reading the license text: show what GitHub says, and what it really is.
+    tip = "GitHub metadata says #{label}. Reading #{esc(note["file"])} in #{repo}: #{esc(note["actual"])} " \
+          "(#{esc(note["class"])}). #{esc(note["note"])}"
+    verdict = in_stack ? OK : BAD
+    return verdict + %(<span class="sub lic lic--read" title="#{tip}">#{esc(label)} <em>= #{esc(note["actual"])}</em></span>)
   end
+
+  tip = if raw.nil?
+          "GitHub reports no license file for #{repo}; The Stack v2/v3 keep no_license files"
+        elsif raw == "NOASSERTION"
+          "#{NOASSERT_TIP}. We have not read #{repo}'s license text, so its terms are unverified"
+        else
+          "GitHub reports #{esc(label)} for #{repo}"
+        end
+  cls = raw == "NOASSERTION" ? "sub lic lic--vague" : "sub lic"
+  (in_stack ? OK : BAD) + %(<span class="#{cls}" title="#{tip}">#{esc(label)}</span>)
 end
-def code_in_stack?(rp) = rp && rp["docs_in_stack"] == "yes"
+
+# A verified reading of the license text beats GitHub's label: the corpus builders scan the text too.
+def code_in_stack?(rp, note = nil)
+  return note["stack_eligible"] unless note.nil? || note["stack_eligible"].nil?
+
+  rp && rp["docs_in_stack"] == "yes"
+end
 
 # Code channel, collection step: The Stack is built from the Software Heritage archive, so a
 # permissive docs repo only reaches the code corpus if SWH has actually collected it.
@@ -194,10 +224,11 @@ present_cats.each do |cat|
     rp = repos[r["name"]]
     sw = swh[r["name"]]
     qs = quality_sample[r["name"]]
+    note = rp && license_notes[rp["docs_repo"]]
     # When the docs already reach The Stack via a permissive repo, the web gates are secondary: mute
     # them. A repo Software Heritage has verifiably not collected is not in The Stack, so it keeps
     # the web gates live.
-    in_code = code_in_stack?(rp) && !(sw && sw["archived"] == false)
+    in_code = code_in_stack?(rp, note) && !(sw && sw["archived"] == false)
     mute = in_code ? " muted" : ""
     muted_tip = in_code ? %( title="already eligible via the code corpus; the web gates are secondary here") : ""
     trows << %(<tr data-cat="#{slug(cat)}" data-name="#{esc(r["name"].downcase)}" data-cc="#{cov_sortkey(c)}">) \
@@ -205,7 +236,7 @@ present_cats.each do |cat|
       "<td>#{cell_robots(r)}</td><td>#{cell_bot(r)}</td>" \
       "<td>#{mark(r["sitemap"])}</td><td>#{mark(r["llms_txt"])}</td>" \
       "<td>#{mark(r["content_neg"])}</td><td>#{mark(r["md_route"])}</td>" \
-      "<td class=\"train train--code\">#{cell_code(rp)}</td>" \
+      "<td class=\"train train--code\">#{cell_code(rp, note)}</td>" \
       "<td class=\"train\">#{cell_swh(sw, rp)}</td>" \
       "<td class=\"train cc#{mute}\"#{muted_tip}>#{cov_cell(c, scoped: !r["cc_scope"].to_s.empty?)}</td>" \
       "<td class=\"train#{mute}\"#{muted_tip}>#{cell_quality(qs)}</td></tr>"
@@ -240,7 +271,7 @@ CONTENT_GAP = if content_gap
   sources = src_urls.empty? ? "" : %(<p class="note cg-srclist">Sources: ) +
     src_urls.map { |u| host = (URI.parse(u).host&.sub(/\Awww\./, "") || u); %(<sup>#{src_num[u]}</sup>&nbsp;<a href="#{esc(u)}">#{esc(host)}</a>) }.join(" &middot; ") + "</p>"
   heads = content_gap["stacks"].map { |s| %(<th>#{esc(s["label"])} <span class="cg-sub">#{esc(s["sub"])}</span></th>) }.join
-  rows = content_gap["tasks"].map do |t|
+  cg_rows = content_gap["tasks"].map do |t|
     %(<tr><th scope="row">#{esc(t["task"])} <span class="cg-detail">#{esc(t["detail"])}</span></th>#{cg_cell(t["js"], src_num)}#{cg_cell(t["py"], src_num)}</tr>)
   end.join("\n      ")
   <<CG
@@ -253,7 +284,7 @@ takes or absent.</p>
 <table class="cg-table">
   <thead><tr><th scope="col">Build &hellip; in Rails</th>#{heads}</tr></thead>
   <tbody>
-      #{rows}
+      #{cg_rows}
   </tbody>
 </table>
 </div>
@@ -298,6 +329,46 @@ Resend's quickstart both <em>fail</em> this filter yet Claude recites them from 
 QUAL
 else
   ""
+end
+
+# ---- what GitHub's license metadata actually says (and where it hides the terms) ----
+# The code-corpus verdict is usually read off GitHub's `license.spdx_id`. That field is coarser than
+# the decision it is used for, so the distribution is worth showing: NOASSERTION is a single bucket
+# holding every license GitHub could not identify.
+LICENSES = begin
+  seen = rows.filter_map { |r| repos[r["name"]] }.select { |rp| rp["docs_repo"] }
+  tally = seen.group_by { |rp| rp["docs_license"] }.transform_values(&:size).sort_by { |lic, cnt| [lic.nil? ? 1 : 0, -cnt] }
+  vague = tally.to_h["NOASSERTION"].to_i
+  read = license_notes.map do |slug, nt|
+    %(<li><code>#{esc(slug)}</code> reports <strong>NOASSERTION</strong>, and its #{esc(nt["file"])} is the
+      <strong>#{esc(nt["actual"])}</strong>: #{esc(nt["note"])} That makes it
+      <em>#{esc(nt["class"])}</em>, so the docs are #{nt["stack_eligible"] ? "still eligible for" : "<strong>not</strong> eligible for"}
+      the code corpus, which GitHub's label alone would never tell you.</li>)
+  end.join("\n    ")
+  items = tally.map do |lic, cnt|
+    label = GH_META.fetch(lic, lic)
+    extra = lic == "NOASSERTION" ? %( <span class="lic-note">any custom or source-available terms</span>) : ""
+    %(<li><code>#{esc(label)}</code> <span class="lic-n">#{cnt}</span>#{extra}</li>)
+  end.join("\n    ")
+  <<LIC
+<h3 class="cg-title">What GitHub's license metadata actually says</h3>
+<p class="note">The code-corpus column reports the license string GitHub's API returns, verbatim, because
+that string is what tooling reads, and it is lossier than it looks. GitHub identifies a license by matching
+the file against a known list; anything it cannot match becomes <code>spdx_id: NOASSERTION</code>
+(<code>name: "Other"</code>). <strong>Every source-available license looks identical in that metadata</strong>,
+and so does a bespoke permissive one. Across the #{seen.size} resources with a public docs repo:</p>
+<ul class="lic-tally">
+    #{items}
+</ul>
+<p class="note">#{vague} of them sit in that <code>NOASSERTION</code> bucket, where the terms can only be
+established by opening the file. Where we have done so:</p>
+<ul class="lic-read">
+    #{read}
+</ul>
+<p class="note">This matters because the corpus builders read the license <em>text</em>, not GitHub's label:
+a repo that looks merely "custom" in the metadata can be firmly excluded, or firmly fine. Treat
+<code>NOASSERTION</code> as "unknown", never as "probably OK".</p>
+LIC
 end
 
 PAGE = <<HTML
@@ -394,6 +465,8 @@ web cells are <span style="opacity:.45">dimmed</span> as secondary. Click any he
 </scorecard-table>
 
 #{QUALITY}
+
+#{LICENSES}
 </section>
 
 <section>

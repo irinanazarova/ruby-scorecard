@@ -30,12 +30,18 @@ rescue StandardError
   "ERR"
 end
 
+# By default only fill in repos we have no answer for, so adding one resource costs one request
+# instead of re-spending the whole hourly allowance and 429-ing before it reaches the new entry.
+# Pass --refresh for the quarterly full re-check.
+refresh = ARGV.include?("--refresh")
+
 cache = {}
 stamp = Time.now.strftime("%Y-%m")
 i = 0
 repos.each do |name, rp|
   slug = rp["docs_repo"]
   next unless slug
+  next if !refresh && out.dig(name, "archived") != nil && out.dig(name, "repo") == slug
 
   i += 1
   unless cache.key?(slug)

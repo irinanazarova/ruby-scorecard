@@ -1,0 +1,11 @@
+{
+  "_comment": "Hand-verified license readings, keyed by repo slug. GitHub's API collapses every license it cannot identify into spdx_id NOASSERTION (name 'Other'), so a source-available license and a bespoke permissive one look identical in the metadata. Where we opened the license file ourselves, the real terms are recorded here. `stack_eligible` overrides the metadata-derived verdict: the corpus builders scan license TEXT, not GitHub's label.",
+  "basecamp/fizzy": {
+    "actual": "O'Saasy License Agreement",
+    "class": "source-available",
+    "file": "LICENSE.md",
+    "note": "MIT-style grant plus a clause forbidding use as a competing hosted/SaaS product, so it is not permissive.",
+    "stack_eligible": false,
+    "read": "2026-08"
+  }
+}

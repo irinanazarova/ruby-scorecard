@@ -33,6 +33,14 @@
           No model reproduced this text.
           <small>Tested <%= summary[:spans_tested] %> passages across <%= summary[:probes] %> probes.
           A negative is weak evidence: models memorize only a fraction of what they read.</small>
+        <% elsif summary[:verdict] == "partial" %>
+          <%# A short run is not the same claim as a long one. Nine words of "Returns `204 No
+              Content` on success" is phrasing thousands of API docs share, so calling that strong
+              evidence would be the kind of overclaim that discredits every honest result here. %>
+          <%= summary[:models_fired].to_a.to_sentence %> continued it for
+          <strong><%= summary[:best_run] %> consecutive words</strong>.
+          <small>A short run is weak evidence on its own: common phrasing recurs across many
+          documents. Treat it as a hint, not a finding.</small>
         <% else %>
           <%= summary[:models_fired].to_a.to_sentence %> reproduced it,
           <strong><%= summary[:best_run] %> consecutive words</strong> verbatim.
