@@ -73,6 +73,22 @@ repo; the anonymous API allows ~120 requests/hour, so the full run fits. On a 42
 known answers; unknown values render as "not checked". A repo verifiably absent from SWH also keeps
 that row's web-gate cells live (unmuted) even when the license would qualify it for The Stack.
 
+### Record what a license really says
+The code-corpus column prints GitHub's `license.spdx_id` **verbatim**, because that string is what
+tooling reads and it is lossy: every license GitHub cannot match becomes `NOASSERTION` ("Other"), so a
+bespoke permissive license and a source-available one look identical. `basecamp/fizzy` is the worked
+example: `NOASSERTION` in the metadata, O'Saasy License Agreement in `LICENSE.md`, non-compete clause
+and all.
+
+When you open a license file yourself, record it in `data/license_notes.json`, keyed by repo slug:
+```json
+{"owner/repo": {"actual": "...", "class": "source-available", "file": "LICENSE.md",
+                "note": "...", "stack_eligible": false, "read": "2026-08"}}
+```
+`stack_eligible` overrides the metadata-derived verdict in both the code-corpus cell and the web-gate
+muting, since corpus builders scan license *text*, not GitHub's label. The file is curated by hand and
+never written by a script. Read the text before adding an entry; do not infer terms from the name.
+
 ### Update the benchmark figures
 The model benchmark and capability numbers come from the `whichlang` project. When it is re-run on new
 models, update the constants in `scripts/build.rb` (search for `4.2`, `0/210`, `0/30`, and the CC sample

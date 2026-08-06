@@ -26,8 +26,17 @@ class AnalyzeJob < ApplicationJob
       broadcast_step(analysis, step, payload, run)
     end
 
+    # Two corrections, both of which were charging visitors for runs that cost nothing:
+    #
+    #   - `target` is not a check. It is the parsed input, echoed back, and it never has a cache
+    #     entry, so `all?` over every step could never be true and NO run was ever recorded as
+    #     cached. A fully warm re-run still consumed an allowance slot.
+    #   - A run the controller already judged free stays free. It decided before doing the work,
+    #     and that is the decision the visitor was shown on the form.
+    cached = analysis.from_cache || results.except(:target).values.all? { |p| p[:cache_hit] }
+
     analysis.update!(status: "done", results: results.as_json, cost_millicents: spent,
-                     from_cache: results.values.all? { |p| p[:cache_hit] })
+                     from_cache: cached)
     analysis.user&.spend!(spent)
     analysis.user&.increment!(:analyses_count)
     broadcast_status(analysis)

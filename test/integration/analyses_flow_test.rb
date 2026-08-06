@@ -167,6 +167,25 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
     assert_not AnalyzerConfig.example?("https://example.com/docs/not-listed")
   end
 
+  # The job used to recompute from_cache over EVERY step including `target`, which is the parsed
+  # input echoed back and never has a cache entry, so `all?` could never be true and a fully warm
+  # re-run still consumed an allowance slot.
+  test "a fully cached run is recorded as cached and stays free" do
+    target = "https://example.com/docs/warm-rerun"
+    %i[retrieval code_channel web_channel memorization].each do |kind|
+      Analyzer::Cache.fetch(kind, target) { { checks: [] } }
+    end
+
+    post "/analyses", params: { input: target }
+    analysis = Analysis.last
+    perform_enqueued_jobs
+
+    assert analysis.reload.from_cache, "a warm run must be recorded as cached, not billable"
+    assert_equal AnalyzerConfig::FREE_ANALYSES_PER_SESSION,
+                 Analysis.free_remaining(session_token_from_cookie),
+                 "a cached run must not consume the allowance"
+  end
+
   private
 
   def session_token_from_cookie
