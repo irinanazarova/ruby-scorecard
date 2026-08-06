@@ -1,11 +1,25 @@
 <% content_for :title, "#{@analysis.status == 'done' ? 'Results for' : 'Analyzing'} #{@analysis.input}" %>
 <%= turbo_stream_from @analysis %>
 
-<section class="result">
+<%# data-analysis-sync-* : the safety net for a broadcast that arrives before the socket does.
+    A fully cached run finishes in ~1.5s, which is faster than the WebSocket connects, so every
+    step was broadcast into a page that was not yet listening and the visitor sat in front of four
+    "waiting" boxes with the finished results already in the database. The controller re-fetches
+    this page until it reads as done, so the answer converges whatever the cable does. %>
+<section class="result" data-controller="analysis-sync"
+         data-analysis-sync-status-value="<%= @analysis.status %>"
+         data-analysis-sync-url-value="<%= analysis_path(@analysis) %>">
   <p class="result__back"><%= link_to "&larr; Check another".html_safe, test_path %></p>
   <h1 class="result__target"><%= @analysis.input %></h1>
 
-  <div id="analysis_status"><%= render "analyses/status", analysis: @analysis %></div>
+  <% stored = @analysis.step_payloads %>
+
+  <%# The answer comes first. The four boxes below are the evidence behind it. %>
+  <%= render "analyses/verdict", payloads: stored, status: @analysis.status %>
+
+  <%= render "analyses/status", analysis: @analysis %>
+
+  <h2 class="evidence__title" id="evidence">The evidence</h2>
 
   <%# Order is the argument, not just the loading order: can an agent read it, could it ever be
       trained on, and did that actually happen. Each box fills as its check lands.
@@ -14,7 +28,6 @@
       permalink shows the finished analysis. Only steps still in flight render the placeholder and
       wait for their broadcast. Finished steps render the partial bare: it carries the step id
       itself, which is what the broadcast replaces, so wrapping it would nest the same id twice. %>
-  <% stored = @analysis.step_payloads %>
   <div class="steps">
     <% Analysis::STEPS.each do |step, title, hint| %>
       <% if (payload = stored[step]) %>

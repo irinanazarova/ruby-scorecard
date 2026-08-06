@@ -23,7 +23,15 @@ class AnalyzeJob < ApplicationJob
       # guessed the repo for a docs URL.
       results[step] = payload.merge(repo_source: run.repo_source)
       spent += model_cost_millicents(payload)
+
+      # Persist after every step, not only at the end. A reload halfway through a 110s run used to
+      # render four empty boxes because the results column was still nil, and the page has no other
+      # way to recover a broadcast it missed. Four extra UPDATEs per run buys a page that is correct
+      # whenever it is loaded, whatever the stream did.
+      analysis.update_columns(results: results.as_json, updated_at: Time.current)
+
       broadcast_step(analysis, step, payload, run)
+      broadcast_verdict(analysis, results)
     end
 
     # Two corrections, both of which were charging visitors for runs that cost nothing:
@@ -65,6 +73,17 @@ class AnalyzeJob < ApplicationJob
       analysis, target: "step_#{step}",
       partial: "analyses/step",
       locals: { step: step, payload: payload, analysis: analysis, repo_source: run.repo_source }
+    )
+  end
+
+  # The headline is recomputed from everything known SO FAR after every step, which is what makes it
+  # sharpen instead of appearing at the end. Keys are stringified because Verdict reads the same
+  # shape a reloaded page reads, and `results` here is still keyed by symbol.
+  def broadcast_verdict(analysis, results)
+    Turbo::StreamsChannel.broadcast_replace_to(
+      analysis, target: "analysis_verdict",
+      partial: "analyses/verdict",
+      locals: { payloads: results.stringify_keys, status: analysis.status }
     )
   end
 

@@ -129,6 +129,56 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
     assert_match "the slow one", response.body
   end
 
+  # The page answers the two questions a visitor arrived with, above the working. Reading four boxes
+  # of checks and deriving the answer yourself is the job the page is supposed to do for you.
+  test "a finished analysis states the answer above the evidence" do
+    post "/analyses", params: { input: "https://example.com/docs/answered" }
+    analysis = Analysis.last
+
+    analysis.update!(status: "done", results: {
+      "retrieval" => { "result" => { "checks" => [
+        { "name" => "Crawlers allowed", "pass" => true, "detail" => "robots.txt permits AI crawlers" },
+        { "name" => "Reachable by a crawler", "pass" => true, "detail" => "" },
+        { "name" => "Markdown twin (.md)", "pass" => true, "detail" => "" }
+      ] } },
+      "code_channel" => { "result" => { "present" => true, "repo" => "acme/docs",
+                                        "swh_archived" => true, "kept_by_stack" => true } },
+      "web_channel" => { "result" => { "checks" => [
+        { "name" => "In Common Crawl", "pass" => true, "detail" => "" },
+        { "name" => "Passes the quality filter", "pass" => true, "score" => 3.2, "detail" => "" }
+      ] } },
+      "memorization" => { "result" => { "summary" => {
+        "verdict" => "strong", "best_run" => 42, "models_fired" => ["Claude Opus"],
+        "spans_tested" => 3, "probes" => 9
+      } } }
+    })
+
+    get "/analyses/#{analysis.id}"
+    assert_response :success
+    assert_match "Is this text in the training data?", response.body
+    assert_match "42 consecutive words", response.body
+    assert_match "agents can read the source text", response.body
+  end
+
+  # A reload halfway through used to render four empty boxes: results were written once, at the end.
+  # The answer has to be derivable from whatever has landed, or the fallback that rescues a missed
+  # broadcast has nothing to show.
+  test "an analysis still running renders the answer it can already support" do
+    post "/analyses", params: { input: "https://example.com/docs/half-done" }
+    analysis = Analysis.last
+
+    analysis.update!(status: "running", results: {
+      "code_channel" => { "result" => { "present" => true, "repo" => "acme/docs",
+                                        "swh_archived" => true, "kept_by_stack" => true } }
+    })
+
+    get "/analyses/#{analysis.id}"
+    assert_response :success
+    assert_match "The code path is open", response.body
+    assert_match "Still checking", response.body
+    assert_match "analysis-sync", response.body, "an in-flight page needs the fallback controller"
+  end
+
   # The listed examples are the tour: clicking all four must never cost a visitor their allowance
   # or trip the per-IP limit, however cold the cache is.
   test "listed examples never consume the free allowance" do

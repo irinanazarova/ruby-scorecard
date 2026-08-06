@@ -4,7 +4,7 @@
      when "pending" then %>Queued…<%
      when "running" then %>Running. Fast checks appear first; Common Crawl and the model probes take longer.<%
      when "done" then %>
-       Done<% if analysis.from_cache %>, replayed from cache<% end %>.
+       Done<% if analysis.replayed? %>, replayed from cache<% end %>.
        <% if analysis.cost_millicents.positive? %>
          <small>Model spend: <%= (analysis.cost_millicents / 1000.0).round(3) %> dollars</small>
        <% end %>

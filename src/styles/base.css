@@ -186,8 +186,18 @@ section > p { max-width: var(--measure); }
   /* No scroll box on wide screens: the page scrolls normally and the sticky <thead> pins to the
      viewport top, releasing when the table ends. (An overflow ancestor would break that.) */
 }
-@media (max-width: 1040px) {
-  /* Below the table's natural width it would overflow, so contain it; the header and
+/* The table is wider than the page column (--maxw), so on wide screens the whole scorecard block
+   (controls + table) breaks out to --table-w, overhanging the column equally on both sides to stay
+   centered with the page. Breakpoint = --table-w + 2 * --pad (36px each at this width). */
+@media (min-width: 1320px) {
+  scorecard-table {
+    display: block;
+    width: var(--table-w);
+    margin-left: calc((100% - var(--table-w)) / 2);
+  }
+}
+@media (max-width: 1319px) {
+  /* Below the breakout width the table would overflow, so contain it; the header and
      resource column then stay pinned within the scroll box. */
   .table-scroll { overflow: auto; max-height: 82vh; }
 }

@@ -9,8 +9,8 @@
       "robots_note": "AI crawlers allowed",
       "bot_fetch": "ok",
       "bot_code": "200",
-      "sitemap": false,
-      "llms_txt": false,
+      "sitemap": true,
+      "llms_txt": true,
       "content_neg": false,
       "md_route": false,
       "docs_ok": "200",
@@ -67,7 +67,7 @@
     {
       "name": "Bundler",
       "category": "core",
-      "docs": "https://bundler.io/guides/",
+      "docs": "https://bundler.io/docs.html",
       "root": "https://bundler.io",
       "robots_ai": "allow",
       "robots_note": "AI crawlers allowed",
@@ -77,7 +77,7 @@
       "llms_txt": false,
       "content_neg": false,
       "md_route": false,
-      "docs_ok": "404",
+      "docs_ok": "200",
       "cc_scope": null
     },
     {
@@ -890,8 +890,8 @@
       "bot_fetch": "ok",
       "bot_code": "200",
       "sitemap": true,
-      "llms_txt": false,
-      "content_neg": false,
+      "llms_txt": true,
+      "content_neg": true,
       "md_route": false,
       "docs_ok": "200",
       "cc_scope": null
@@ -1098,7 +1098,7 @@
       "bot_fetch": "ok",
       "bot_code": "200",
       "sitemap": true,
-      "llms_txt": false,
+      "llms_txt": true,
       "content_neg": false,
       "md_route": false,
       "docs_ok": "200",

@@ -18,7 +18,7 @@ RESOURCES = [
   ["Rails Guides", "core", "https://guides.rubyonrails.org/"],
   ["Rails API", "core", "https://api.rubyonrails.org/"],
   ["RubyGems Guides", "core", "https://guides.rubygems.org/"],
-  ["Bundler", "core", "https://bundler.io/guides/"],
+  ["Bundler", "core", "https://bundler.io/docs.html"],   # /guides/ 404s; docs.html is the real index
   ["RubyDoc.info", "core", "https://rubydoc.info/gems/rails"],
   ["Hotwire", "frontend & view", "https://hotwired.dev/"],
   ["Turbo", "frontend & view", "https://turbo.hotwired.dev/handbook/introduction"],

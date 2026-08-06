@@ -15,11 +15,15 @@ class Analysis < ApplicationRecord
 
   # The four checks, in the order they are argued: can an agent read it, could it ever be trained
   # on, and did that actually happen.
+  #
+  # Titled as measurements rather than as questions, because the two answer cards above them now ask
+  # the questions. Two boxes headed "Can agents retrieve it today?" and "Can an agent read this page
+  # today?" on one screen read as the same thing asked twice.
   STEPS = [
-    ["retrieval",     "Can agents retrieve it today?",        "robots, crawlability, sitemap, markdown twins"],
-    ["code_channel",  "Could it reach a corpus through code?", "public repo, collection, license"],
-    ["web_channel",   "Could it reach a corpus through the web?", "Common Crawl, then the quality filter"],
-    ["memorization",  "Do models already reproduce it?",      "the slow one: several passages against every model"]
+    ["retrieval",     "What a crawler sees today",  "robots, crawlability, sitemap, markdown twins"],
+    ["code_channel",  "The code channel",           "public repo, collection, license"],
+    ["web_channel",   "The web channel",            "Common Crawl, then the quality filter"],
+    ["memorization",  "The memorization probe",     "the slow one: several passages against every model"]
   ].freeze
 
   # Finished step payloads, keyed by step name, ready for the `analyses/step` partial.
@@ -38,6 +42,16 @@ class Analysis < ApplicationRecord
       p[:cached_at] = Time.zone.parse(p[:cached_at].to_s) rescue nil if p[:cached_at].present?
       acc[step.to_s] = p
     end
+  end
+
+  # Were the RESULTS replayed, rather than measured just now? That is a different question from
+  # whether the run was free, and the status line was answering the wrong one: the listed examples
+  # carry from_cache by policy however cold the cache is, so a run that had just spent $0.13 on live
+  # model probes announced itself as "replayed from cache" directly above a step badge reading
+  # "measured live in 3.4s".
+  def replayed?
+    steps = step_payloads.except("target")
+    steps.any? && steps.values.all? { |payload| payload[:cache_hit] }
   end
 
   # Anonymous allowance is counted per browser session, and CACHED runs do not count.

@@ -19,6 +19,8 @@
 
   /* Spacing / shape */
   --maxw: 1040px;
+  --table-w: 1240px;          /* scorecard breakout width; must cover the table's natural width
+                                 (~1210px with 11 columns; re-measure if columns change) */
   --measure: 68ch;            /* comfortable reading width for prose */
   --pad: clamp(1.1rem, 4vw, 2.25rem);
   --radius: 10px;

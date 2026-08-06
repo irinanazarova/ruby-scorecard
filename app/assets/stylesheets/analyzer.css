@@ -108,6 +108,57 @@
   background: var(--code-bg); color: var(--text); font-size: .9rem; }
 .status small { color: var(--text-soft); }
 
+/* --- the answer, above the evidence ------------------------------------------------------------
+ *
+ * Two cards, one per question the visitor came with. They are deliberately the largest type on the
+ * page: the four detail boxes are the working, and the working is not an answer.
+ *
+ * Tone is carried by a left rule and the headline colour, never by colour alone — `--unknown` and
+ * `--mixed` differ in wording too, so a red/green-blind reader loses nothing.
+ */
+.answers { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.25rem 0; }
+@media (max-width: 46rem) { .answers { grid-template-columns: 1fr; } }
+
+.answer { border: 1px solid var(--line); border-left: 4px solid var(--line-strong);
+  border-radius: var(--radius, 10px); padding: 1rem 1.2rem; background: var(--surface); }
+.answer__q { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--text-soft); margin: 0 0 .4rem; }
+.answer__headline { font-family: var(--font-grotesk); font-weight: 700;
+  font-size: clamp(1.1rem, 2.2vw, 1.35rem); line-height: 1.25; margin: 0 0 .5rem;
+  letter-spacing: -.01em; }
+.answer__detail { font-size: .92rem; margin: 0; color: var(--text); }
+.answer__caveat { font-size: .82rem; color: var(--text-soft); margin: .6rem 0 0; }
+
+.answer--yes { border-left-color: var(--ok); }
+.answer--yes .answer__headline { color: var(--ok); }
+.answer--no { border-left-color: var(--bad); }
+.answer--no .answer__headline { color: var(--bad); }
+.answer--mixed { border-left-color: var(--warn); }
+.answer--unknown { border-left-color: var(--line-strong); }
+.answer--unknown .answer__headline { color: var(--text-soft); }
+
+/* The progressive part: a card with nothing in it yet reads as unfinished rather than as a null
+   answer, and stops pulsing the moment real evidence lands. */
+.answer--pending .answer__headline { color: var(--text-soft); animation: answer-breathe 1.6s ease-in-out infinite; }
+@keyframes answer-breathe { 0%, 100% { opacity: 1 } 50% { opacity: .45 } }
+@media (prefers-reduced-motion: reduce) { .answer--pending .answer__headline { animation: none } }
+
+/* Which gates have reported, and how each one came back. This is the progress bar: it fills left
+   to right as the checks land, and every dot keeps its meaning once the run is over. */
+.cues { list-style: none; padding: 0; margin: .8rem 0 0; display: flex; flex-wrap: wrap; gap: .35rem .9rem; }
+.cue { display: inline-flex; align-items: center; gap: .35rem; font-size: .78rem;
+  color: var(--text-soft); }
+.cue__dot { width: .55rem; height: .55rem; border-radius: 50%; flex: none;
+  background: var(--line-strong); }
+.cue--pass .cue__dot { background: var(--ok); }
+.cue--fail .cue__dot { background: var(--bad); }
+.cue--unknown .cue__dot { background: var(--warn); }
+.cue--waiting .cue__dot { background: none; border: 1px dashed var(--line-strong); }
+.cue--waiting { opacity: .7; }
+
+.evidence__title { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--text-soft); margin: 1.75rem 0 0; }
+
 .steps { display: grid; gap: 1rem; margin-top: 1.25rem; }
 .step { border: 1px solid var(--line); border-radius: var(--radius, 10px);
   padding: 1rem 1.2rem; background: var(--surface); }

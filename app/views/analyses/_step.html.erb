@@ -1,10 +1,8 @@
 <%# One completed check. `payload` carries :result, :cache_hit, :cached_at, :took_ms. %>
 <% result = payload[:result] || {} %>
-<% titles = { retrieval: "Can agents retrieve it today?",
-              code_channel: "Could it reach a corpus through code?",
-              web_channel: "Could it reach a corpus through the web?",
-              memorization: "Do models already reproduce it?",
-              target: "Target" } %>
+<%# Kept in step with Analysis::STEPS: the same box has to carry the same title whether it renders
+    from stored results or from a broadcast. %>
+<% titles = Analysis::STEPS.to_h { |step, title, _hint| [step.to_sym, title] }.merge(target: "Target") %>
 
 <article class="step step--done" id="step_<%= step %>">
   <header class="step__head">
