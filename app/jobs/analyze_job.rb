@@ -32,6 +32,7 @@ class AnalyzeJob < ApplicationJob
 
       broadcast_step(analysis, step, payload, run)
       broadcast_verdict(analysis, results)
+      broadcast_actions(analysis, results)
     end
 
     # Two corrections, both of which were charging visitors for runs that cost nothing:
@@ -84,6 +85,16 @@ class AnalyzeJob < ApplicationJob
       analysis, target: "analysis_verdict",
       partial: "analyses/verdict",
       locals: { payloads: results.stringify_keys, status: analysis.status }
+    )
+  end
+
+  # Advice follows the same rule as the headline: it is recomputed from everything known so far, so
+  # the list grows as checks land instead of appearing all at once at the end.
+  def broadcast_actions(analysis, results)
+    Turbo::StreamsChannel.broadcast_replace_to(
+      analysis, target: "analysis_actions",
+      partial: "analyses/actions",
+      locals: { payloads: results.stringify_keys }
     )
   end
 

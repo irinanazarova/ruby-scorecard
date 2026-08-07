@@ -22,7 +22,7 @@ export default class extends Controller {
   static CEILING_MS = 5 * 60 * 1000
 
   // These are the regions the job broadcasts. Anything else on the page is static for the run.
-  static TARGETS = ["#analysis_verdict", "#analysis_status", ".steps"]
+  static TARGETS = ["#analysis_verdict", "#analysis_actions", "#analysis_status", ".steps"]
 
   connect() {
     if (this.statusValue === "done" || this.statusValue === "failed") return

@@ -1,0 +1,472 @@
+<% content_for :title, "How your content reaches a model" %>
+
+<%# The system behind the four checks on /test.
+    Written to be deep-linked: every explanation a result can point at carries a stable id, so
+    "what is The Stack v2?" lands on the paragraph that answers it rather than on the top of a
+    long page. Keep the ids stable; Analyzer::Actions references them by name. %>
+<article class="learn">
+  <header class="learn__head">
+    <p class="learn__kicker">Learn</p>
+    <h1>How your content reaches a model, and what changes when it does</h1>
+    <p class="learn__lead">
+      Two separate systems decide whether an LLM knows about your product. One built the model
+      months ago and cannot be changed. The other answers a question live, right now, and can be
+      changed this afternoon. Most advice about "AI visibility" mixes them up, so it points at the
+      wrong lever.
+    </p>
+    <p class="learn__meta">
+      This page is the model behind <a href="/test">the four checks on /test</a>. The measurements
+      and sources are in <a href="/guide">the full guide</a>.
+    </p>
+  </header>
+
+  <nav class="learn__toc" aria-label="On this page">
+    <ol>
+      <li><a href="#two-systems">Training and retrieval are different systems</a></li>
+      <li><a href="#training">Training: collected first, filtered second</a></li>
+      <li><a href="#retrieval">Retrieval: what an agent can fetch today</a></li>
+      <li><a href="#outcomes">What the four outcomes mean for you</a></li>
+      <li><a href="#glossary">Glossary</a></li>
+      <li><a href="#limits">What this cannot tell you</a></li>
+    </ol>
+  </nav>
+
+  <%# --- 1. the framing ------------------------------------------------------------------- %>
+  <section id="two-systems">
+    <h2>Training and retrieval are different systems with different gates</h2>
+
+    <p>
+      A model can quote your documentation for two unrelated reasons. Either your text was in the
+      corpus it was trained on, so the phrasing is inside the weights. Or an agent fetched your page
+      seconds ago because someone asked a question. The two run on different infrastructure, respond
+      to different signals, and fail in different ways.
+    </p>
+
+    <div class="learn__split">
+      <div class="learn__col">
+        <h3>Training</h3>
+        <p class="learn__colmeta">Slow, one-way, already decided</p>
+        <ul>
+          <li>Content is <strong>collected</strong> by a web crawler or from public code hosting.</li>
+          <li>What survives is then <strong>filtered</strong> for quality, license and duplication.</li>
+          <li>You cannot remove yourself from a corpus that already shipped.</li>
+          <li>You cannot correct a version number a model learned two years ago.</li>
+        </ul>
+      </div>
+      <div class="learn__col">
+        <h3>Retrieval</h3>
+        <p class="learn__colmeta">Live, per question, fixable today</p>
+        <ul>
+          <li>An agent fetches a URL while answering, or reads a search index built last week.</li>
+          <li><code>robots.txt</code>, your WAF and your markup decide what it gets.</li>
+          <li>A change you deploy today takes effect on the next question.</li>
+          <li>It only happens when something points the agent at you.</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="learn__note">
+      Both matter, and neither substitutes for the other. Being in the training data makes you the
+      default answer when nobody is looking anything up. Being retrievable is what keeps that answer
+      current.
+    </p>
+  </section>
+
+  <%# --- 2. training ---------------------------------------------------------------------- %>
+  <section id="training">
+    <h2>Training: content is collected first, then filtered</h2>
+
+    <p>
+      Text has to pass two gates to reach a training corpus. It has to be <strong>collected</strong>,
+      and then it has to <strong>survive the corpus builder's filter</strong>. Being public and
+      crawlable clears the first gate only. Modern web pipelines discard roughly 90% of what they
+      collect (<a href="https://arxiv.org/abs/2306.01116" rel="noopener">RefinedWeb</a>).
+    </p>
+
+    <p>
+      There are two routes through those gates, and they behave so differently that the same page can
+      pass on one and fail on the other.
+    </p>
+
+    <h3 id="web-channel">The web channel collects a sample and then discards most of it</h3>
+    <p>
+      Open web corpora start from <a href="#common-crawl">Common Crawl</a>. Its crawler ranks domains
+      by harmonic centrality, gives higher-ranked domains a larger crawl budget, and
+      <a href="https://dl.acm.org/doi/10.1145/3630106.3659033" rel="noopener">never copies any domain
+      in full</a>. Being online is not the same as being crawled. New, deep, weakly linked pages are
+      the ones it misses, which is why a sitemap and internal links matter here and nowhere else.
+    </p>
+    <p>
+      We measured this on two sites we control or track: Common Crawl held 37% of evilmartians.com
+      (221 of 600 pages) and 27% of docs.anycable.io (34 of 125). Crawled and missed pages scored the
+      same on quality, so the gap comes entirely from how the crawler samples links.
+    </p>
+
+    <h3 id="quality-filter">The quality filter was tuned away from technical reference</h3>
+    <p>
+      What Common Crawl collects then meets a classifier. The open one, and the proxy we score
+      against, is <a href="#fineweb-edu">FineWeb-Edu</a>: it keeps a document when its score rounds
+      to 3 or higher (raw 2.5), and it was
+      <a href="https://arxiv.org/abs/2406.17557" rel="noopener">deliberately tuned toward
+      school-level explanation and away from technical pages</a>. Reference documentation,
+      configuration tables and API pages fail it almost without exception. Of 118 pages on
+      docs.anycable.io, zero cleared the bar. Of 598 pages on evilmartians.com, five did.
+    </p>
+    <p>
+      Only the first ~512 tokens are scored, so the opening decides the whole document. In our
+      rewrite experiment, stripping boilerplate moved a blog post from 2.43 to 2.48 and made a
+      reference page worse. Rewriting the lead so it explains what the reader will learn took the
+      same blog post to 3.19. The reference page never cleared the bar, even fully rewritten. Genre
+      sets the ceiling.
+    </p>
+
+    <h3 id="code-channel">The code channel skips the prose filter entirely</h3>
+    <p>
+      Code corpora take files from public repositories with no prose-quality classifier at all. That
+      is the single most important asymmetry on this page: the Markdown in your repo faces a license
+      check and a duplicate check, and nothing else. A reference page that scores 1.6 on the web
+      filter is collected without complaint when it lives in a public repo.
+    </p>
+    <p>
+      The route has three steps, and teams usually only know about the first one:
+    </p>
+    <ol class="learn__steps">
+      <li>
+        <strong>The repo is public on GitHub.</strong> Private content never enters a code corpus.
+      </li>
+      <li>
+        <strong id="software-heritage">Software Heritage has archived it.</strong>
+        <a href="#the-stack">The Stack v2 and v3</a> are built from the
+        <a href="https://archive.softwareheritage.org/" rel="noopener">Software Heritage</a> archive,
+        and archival is a separate step that is neither automatic nor star-driven. A permissive
+        license on an unarchived repo buys nothing.
+      </li>
+      <li>
+        <strong id="licenses">The license is not disqualifying.</strong> The Stack v2 and v3 keep
+        files labelled <code>permissive</code> <em>and</em> <code>no_license</code>, and drop
+        <code>non_permissive</code>: GPL and similar, "all rights reserved", and source-available
+        licenses such as BUSL, FSL and SSPL. The Stack v1 dropped unlicensed files. That rule is
+        three dataset generations old and is still repeated as current advice.
+      </li>
+    </ol>
+    <p class="learn__note">
+      GitHub's API reports <code>NOASSERTION</code> for every source-available license, so a
+      dashboard reading <code>spdx_id</code> cannot tell an Elastic-licensed repo from an unlicensed
+      weekend project. Our check reads the LICENSE text instead.
+    </p>
+
+    <h3 id="copies">Copies predict memorization; stars do not</h3>
+    <p>
+      We probed 168 documentation repositories and 309 passages. Stars correlated with verbatim
+      recall at ρ = +0.006 (p = 0.94), which is nothing. <code>vercel/next.js</code> (141k stars) and
+      <code>supabase/supabase</code> (107k stars) produced no verbatim runs at all, while
+      <code>getsurfboard/manual</code> (115 stars) produced a 33-word one. In a denser study of 15
+      repositories, the number of independent copies of a passage correlated at ρ = +0.70
+      (p = 0.005).
+    </p>
+    <p>
+      Stars measure how many people liked a project. Copies measure how many times its sentences
+      exist in the world, and a corpus counts the second one. Deduplication is the reason: near
+      duplicate detection collapses identical files into one representative, while your sentences
+      quoted inside somebody else's different document survive as separate examples. Being the
+      snippet people paste into their own repos is worth more than any amount of promotion.
+    </p>
+
+    <h3 id="memorization">Verbatim recall proves inclusion; silence proves nothing</h3>
+    <p>
+      To test membership we give a model 55 words of your page and measure the longest exact
+      continuation it produces, alongside a positive control (the MIT license, which must fire) and a
+      fabricated passage (which must not). A long exact run is strong evidence: text cannot be
+      reproduced unless it was seen.
+    </p>
+    <p>
+      A null result is weak evidence in the other direction. Models memorize a fraction of what they
+      read, prose gets paraphrased rather than copied, and two pages in the same repo can behave
+      differently. Supabase's Auth guide reproduces a 23-word run while its Row Level Security guide,
+      in the same repository, shows nothing. Read "no model reproduced it" as "we found no proof",
+      never as "it is absent".
+    </p>
+    <p class="learn__note">
+      A short run is not the same claim as a long one. Nine words of "returns 204 No Content on
+      success" is phrasing thousands of API docs share, so we report it as a hint rather than a
+      finding.
+    </p>
+  </section>
+
+  <%# --- 3. retrieval --------------------------------------------------------------------- %>
+  <section id="retrieval">
+    <h2>Retrieval: what an agent can fetch while it answers</h2>
+
+    <p>
+      This is the half you can still change. When someone asks Claude or ChatGPT about your product
+      today, three things can happen: the model answers from memory, a search index supplies a
+      summary, or an agent fetches your URL live. The last two are governed by your server, and they
+      are governed <em>per crawler</em>.
+    </p>
+
+    <h3 id="crawlers">Each lab runs several crawlers, and robots.txt treats them separately</h3>
+    <p>
+      Blocking "AI bots" is not one decision. The same company runs a training crawler, a search
+      indexer and a user-triggered fetcher, and they are separate user agents with separate effects.
+    </p>
+
+    <div class="learn__tablewrap">
+      <table class="learn__table">
+        <thead>
+          <tr><th>User agent</th><th>Run by</th><th>What it feeds</th><th>Blocking it means</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>CCBot</code></td><td>Common Crawl</td>
+            <td>Open web corpora, and the labs that build on them</td>
+            <td>You leave the open corpora that most public datasets start from</td>
+          </tr>
+          <tr>
+            <td><code>ClaudeBot</code></td><td>Anthropic</td><td>Model training</td>
+            <td>Your content is not collected for training</td>
+          </tr>
+          <tr>
+            <td><code>Claude-SearchBot</code></td><td>Anthropic</td><td>Search result quality</td>
+            <td>You are less likely to be surfaced in Claude's search</td>
+          </tr>
+          <tr>
+            <td><code>Claude-User</code></td><td>Anthropic</td><td>A user asking Claude to read a page</td>
+            <td>Claude cannot open your page when a user asks it to</td>
+          </tr>
+          <tr>
+            <td><code>GPTBot</code></td><td>OpenAI</td><td>Model training</td>
+            <td>Your content is not collected for training</td>
+          </tr>
+          <tr>
+            <td><code>OAI-SearchBot</code></td><td>OpenAI</td><td>ChatGPT search results</td>
+            <td>You are not surfaced in ChatGPT's search</td>
+          </tr>
+          <tr>
+            <td><code>ChatGPT-User</code></td><td>OpenAI</td><td>A user asking ChatGPT to visit a page</td>
+            <td>OpenAI documents that robots.txt rules may not apply to this user-initiated fetch</td>
+          </tr>
+          <tr>
+            <td><code>Google-Extended</code></td><td>Google</td>
+            <td>Gemini training and grounding</td>
+            <td>Gemini stops using you. Google documents that Search inclusion and ranking are unaffected</td>
+          </tr>
+          <tr>
+            <td><code>Googlebot</code></td><td>Google</td><td>Search, and the answers built on it</td>
+            <td>You leave Google Search</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="learn__note">
+      Sources:
+      <a href="https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler" rel="noopener">Anthropic</a>,
+      <a href="https://developers.openai.com/api/docs/bots" rel="noopener">OpenAI</a> and
+      <a href="https://developers.google.com/search/docs/crawling-indexing/google-common-crawlers" rel="noopener">Google</a>
+      each publish their crawler list. All of them state their crawlers honour robots.txt, with
+      OpenAI noting that user-initiated fetches are treated differently.
+    </p>
+    <p>
+      Our <code>robots.txt</code> check reports the training crawlers, because that is the gate that
+      is permanent. A page you exclude from training today can still be fetched live tomorrow, and a
+      page you allow into training cannot be taken back out.
+    </p>
+
+    <h3 id="reachable">A crawler that is allowed can still be blocked at the edge</h3>
+    <p>
+      <code>robots.txt</code> is a request. Your CDN, WAF or bot-management rule is an enforcement
+      point, and the two disagree more often than teams expect. We fetch your page with a crawler
+      user agent and report what actually comes back, because "allowed in robots.txt" and "returns
+      200 to a crawler" are separate facts.
+    </p>
+
+    <h3 id="clean-text">Agents read what you serve, and rendered HTML costs them</h3>
+    <p>
+      An agent that fetches a documentation page gets your markup: navigation, cookie banners,
+      component wrappers, syntax-highlighting spans. It then spends tokens and attention recovering
+      the prose you started from. Serving the source text directly removes that step.
+    </p>
+    <p>
+      Two mechanisms do this, and we check for both. <strong>Content negotiation</strong> means
+      returning <code>text/markdown</code> when a client sends <code>Accept: text/markdown</code>.
+      A <strong>markdown twin</strong> means the same page is also available at a <code>.md</code>
+      URL. Neither is required by any lab. Both make the difference between an agent reading your
+      sentences and an agent parsing your theme.
+    </p>
+
+    <h3 id="sitemap">Crawl budget decides which of your pages exist to be found</h3>
+    <p>
+      Crawlers reach deep pages far less often without a <code>sitemap.xml</code>, and the pages they
+      miss are new, deep and weakly linked. This is the one place where classic crawl hygiene
+      transfers directly: ship a sitemap, redirect moved URLs with 301, reduce click depth from the
+      homepage, and earn links to the pages you care about.
+    </p>
+
+    <h3 id="llms-txt">llms.txt is widely adopted and used by nobody</h3>
+    <p>
+      <code>llms.txt</code> proposes a curated index of your documentation for LLMs. It has been
+      adopted broadly, and
+      <a href="https://www.seroundtable.com/google-does-not-endorse-llms-txt-40789.html" rel="noopener">no
+      major AI system uses it</a> for training or inference. We report it as informational: present
+      or absent, never as a win. It costs little, and it is not the reason a model does or does not
+      know you.
+    </p>
+  </section>
+
+  <%# --- 4. outcomes ---------------------------------------------------------------------- %>
+  <section id="outcomes">
+    <h2>What the four outcomes mean for you</h2>
+
+    <p>
+      Cross the two questions and you get four situations. Each one has a different failure mode and
+      a different next move.
+    </p>
+
+    <div class="learn__tablewrap">
+      <table class="learn__table learn__table--outcomes">
+        <thead>
+          <tr><th></th><th scope="col">Retrievable today</th><th scope="col">Not retrievable</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">In the training data</th>
+            <td>
+              <strong>Your idioms are the default.</strong> The model answers about you without
+              being asked to look, and an agent can check the current details when it matters. The
+              work here is maintenance: keep the canonical snippet yours, and keep the fetchable
+              copy current so the live answer corrects the remembered one.
+            </td>
+            <td>
+              <strong>The model quotes a version you have moved past.</strong> This is the worst
+              failure mode, because it is invisible to you and confident to the user. Nothing can be
+              removed from a shipped corpus, so the fix is to make the current page reachable and
+              cleanly readable, so live fetches override stale memory.
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Not in the training data</th>
+            <td>
+              <strong>You exist only when someone points at you.</strong> Answers about your product
+              are assembled from whatever else the model read: competitors, Stack Overflow, an old
+              tutorial. Getting the docs source into a public repo is the highest-value change,
+              because it is the channel with no prose quality filter.
+            </td>
+            <td>
+              <strong>You are absent from both systems.</strong> Whatever the model says about you
+              comes from other people's writing about you. Start with collection: a public repo for
+              the training side, and crawlability for the retrieval side.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="learn__note">
+      One correction that saves a lot of wasted effort: these outcomes are not a funnel, and the
+      quality filter is not a quality judgement of your writing. A reference page scoring 1.6 is not
+      badly written. It is the wrong genre for a classifier tuned on school material, and the code
+      channel exists precisely to carry it.
+    </p>
+
+    <p>
+      <a class="learn__cta" href="/test">Check a page &rarr;</a>
+      <a class="learn__cta learn__cta--quiet" href="/guide">Read the measurements and sources &rarr;</a>
+    </p>
+  </section>
+
+  <%# --- 5. glossary ---------------------------------------------------------------------- %>
+  <section id="glossary">
+    <h2>Glossary</h2>
+
+    <dl class="learn__glossary">
+      <dt id="common-crawl">Common Crawl</dt>
+      <dd>
+        A non-profit that crawls the web and publishes the result. Most open web corpora start from
+        it. It samples by domain centrality and never copies a domain in full, so presence in it is a
+        real measurement rather than a formality. Our check asks whether your exact URL appears in
+        the most recent monthly index.
+      </dd>
+
+      <dt id="fineweb-edu">FineWeb and FineWeb-Edu</dt>
+      <dd>
+        FineWeb is an open web corpus built from Common Crawl. FineWeb-Edu is the subset kept by an
+        educational-quality classifier, which is
+        <a href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier" rel="noopener">published
+        openly</a>. We score pages with it because it is the only filter in this pipeline anyone can
+        actually run. It is a proxy for what a modern web pipeline keeps, not the filter any specific
+        lab used.
+      </dd>
+
+      <dt id="the-stack">The Stack v2 and v3</dt>
+      <dd>
+        Open code corpora used to train code models, built by the BigCode project. v2 was built from
+        the Software Heritage archive rather than by crawling GitHub directly, and it keeps Markdown
+        alongside source files: about 254 GB of Markdown in v1. Its license policy is the one that
+        matters in practice: <code>permissive</code> and <code>no_license</code> are kept,
+        <code>non_permissive</code> is dropped. v1's stricter rule, which excluded unlicensed files,
+        is what most advice still describes.
+      </dd>
+
+      <dt id="swh">Software Heritage</dt>
+      <dd>
+        A long-term archive of public source code. It is the collection step for The Stack v2 and v3.
+        Archival is not automatic: repositories are picked up through listers and explicit save
+        requests, so a popular permissive repo can simply be absent. Our check asks the archive
+        whether it holds a full visit of your repository.
+      </dd>
+
+      <dt id="ccbot">CCBot</dt>
+      <dd>
+        Common Crawl's crawler. Blocking it in <code>robots.txt</code> removes you from future
+        crawls, and therefore from the corpora built on them. It is not operated by any AI lab.
+      </dd>
+
+      <dt id="memorization-probe">Memorization probe</dt>
+      <dd>
+        Our test for whether a model has seen a passage: show it the first 55 words and measure the
+        longest exact continuation. We run several passages against several models, plus two
+        controls. The MIT license must fire and an invented passage must not; if the controls
+        misbehave, no result in that run is interpretable.
+      </dd>
+
+      <dt id="markdown-twin">Markdown twin</dt>
+      <dd>
+        The same page served as Markdown at a parallel URL, usually by appending <code>.md</code>. It
+        gives an agent the source text instead of the rendered theme. Related but distinct from
+        content negotiation, which serves Markdown at the same URL when the client asks for it.
+      </dd>
+    </dl>
+  </section>
+
+  <%# --- 6. limits ------------------------------------------------------------------------ %>
+  <section id="limits">
+    <h2>What this cannot tell you</h2>
+    <ul>
+      <li>
+        <strong>These are open proxies, not any lab's filter.</strong> Common Crawl, FineWeb-Edu, The
+        Stack and Software Heritage are public and documented. Anthropic, OpenAI and Google do not
+        disclose their pipelines. We measure what a representative open pipeline would do.
+      </li>
+      <li>
+        <strong>Quality scores are single runs on the first ~512 tokens.</strong> Differences under
+        0.3 are noise.
+      </li>
+      <li>
+        <strong>A negative memorization result is weak evidence.</strong> It says we found no proof,
+        which is a much smaller claim than absence.
+      </li>
+      <li>
+        <strong>Inclusion is not influence.</strong> Text that reached a corpus is still
+        deduplicated, weighted and mixed with everything else.
+      </li>
+      <li>
+        <strong>Rules are versioned.</strong> Any claim about licenses has to name the corpus
+        version, because The Stack v1 and v2 disagree about unlicensed code.
+      </li>
+    </ul>
+    <p class="learn__meta">
+      Every number on this page is reproducible from <code>scripts/</code> and <code>data/</code> in
+      <a href="https://github.com/irinanazarova/ruby-scorecard" rel="noopener">the repo</a>, and the
+      full evidence with sources is in <a href="/guide">the guide</a>.
+    </p>
+  </section>
+</article>

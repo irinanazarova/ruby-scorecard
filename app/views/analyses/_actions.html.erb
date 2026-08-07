@@ -1,0 +1,40 @@
+<%# What to do about the result. Rendered bare: this element carries the id the broadcast replaces. %>
+<% actions = Analyzer::Actions.new(payloads) %>
+<% items = actions.items %>
+<% settled = actions.settled %>
+
+<section class="actions" id="analysis_actions">
+  <% if items.any? %>
+    <h2 class="actions__title">What to do next</h2>
+    <ol class="actions__list">
+      <% items.each do |item| %>
+        <li class="action action--<%= item.impact %>">
+          <p class="action__head">
+            <span class="action__title"><%= item.title %></span>
+            <span class="action__tag"><%= item.impact %> impact</span>
+          </p>
+          <p class="action__why"><%= item.why %></p>
+          <p class="action__link">
+            <a href="/learn#<%= item.anchor %>">Learn: <%= item.anchor_label %> &rarr;</a>
+          </p>
+        </li>
+      <% end %>
+    </ol>
+  <% elsif settled.any? %>
+    <h2 class="actions__title">What to do next</h2>
+    <p class="action action--low">
+      <span class="action__title">Nothing on this page.</span>
+      <span class="action__why">Every gate we check is already open, so the remaining work is
+      keeping it that way. <a href="/learn#outcomes">What that means &rarr;</a></span>
+    </p>
+  <% end %>
+
+  <% if settled.any? %>
+    <details class="actions__settled">
+      <summary>Already in place (<%= settled.size %>)</summary>
+      <ul>
+        <% settled.each do |line| %><li><%= line %></li><% end %>
+      </ul>
+    </details>
+  <% end %>
+</section>

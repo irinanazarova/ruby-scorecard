@@ -129,6 +129,42 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
     assert_match "the slow one", response.body
   end
 
+  test "the learn page renders with the anchors results link into" do
+    get "/learn"
+    assert_response :success
+    assert_match "How your content reaches a model", response.body
+
+    %w[code-channel software-heritage licenses web-channel quality-filter crawlers reachable
+       clean-text sitemap outcomes].each do |anchor|
+      assert_match(/id="#{anchor}"/, response.body, "/learn lost the ##{anchor} target")
+    end
+  end
+
+  # Results without next steps leave a visitor to invent their own plan, usually the wrong one.
+  test "a result carries prioritised action items that link into the learn page" do
+    post "/analyses", params: { input: "https://example.com/docs/actionable" }
+    analysis = Analysis.last
+
+    analysis.update!(status: "done", results: {
+      "retrieval" => { "result" => { "checks" => [
+        { "name" => "Crawlers allowed", "pass" => true, "detail" => "" },
+        { "name" => "Reachable by a crawler", "pass" => true, "detail" => "" },
+        { "name" => "Sitemap", "pass" => false, "detail" => "" },
+        { "name" => "Markdown twin (.md)", "pass" => false, "detail" => "" }
+      ] } },
+      "code_channel" => { "result" => { "present" => false } }
+    })
+
+    get "/analyses/#{analysis.id}"
+    assert_response :success
+    assert_match "What to do next", response.body
+    assert_match "Put the docs source in a public repo", response.body
+    assert_match "/learn#code-channel", response.body
+    assert_operator response.body.index("Put the docs source in a public repo"), :<,
+                    response.body.index("Ship a sitemap.xml"),
+                    "the repo item outranks crawl hygiene"
+  end
+
   # The page answers the two questions a visitor arrived with, above the working. Reading four boxes
   # of checks and deriving the answer yourself is the job the page is supposed to do for you.
   test "a finished analysis states the answer above the evidence" do

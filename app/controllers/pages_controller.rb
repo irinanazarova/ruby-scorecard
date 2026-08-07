@@ -19,6 +19,11 @@ class PagesController < ApplicationController
     "blog-rewrites-review" => "blog-rewrites-review.html"
   }.freeze
 
+  # /learn is the one content page rendered by Rails rather than generated into dist/. It is deep
+  # linked from every result on /test, so it needs the app layout: the same theme toggle, the same
+  # header, and a way back to the analyzer. A standalone generated page would drop all three.
+  def learn; end
+
   def show
     file = PAGES[params[:page]]
     return head :not_found unless file

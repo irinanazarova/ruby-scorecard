@@ -95,9 +95,12 @@
           <span class="check__body">
             <strong><%= c[:name] %></strong>
             <span class="check__detail"><%= c[:detail] %></span>
-            <% if c[:why].present? %><span class="check__why"><%= c[:why] %></span><% end %>
+            <%# The terms these rows lean on (The Stack, Software Heritage, Common Crawl) are the
+                ones a visitor is least likely to know, so each first mention links to its
+                definition on /learn instead of assuming the vocabulary. %>
+            <% if c[:why].present? %><span class="check__why"><%= with_learn_links(c[:why]) %></span><% end %>
             <% if c[:subjective].present? %>
-              <span class="check__why check__why--caveat"><%= c[:subjective] %></span>
+              <span class="check__why check__why--caveat"><%= with_learn_links(c[:subjective]) %></span>
             <% end %>
           </span>
         </li>

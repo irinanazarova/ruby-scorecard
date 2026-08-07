@@ -14,10 +14,17 @@
 
   <% stored = @analysis.step_payloads %>
 
-  <%# The answer comes first. The four boxes below are the evidence behind it. %>
+  <%# The answer comes first, then what to do about it, then the working. A visitor who reads only
+      the top of this page should still leave knowing their situation and their next move.
+
+      The progress line sits above the answer rather than between the answer and the advice: while
+      a run is filling it explains why, and once the run is done it is the least interesting line
+      on the page. %>
+  <%= render "analyses/status", analysis: @analysis %>
+
   <%= render "analyses/verdict", payloads: stored, status: @analysis.status %>
 
-  <%= render "analyses/status", analysis: @analysis %>
+  <%= render "analyses/actions", payloads: stored %>
 
   <h2 class="evidence__title" id="evidence">The evidence</h2>
 

@@ -2,6 +2,8 @@ Rails.application.routes.draw do
   # --- the existing static site (generated into dist/, copied to public/ by build.sh) ---
   root "pages#show", defaults: { page: "scorecard" }
   get "/guide",                to: "pages#show", defaults: { page: "guide" }
+  # Rendered by Rails, not generated: /test links into its anchors from every result.
+  get "/learn",                to: "pages#learn", as: :learn
   get "/check",                to: "pages#show", defaults: { page: "check" }
   get "/contributors",         to: "pages#show", defaults: { page: "contributors" }
   get "/quality-rewrites",     to: "pages#show", defaults: { page: "quality-rewrites" }
