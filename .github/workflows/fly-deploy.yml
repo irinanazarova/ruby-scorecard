@@ -1,0 +1,24 @@
+# Deploy to Fly on every push to main.
+#
+# The image build needs public/ populated, but /public/* is gitignored (only Rails'
+# error pages and robots.txt are force-added). The static site is committed in dist/,
+# so CI publishes it with a plain copy — build.sh's last step, without regenerating
+# anything: regeneration probes 94 sites over HTTP and belongs to /update-scorecard,
+# not to a deploy.
+name: Fly Deploy
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    name: Deploy to Fly
+    runs-on: ubuntu-latest
+    # One deploy at a time; a newer push cancels a queued (not yet running) older one.
+    concurrency: fly-deploy
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp -R dist/. public/
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

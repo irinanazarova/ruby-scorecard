@@ -12,7 +12,7 @@
     "total_source": null
   },
   "Rails API": {
-    "cc_pages": 4956,
+    "cc_pages": 4939,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -48,7 +48,7 @@
     "total_source": "benchmark spot-check"
   },
   "Stimulus": {
-    "cc_pages": 0,
+    "cc_pages": 3,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -90,7 +90,7 @@
     "total_source": null
   },
   "Sinatra": {
-    "cc_pages": 33,
+    "cc_pages": 37,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -126,7 +126,7 @@
     "total_source": null
   },
   "dry-rb": {
-    "cc_pages": 72,
+    "cc_pages": 36,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
@@ -186,13 +186,13 @@
     "total_source": null
   },
   "Action Policy": {
-    "cc_pages": 2,
+    "cc_pages": 17,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Shrine": {
-    "cc_pages": 4,
+    "cc_pages": 6,
     "cc_exact": true,
     "total_pages": 127,
     "total_source": "sitemap"
@@ -224,7 +224,7 @@
   "Nokogiri": {
     "cc_pages": 11,
     "cc_exact": true,
-    "total_pages": 1,
+    "total_pages": 22,
     "total_source": "sitemap"
   },
   "Faraday": {
@@ -258,13 +258,13 @@
     "total_source": "sitemap"
   },
   "Falcon": {
-    "cc_pages": 0,
+    "cc_pages": 3,
     "cc_exact": true,
     "total_pages": null,
     "total_source": null
   },
   "Karafka": {
-    "cc_pages": 1,
+    "cc_pages": 136,
     "cc_exact": true,
     "total_pages": 209,
     "total_source": "sitemap"
@@ -330,13 +330,13 @@
     "total_source": null
   },
   "SF Ruby": {
-    "cc_pages": null,
-    "cc_exact": null,
+    "cc_pages": 14,
+    "cc_exact": true,
     "total_pages": 9,
     "total_source": "sitemap"
   },
   "Ruby Weekly": {
-    "cc_pages": 301,
+    "cc_pages": 219,
     "cc_exact": true,
     "total_pages": 625,
     "total_source": "sitemap"
@@ -386,11 +386,11 @@
   "Riding Rails": {
     "cc_pages": 57,
     "cc_exact": true,
-    "total_pages": 2328,
+    "total_pages": 2356,
     "total_source": "sitemap"
   },
   "Joe Masilotti": {
-    "cc_pages": 1,
+    "cc_pages": 2,
     "cc_exact": true,
     "total_pages": 134,
     "total_source": "sitemap"
@@ -554,7 +554,7 @@
   "Supabase": {
     "cc_pages": 0,
     "cc_exact": true,
-    "total_pages": 3319,
+    "total_pages": 3320,
     "total_source": "sitemap-index"
   },
   "Neon": {

@@ -120,9 +120,18 @@ UA = "Mozilla/5.0 research"
 BOTUA = "CCBot/2.0 (+http://commoncrawl.org/faq/)"
 AIB = ["*", "ccbot", "gptbot", "claudebot", "google-extended", "perplexitybot", "anthropic-ai", "applebot-extended"].freeze
 
+# Retries once on an empty result. A dropped connection and "this site is unreachable" are
+# indistinguishable in a single attempt, and treating the first as the second is how a whole run
+# turns into false findings: an unfetched robots.txt reads as "allows AI crawlers", and an
+# unfetched llms.txt reads as "they removed it".
 def curl(args, timeout: 20)
-  out, _err, _st = Open3.capture3("curl", "-sL", "--max-time", timeout.to_s, *args)
-  out
+  2.times do |attempt|
+    out, _err, _st = Open3.capture3("curl", "-sL", "--max-time", timeout.to_s, *args)
+    return out unless out.to_s.strip.empty?
+
+    sleep 1.5 if attempt.zero?
+  end
+  ""
 rescue StandardError
   ""
 end
@@ -242,5 +251,21 @@ RESOURCES.each do |name, cat, docs, cc_scope|
          row["content_neg"] ? 1 : 0, md ? 1 : 0)
 end
 
+# Refuse to overwrite good data with a broken run.
+#
+# Twice now a run has lost the network partway and recorded docs_ok=000 for most resources. Written
+# out, that does not read as "the probe failed", it reads as dozens of projects having deleted their
+# sitemap and llms.txt overnight, and as four sites that block AI crawlers suddenly allowing them.
+# A run where a large share is unreachable is a broken instrument, not a finding.
+unreachable = out.count { |r| r["docs_ok"].to_s == "000" || r["docs_ok"].to_s == "ERR" }
+limit = [(out.size * 0.15).ceil, 5].max
+
+if unreachable > limit
+  warn "ABORTED: #{unreachable}/#{out.size} resources unreachable (limit #{limit})."
+  warn "That is a network failure here, not a change out there. data/scorecard.json left untouched."
+  warn "Re-run when the connection is stable; a partial run must never overwrite good data."
+  exit 1
+end
+
 File.write(File.join(ROOT, "data", "scorecard.json"), JSON.pretty_generate({ "rows" => out }))
-puts "DONE #{out.size}"
+puts "DONE #{out.size} (#{unreachable} unreachable, within the #{limit} tolerance)"
