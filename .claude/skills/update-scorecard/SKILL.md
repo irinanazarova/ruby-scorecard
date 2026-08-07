@@ -20,9 +20,30 @@ column sort, and stat-counter animations.
 
 ### Refresh the scorecard (re-probe everything, then rebuild)
 ```bash
-ruby scripts/probe.rb         # probes every resource over HTTP -> data/scorecard.json
-./build.sh                    # bundles assets + renders dist/scorecard.html
+./fetch/run-on-fly.sh         # BOTH probes from a disposable Fly machine, then rebuilds dist/
 ```
+This is the way to refresh. It creates a throwaway Fly app, runs `probe.rb --print` and
+`coverage.rb --print` there, captures each to `data/`, rebuilds, and destroys the app. Run it, review
+the diff, then `fly deploy` from the repo root and commit.
+
+Why not locally: a home connection that drops mid-run makes `probe.rb` record every remaining
+resource as unreachable, and that does not read as "the probe failed". It reads as dozens of projects
+having deleted their sitemap and llms.txt overnight, and as sites that block AI crawlers suddenly
+allowing them, because an unfetched `robots.txt` defaults to "allow". That happened three times in
+one afternoon and was caught by hand each time. Common Crawl's IP rate limit is the second reason.
+
+Three safeguards, so a bad run cannot become a bad publish:
+- a failed fetch is retried once (a dropped connection and a dead host look identical in one try);
+- `probe.rb` aborts without writing if more than 15% of resources are unreachable;
+- captures go to a temp file and only replace `data/` once the JSON validates, since redirecting
+  straight into `data/*.json` truncates it before the probe has produced anything.
+
+For coverage, counts the run could not measure are carried forward from the previous file. A null
+means "we did not reach the index", never "this site left the corpus".
+
+Local runs still work (`ruby scripts/probe.rb`, `ruby scripts/coverage.rb`) and honour the same abort
+guard; use them for a quick look, not to publish.
+
 `probe.rb` checks, per resource, against its **docs URL** (not the landing page):
 robots-allows-AI, crawlable (fetches as a CCBot user-agent to catch Cloudflare/WAF blocks), sitemap,
 llms.txt (at the docs host and the bare domain), content negotiation (`Accept: text/markdown`), `.md` routes.

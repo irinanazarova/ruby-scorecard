@@ -116,6 +116,12 @@ RESOURCES = [
   ["Neon", "background, realtime & deploy", "https://neon.com/docs/guides/ruby-on-rails", "neon.com/docs/guides/ruby-on-rails"]
 ].freeze
 
+# --print emits the scorecard JSON to STDOUT (progress goes to STDERR) so the run can be captured
+# off a disposable Fly machine, the same way coverage.rb is. Running from Fly is not about hiding:
+# a home connection that drops mid-run produced three false "everything vanished" datasets, and a
+# datacentre machine simply does not.
+PRINT_ONLY = ARGV.include?("--print")
+
 UA = "Mozilla/5.0 research"
 BOTUA = "CCBot/2.0 (+http://commoncrawl.org/faq/)"
 AIB = ["*", "ccbot", "gptbot", "claudebot", "google-extended", "perplexitybot", "anthropic-ai", "applebot-extended"].freeze
@@ -246,9 +252,10 @@ RESOURCES.each do |name, cat, docs, cc_scope|
     "md_route" => md, "docs_ok" => status(docs), "cc_scope" => cc_scope
   }
   out << row
-  printf("%-24s docs=%-3s robots=%-5s bot=%-5s sitemap=%d llms=%d neg=%d md=%d\n",
-         name, status(docs), ai, bot, row["sitemap"] ? 1 : 0, llms ? 1 : 0,
-         row["content_neg"] ? 1 : 0, md ? 1 : 0)
+  (PRINT_ONLY ? $stderr : $stdout).printf(
+    "%-24s docs=%-3s robots=%-5s bot=%-5s sitemap=%d llms=%d neg=%d md=%d\n",
+    name, row["docs_ok"], ai, bot, row["sitemap"] ? 1 : 0, llms ? 1 : 0,
+    row["content_neg"] ? 1 : 0, md ? 1 : 0)
 end
 
 # Refuse to overwrite good data with a broken run.
@@ -267,5 +274,13 @@ if unreachable > limit
   exit 1
 end
 
-File.write(File.join(ROOT, "data", "scorecard.json"), JSON.pretty_generate({ "rows" => out }))
-puts "DONE #{out.size} (#{unreachable} unreachable, within the #{limit} tolerance)"
+# In --print mode nothing but JSON may reach STDOUT, because the caller redirects it into
+# data/scorecard.json. The abort above exits before this point, so a broken run writes no JSON at
+# all and the caller's validation catches it.
+if PRINT_ONLY
+  puts JSON.pretty_generate({ "rows" => out })
+  warn "DONE #{out.size} (#{unreachable} unreachable, within the #{limit} tolerance)"
+else
+  File.write(File.join(ROOT, "data", "scorecard.json"), JSON.pretty_generate({ "rows" => out }))
+  puts "DONE #{out.size} (#{unreachable} unreachable, within the #{limit} tolerance)"
+end
