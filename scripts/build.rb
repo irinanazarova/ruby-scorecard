@@ -11,6 +11,7 @@ require "cgi"
 require "uri"
 require "digest"
 require "fileutils"
+require_relative "site_nav"
 
 ROOT = File.expand_path("..", __dir__)
 rows = JSON.parse(File.read(File.join(ROOT, "data", "scorecard.json")))["rows"]
@@ -387,6 +388,7 @@ PAGE = <<HTML
 <script type="module" src="assets/app.js#{asset_q("assets/app.js")}"></script>
 </head>
 <body>
+#{site_nav}
 <header class="hero">
   <div class="wrap">
     <div class="hero__top">

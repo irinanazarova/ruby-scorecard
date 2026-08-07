@@ -42,6 +42,21 @@ strong { font-weight: 650; }
   font-weight: 600;
 }
 
+/* ---------- Site navigation ----------
+   The same bar the Rails layout renders for /test and /learn, so crossing between the generated
+   pages and the app does not move it. It sits on --bg above the dark hero rather than inside it:
+   .hero hardcodes cream text for a near-black band, and links inherited from it were invisible
+   against the page background on every other page. */
+.site-nav {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  max-width: var(--maxw); margin: 0 auto; padding: 1.1rem var(--pad);
+  font-size: .9rem; border-bottom: 1px solid var(--line);
+}
+.site-nav__brand { font-weight: 700; color: var(--text); text-decoration: none; }
+.site-nav__links { display: flex; align-items: center; gap: 1rem; }
+.site-nav__links a { color: var(--text); }
+.site-nav__links a[aria-current] { color: var(--accent); font-weight: 600; }
+
 /* ---------- Hero ---------- */
 .hero {
   background: var(--hero-bg);

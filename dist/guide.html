@@ -78,9 +78,26 @@ footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line
   .toc { break-inside: avoid; }
   footer { break-before: avoid; }
 }
+.site-nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  flex-wrap: wrap; max-width: 60rem; margin: 0 auto; padding: 1.1rem 1.5rem; font-size: .9rem;
+  font-family: "Inter", -apple-system, "Segoe UI", Arial, sans-serif;
+  border-bottom: 1px solid rgba(128, 110, 120, .25); }
+.site-nav__brand { font-weight: 700; color: inherit; text-decoration: none; }
+.site-nav__links { display: flex; align-items: center; gap: 1rem; }
+.site-nav__links a[aria-current] { font-weight: 700; }
+@media print { .site-nav { display: none; } }
 </style>
 </head>
 <body>
+  <nav class="site-nav" aria-label="Main">
+  <a class="site-nav__brand" href="/">Ruby &amp; Rails LLM scorecard</a>
+  <div class="site-nav__links">
+    <a href="/learn">Learn</a>
+    <a href="/guide">Guide</a>
+    <a href="/test">Test a page</a>
+  </div>
+</nav>
+
   <article class="wrap">
     <p class="kicker">Evil Martians &middot; Ruby &middot; LLM discoverability</p>
     <h1>How to get your documentation into LLM training data</h1>

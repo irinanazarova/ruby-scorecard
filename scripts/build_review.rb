@@ -9,6 +9,7 @@
 require_relative "quality_core"
 require "json"
 require "cgi"
+require_relative "site_nav"
 
 ROOT = File.expand_path("..", __dir__)
 DIST = File.join(ROOT, "dist")
@@ -115,8 +116,10 @@ end.map { |r| "<section class=\"entry\">#{r}" }.join
 html = <<~HTML
   <!doctype html><html lang="en"><head><meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Blog opening rewrites &mdash; editorial review</title><style>#{css}</style></head>
-  <body><main class="wrap">
+  <title>Blog opening rewrites &mdash; editorial review</title><style>#{css}#{SITE_NAV_CSS}</style></head>
+  <body>
+  #{site_nav}
+  <main class="wrap">
     <p class="kick">Evil Martians &middot; for Irina &amp; Travis</p>
     <h1>Blog opening rewrites: editorial review</h1>
     <p class="lead">Six Chronicles posts whose openings score just under the FineWeb-Edu training-data

@@ -9,6 +9,7 @@
 require_relative "quality_core"
 require "json"
 require "cgi"
+require_relative "site_nav"
 
 ROOT = File.expand_path("..", __dir__)
 DIST = File.join(ROOT, "dist")
@@ -161,7 +162,9 @@ html = <<~HTML
   <!doctype html><html lang="en"><head><meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Rewriting real posts to pass the training-data filter</title>
-  <style>#{css}</style></head><body><main class="wrap">
+  <style>#{css}#{SITE_NAV_CSS}</style></head><body>
+  #{site_nav}
+  <main class="wrap">
   #{intro}
   #{card_html}
   <footer>Scores computed with <code>scripts/quality_core.rb</code> (FineWeb-Edu via ONNX) at build time.

@@ -129,6 +129,18 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
     assert_match "the slow one", response.body
   end
 
+  # The generated pages and the Rails pages carry two copies of the same bar (scripts/site_nav.rb
+  # and the layout), so this asserts the published HTML really has it. A generator edited without a
+  # rebuild leaves dist/ behind, and the only symptom is a page that quietly cannot reach /learn.
+  test "every published page carries the main navigation" do
+    %w[/ /guide /check /contributors /test /learn].each do |path|
+      get path
+      assert_response :success, "#{path} did not render"
+      assert_match "/learn", response.body, "#{path} has no link to /learn"
+      assert_match "/test", response.body, "#{path} has no link to /test"
+    end
+  end
+
   test "the learn page renders with the anchors results link into" do
     get "/learn"
     assert_response :success

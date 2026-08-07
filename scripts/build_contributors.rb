@@ -10,6 +10,7 @@ require "json"
 require "cgi"
 require "digest"
 require "fileutils"
+require_relative "site_nav"
 
 ROOT = File.expand_path("..", __dir__)
 data = JSON.parse(File.read(File.join(ROOT, "data", "contributors.json")))
@@ -269,6 +270,7 @@ PAGE = <<HTML
 </style>
 </head>
 <body>
+#{site_nav}
 <header class="hero">
   <div class="wrap">
     <div class="hero__top">

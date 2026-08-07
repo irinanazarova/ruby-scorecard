@@ -9,6 +9,7 @@
 # Produces <same-path>.html. Run build_doc_pdf.sh afterwards (or build.sh) for the PDF.
 
 require "redcarpet"
+require_relative "site_nav"
 
 ROOT = File.expand_path("..", __dir__)
 src = ARGV[0] || File.join(ROOT, "docs", "how-devtooling-gets-into-training-data.md")
@@ -136,9 +137,10 @@ html = <<~HTML
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>#{title}</title>
-    <style>#{css}</style>
+    <style>#{css}#{SITE_NAV_CSS}</style>
   </head>
   <body>
+    #{site_nav}
     <article class="wrap">
       <p class="kicker">Evil Martians &middot; Ruby &middot; LLM discoverability</p>
       <h1>#{title}</h1>

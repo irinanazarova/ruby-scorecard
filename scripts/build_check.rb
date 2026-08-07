@@ -4,6 +4,7 @@
 # and calls the inference API. Run after build.rb (which produces dist/assets/styles.css).
 
 require "digest"
+require_relative "site_nav"
 
 ROOT = File.expand_path("..", __dir__)
 DIST = File.join(ROOT, "dist")
@@ -65,6 +66,7 @@ page = <<~HTML
     </style>
   </head>
   <body>
+    #{site_nav}
     <main class="check-wrap">
       <p class="kicker">Evil Martians &middot; Ruby</p>
       <h1>Would a model train on this page?</h1>
