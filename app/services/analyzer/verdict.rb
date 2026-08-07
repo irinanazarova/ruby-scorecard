@@ -83,7 +83,7 @@ module Analyzer
 
     def retrieval_wording(allowed, reachable, clean)
       if allowed == false
-        { tone: :no, headline: "No. robots.txt turns AI crawlers away.",
+        { tone: :no, headline: "No. robots.txt blocks AI crawlers.",
           detail: "#{detail_of('retrieval', 'Crawlers allowed')}. A disallowed crawler skips the " \
                   "page entirely, so nothing downstream can happen." }
       elsif reachable == false
@@ -139,20 +139,28 @@ module Analyzer
       open_paths = [code, web].select { |state, _| state == :open }
 
       if open_paths.any?
-        { tone: :mixed, headline: "No evidence yet, and the door is open.",
-          detail: "Open route: #{clauses(open_paths)}. That is how this text could reach a corpus. " \
-                  "Nothing came back verbatim under our probes.",
+        { tone: :mixed, headline: "No model reproduced it. #{open_label(code, web)} open.",
+          detail: "Open route: #{clauses(open_paths)}.",
           caveat: probe_caveat(mem) }
       elsif [code, web].any? { |state, _| %i[unknown waiting].include?(state) }
-        { tone: :unknown, headline: "No evidence, and one channel could not be checked.",
+        { tone: :unknown, headline: "No model reproduced it, and one channel could not be checked.",
           detail: "Unresolved: #{clauses([code, web].select { |s, _| %i[unknown waiting].include?(s) })}. " \
-                  "No model reproduced the text, which on its own settles nothing.",
+                  "That leaves the question open in one direction.",
           caveat: probe_caveat(mem) }
       else
-        { tone: :no, headline: "Unlikely. Every path we can check is closed.",
-          detail: "No open route: #{clauses([code, web])}. No model reproduced the text either.",
+        { tone: :no, headline: "Unlikely. No model reproduced it and no channel is open.",
+          detail: "No open route: #{clauses([code, web])}.",
           caveat: probe_caveat(mem) }
       end
+    end
+
+    # "The code path is" / "The web path is" / "Both paths are", so the headline names the route
+    # rather than gesturing at one.
+    def open_label(code, web)
+      open = { code: code.first == :open, web: web.first == :open }
+      return "Both paths are" if open[:code] && open[:web]
+
+      open[:code] ? "The code path is" : "The web path is"
     end
 
     # Still running. Say what is known, name what is still outstanding, and never pre-announce the
@@ -167,9 +175,9 @@ module Analyzer
 
       case code.first
       when :waiting
-        { tone: :unknown, headline: "Working out whether it could reach a corpus…",
-          detail: "Checking the code path first: a public repo skips the web quality filter that " \
-                  "most documentation fails." }
+        { tone: :unknown, headline: "Checking the code path first.",
+          detail: "A public repo skips the web quality filter that most documentation fails, so " \
+                  "that is the channel worth asking about first." }
       when :open
         { tone: :mixed, headline: "The code path is open.",
           detail: "Open route: #{clauses(landed.select { |s, _| s == :open })}.#{tail}" }
@@ -299,7 +307,7 @@ module Analyzer
 
     def repo_retrieval_answer
       answer(:retrieval, state: :final, tone: :unknown,
-             headline: "Not asked: you gave us a repo, not a page.",
+             headline: "Not checked. This target is a repo.",
              detail: "Retrieval is a property of a URL an agent can fetch. Paste a documentation " \
                      "link to have it checked.", cues: [])
     end

@@ -67,7 +67,8 @@ class VerdictTest < ActiveSupport::TestCase
                 "memorization" => memorized("none")}).training_answer
 
     refute_match(/not in the training data/i, "#{a.headline} #{a.detail}")
-    assert_match(/no evidence/i, a.headline)
+    assert_match(/no model reproduced it/i, a.headline)
+    assert_match(/the code path is open/i, a.headline, "the headline names the open route")
     assert_match(/weak evidence/i, a.caveat)
   end
 
@@ -144,6 +145,6 @@ class VerdictTest < ActiveSupport::TestCase
   test "a repo target does not pretend to answer the retrieval question" do
     a = verdict({"target" => step(kind: "repo", repo: "acme/docs")}).retrieval_answer
     assert_equal :unknown, a.tone
-    assert_match(/repo, not a page/i, a.headline)
+    assert_match(/not checked/i, a.headline)
   end
 end
