@@ -38,53 +38,44 @@ class AnalysesController < ApplicationController
     target = build_target
     return redirect_to(test_path, alert: target.error) unless target.valid?
 
-    # Free runs cost nothing to serve, so they neither consume the anonymous allowance nor require
-    # signing in. This is also the behaviour the demo wants to show off.
-    cached = free_run?
-
-    unless cached
-      if !signed_in? && free_remaining <= 0
-        return redirect_to(test_path, alert: "You have used your #{AnalyzerConfig::FREE_ANALYSES_PER_SESSION} free checks. Sign in with GitHub to continue.")
-      end
-      if signed_in? && current_user.budget_exhausted?
-        return redirect_to(test_path, alert: "You have reached your $#{current_user.budget_dollars} budget.")
-      end
+    if (denial = policy.run(free: free_run?))
+      return redirect_to(test_path, alert: denial_message(denial))
     end
 
-    analysis = Analysis.create!(
-      user: current_user, session_token: session_token,
-      input: target.label, docs_url: target.url, repo: target.repo, passage: target.passage,
-      kind: target.kind.to_s, status: "pending", ip_hash: ip_hash, from_cache: cached
-    )
-    AnalyzeJob.perform_later(analysis.id)
+    analysis = Analyses::StartRun.call(target: target, free: free_run?, user: current_user,
+                                       session_token: session_token, ip_hash: ip_hash)
     redirect_to analysis
   end
 
   def show
     @analysis = Analysis.find(params[:id])
-    head :not_found unless owns?(@analysis)
+    head :not_found unless policy.read?(@analysis)
   end
 
   private
 
-  # What actually costs money is the memorization probe calling models; every other check is plain
-  # HTTP against someone else's server. So a run is free when that probe is already cached, and the
-  # listed examples are free by policy however cold the cache is.
-  #
-  # Keyed the way Run keys it (url or repo), because checking the wrong key silently reports every
-  # run as billable. The previous version asked cache_status for all four checks, and code_channel
-  # caches under the REPO while cache_status passed the URL, so it never once returned true and
-  # cached re-runs kept consuming the allowance they were meant to be exempt from.
+  def policy
+    @policy ||= AnalysisPolicy.new(user: current_user, session_token: session_token)
+  end
+
+  # The policy decides, the controller words it. A flash message is presentation, and a policy that
+  # returns sentences is a policy you have to edit to reword one.
+  def denial_message(denial)
+    case denial.reason
+    when :free_allowance_exhausted
+      "You have used your #{denial.limit} free checks. Sign in with GitHub to continue."
+    when :budget_exhausted
+      "You have reached your $#{denial.limit} budget."
+    end
+  end
+
+  # Memoized rather than recomputed: the rate-limit guard and #create both ask, and the second call
+  # would otherwise hit the cache again. `defined?` rather than `||=` because the answer is a
+  # boolean and `false ||= ...` recomputes forever.
   def free_run?
-    return @free_run unless @free_run.nil?
+    return @free_run if defined?(@free_run)
 
-    target = build_target
-
-    @free_run =
-      if !target.valid? then false
-      elsif AnalyzerConfig.example?(target.url, target.repo) then true
-      else Analyzer::Cache.warm?(:memorization, target.cache_key)
-      end
+    @free_run = Analyzer::RunCost.free?(build_target)
   end
 
   # Two named fields now, and the form still accepts a single `input` so an old bookmark or a linked
@@ -99,19 +90,6 @@ class AnalysesController < ApplicationController
         Analyzer::Target.new(docs_url: params[:docs_url], repo: params[:repo],
                              passage: params[:passage])
       end
-  end
-
-  # Results are tied to whoever ran them, so a stranger cannot walk IDs and read other people's
-  # inputs.
-  #
-  # The user_id comparison MUST be guarded against nil. Written as
-  # `analysis.user_id == current_user&.id` it becomes `nil == nil` for an anonymous analysis viewed
-  # by an anonymous visitor, which is true, and every result becomes world-readable by ID.
-  def owns?(analysis)
-    return true if analysis.session_token == session_token
-    return true if analysis.user_id.present? && analysis.user_id == current_user&.id
-
-    false
   end
 
   def too_many_requests(message)
