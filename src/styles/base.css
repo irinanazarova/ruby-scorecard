@@ -55,6 +55,8 @@ strong { font-weight: 650; }
 .site-nav__links { display: flex; align-items: center; gap: 1rem; }
 .site-nav__links a { color: var(--text); }
 .site-nav__links a[aria-current] { color: var(--accent); font-weight: 600; }
+.nav-gh { display: inline-flex; align-items: center; color: var(--text); }
+.nav-gh:hover { color: var(--accent); }
 
 /* ---------- Hero ---------- */
 .hero {
