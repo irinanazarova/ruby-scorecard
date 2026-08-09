@@ -31,6 +31,11 @@ Two kinds of entry appear here, and they mean different things:
 - MIT licence, contribution guide, code of conduct and this changelog.
 - CI running RuboCop, Brakeman, the test suite, and a check that `dist/` still regenerates
   unchanged from `data/` and `src/`.
+- **Deploys are gated on CI.** The Fly deploy is a job in the CI workflow with
+  `needs: [lint, security, test, generators]`, so a red check stops a release. Previously the two
+  were independent workflows racing on the same push, and a failing test suite shipped anyway.
+  `Fly Deploy (manual)` remains for a redeploy that carries no commit (rollback, restart, or after a
+  secret changes).
 - RuboCop wired to `rubocop-rails-omakase`, which the project had carried as a dependency without a
   config since the beginning.
 

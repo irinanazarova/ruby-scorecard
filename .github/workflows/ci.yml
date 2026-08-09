@@ -68,3 +68,34 @@ jobs:
       - run: ruby scripts/build.rb
       - run: git diff --exit-code -- dist/scorecard.html
         # A failure here means: run ./build.sh and commit dist/.
+
+  # --- deploy -------------------------------------------------------------------------------
+  #
+  # Gated on every check above. This lives in the CI workflow rather than in its own file on
+  # purpose: `needs` is enforced by Actions against THIS run and this exact commit, whereas a
+  # separate workflow keyed on `workflow_run` has to re-derive the SHA and is easy to get subtly
+  # wrong (it defaults to the branch tip, which by then may be a different commit).
+  #
+  # Before this gate, CI and the deploy were independent workflows racing on the same push: a red
+  # test suite did not stop a release, and for several days the deploy was failing in 12 seconds on
+  # a missing FLY_API_TOKEN while nothing said so.
+  #
+  # fly-deploy.yml is still there for a manual redeploy that carries no commit.
+  deploy:
+    name: Deploy to Fly
+    needs: [ lint, security, test, generators ]
+    if: ${{ success() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    # One deploy at a time; a newer push cancels a queued (not yet running) older one.
+    concurrency: fly-deploy
+    steps:
+      - uses: actions/checkout@v4
+      # The image build needs public/ populated, but /public/* is gitignored. The static site is
+      # committed in dist/, so publish it with a plain copy: build.sh's last step, without
+      # regenerating anything. Regeneration probes 94 sites over HTTP and belongs to
+      # /update-scorecard, not to a deploy.
+      - run: cp -R dist/. public/
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

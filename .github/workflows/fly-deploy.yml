@@ -1,22 +1,35 @@
-# Deploy to Fly on every push to main.
+# Manual deploy to Fly.
 #
-# The image build needs public/ populated, but /public/* is gitignored (only Rails'
-# error pages and robots.txt are force-added). The static site is committed in dist/,
-# so CI publishes it with a plain copy — build.sh's last step, without regenerating
-# anything: regeneration probes 94 sites over HTTP and belongs to /update-scorecard,
-# not to a deploy.
-name: Fly Deploy
+# The AUTOMATIC deploy lives in ci.yml, as a job gated on lint, security, tests and the dist/
+# freshness check. This file used to do that job on `push: [main]`, which meant CI and the deploy
+# raced as independent workflows and a red test suite did not stop a release.
+#
+# It stays for the case the gated path cannot serve: redeploying without a commit. Rolling back to a
+# previous image, restarting after a Fly incident, or shipping after a secret changed. Run it from
+# the Actions tab, optionally against a specific ref.
+name: Fly Deploy (manual)
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Commit, tag or branch to deploy (defaults to main)"
+        required: false
+        default: main
+
 jobs:
   deploy:
     name: Deploy to Fly
     runs-on: ubuntu-latest
-    # One deploy at a time; a newer push cancels a queued (not yet running) older one.
+    # Shares the group with ci.yml's deploy job, so a manual run and an automatic one cannot
+    # overlap and land on the machine in an unpredictable order.
     concurrency: fly-deploy
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      # The image build needs public/ populated, but /public/* is gitignored. The static site is
+      # committed in dist/, so publish it with a plain copy rather than regenerating: regeneration
+      # probes 94 sites over HTTP and belongs to /update-scorecard, not to a deploy.
       - run: cp -R dist/. public/
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: flyctl deploy --remote-only
