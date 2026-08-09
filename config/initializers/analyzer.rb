@@ -74,9 +74,21 @@ module AnalyzerConfig
   # yields 39 words even via its markdown twin, so the probe correctly refuses to test it. Pick
   # pages with real prose or the demo's best moment never runs.
   #
-  # Every note states a MEASURED result. They are ordered so the two flat outcomes come first and
-  # the two surprises come last: a visitor clicking straight down the list sees "eligible but
-  # absent" twice, then sees a gate nobody expects, then sees what a hit looks like.
+  # Every note states a measured result that RE-MEASURES THE SAME. That rules out claims about
+  # recall on a live page, which is the one thing here that does not reproduce.
+  #
+  # Measured on the same passages, byte for byte, from a laptop and from the Fly machine an hour
+  # apart, tailwindcss.com/docs/hover-focus-and-other-states scored a 54-word verbatim run on GPT-5.5
+  # and then a 3-word one. The pinned reference passages and the MIT control did not move (30 vs 28,
+  # 31 vs 28), so this is not the probe drifting: strongly memorized text reproduces consistently and
+  # borderline text is a coin flip, which is exactly what the "a short run is weak evidence" caveat
+  # says. A note promising the room that two labs reproduce this page word for word is therefore a
+  # note that will be wrong on stage roughly half the time.
+  #
+  # For a demonstration of recall that fires every time, use the paragraph field with text that is
+  # duplicated across many repos.
+  #
+  # Ordered so the two flat outcomes come first and the two surprises come last.
   EXAMPLES = [
     { docs: "https://workos.com/docs/authkit/sessions",
       repo: "workos/authkit-nextjs",
@@ -98,13 +110,14 @@ module AnalyzerConfig
       note: "MIT with 941 stars, and Software Heritage has still never archived it. A licence on " \
             "an uncollected repo buys nothing." },
 
-    # The study's headline in one page: 140 stars, no licence at all, below the quality bar, and
-    # still reproduced by two frontier models from different labs. Copies beat popularity.
+    # The two gates disagreeing about the same repo, which is the sharpest thing on the page: no
+    # LICENSE file at all means The Stack keeps it and nobody may use it.
     { docs: "https://tailwindcss.com/docs/hover-focus-and-other-states",
       repo: "tailwindlabs/tailwindcss.com",
       label: "Tailwind CSS",
-      note: "No licence file and 140 stars. Scores below the quality bar, and frontier models from " \
-            "two labs still reproduce it word for word." }
+      note: "No LICENSE file and 140 stars. The Stack v2/v3 keep it anyway, while default copyright " \
+            "means nobody may use it. Scores below the quality bar, so the web channel drops the " \
+            "page and the code channel does not." }
   ].freeze
 
   # Clicking a listed example must never cost a visitor an allowance slot or trip the per-IP limit,
