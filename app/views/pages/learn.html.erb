@@ -20,8 +20,8 @@
       change it today.
     </p>
     <p class="learn__meta">
-      The model behind <a href="/test">the checks on /test</a>. Every number is measured and links
-      to its working; every rule links to the document that states it.
+      The reasoning behind <a href="/test">the checks on /test</a>. Every number links to its
+      working; every rule links to the document that states it.
     </p>
   </header>
 
@@ -58,10 +58,10 @@
         drops <code>non_permissive</code>. <a href="#licenses">Which &rarr;</a></span>
       </li>
       <li>
-        <strong>Check the repo against the Am-I-in-The-Stack index, and confirm Software
-        Heritage archived it.</strong>
-        <span class="learn__why">Membership is observable; archival is the collection path you
-        can trigger yourself. <a href="#software-heritage">Why &rarr;</a></span>
+        <strong>Look the repo up in the Am-I-in-The-Stack index; ask Software Heritage
+        to archive it.</strong>
+        <span class="learn__why">The index answers membership directly; archival you can trigger
+        yourself. <a href="#software-heritage">Why &rarr;</a></span>
       </li>
       <li>
         <strong>Write the README and a runnable <code>examples/</code>.</strong>
@@ -102,7 +102,7 @@
         <span class="learn__why"><a href="#sitemap">Crawl budget &rarr;</a></span>
       </li>
       <li>
-        <strong>Decide per crawler, not per company.</strong>
+        <strong>Decide crawler by crawler.</strong>
         <span class="learn__why">Nine user agents, three jobs, different costs.
         <a href="#crawlers">Table &rarr;</a></span>
       </li>
@@ -116,9 +116,10 @@
     <h3>Skip</h3>
     <ul class="learn__skip">
       <li><strong>Blocking <code>CCBot</code>, <code>ClaudeBot</code>, <code>GPTBot</code></strong>
-        if you want inclusion. The one lever proven to work, in the direction of exclusion.</li>
+        if you want inclusion. Blocking is the one lever proven to work, and it works toward
+        exclusion.</li>
       <li><strong>Private repos and copyleft.</strong> Never collected, or dropped by name.</li>
-      <li><strong>Chasing stars.</strong> Not a filter in any Stack version. Gates forks only, at 5+.</li>
+      <li><strong>Chasing stars.</strong> No Stack version filters on them; only forks need 5+.</li>
       <li><strong>Mirroring your docs into other repos.</strong> MinHash collapses copies into one.</li>
       <li><strong>Stripping boilerplate.</strong> Measured: 2.43 &rarr; 2.48, and worse for reference
         pages. <a href="#quality-filter">Chart &rarr;</a></li>
@@ -244,9 +245,10 @@
       <svg viewBox="0 0 720 232" class="learn__svg" role="img" aria-labelledby="fig2-t fig2-d">
         <title id="fig2-t">The four channels and the gate each one meets</title>
         <desc id="fig2-d">Code and docs in repos are collected by GitHub crawls and Software
-          Heritage and face no prose gate. Blog posts, rendered documentation and marketing pages are all collected by
-          Common Crawl and face the FineWeb-Edu classifier, which rewards tutorial prose, is hostile
-          to reference material and rewards marketing pages almost not at all.</desc>
+          Heritage and face no prose gate. Blog posts, rendered documentation and marketing pages
+          are all collected by Common Crawl and face the FineWeb-Edu classifier, which rewards
+          tutorial prose, penalizes reference material, and gives marketing pages almost
+          nothing.</desc>
 
         <text class="svg-cap" x="18"  y="16">SURFACE</text>
         <text class="svg-cap" x="220" y="16">COLLECTED BY</text>
@@ -290,11 +292,11 @@
       </figcaption>
     </figure>
 
-    <h3 id="web-channel">Common Crawl samples; it does not copy you</h3>
+    <h3 id="web-channel">Common Crawl never copies a domain in full</h3>
     <ul class="learn__facts">
-      <li>Ranks domains by harmonic centrality, budgets crawling by rank, and
-        <a href="https://dl.acm.org/doi/10.1145/3630106.3659033" rel="noopener">never copies a
-        domain in full</a>.</li>
+      <li>Ranks domains by harmonic centrality and
+        <a href="https://dl.acm.org/doi/10.1145/3630106.3659033" rel="noopener">budgets crawling
+        by rank</a>.</li>
       <li>Misses new, deep, weakly linked pages.</li>
     </ul>
 
@@ -310,7 +312,7 @@
       </table>
     </div>
     <p class="learn__note">
-      Crawled and missed pages score the same. The gap is link sampling, not writing quality.
+      Crawled and missed pages score the same. The difference is links, and links can be earned.
     </p>
 
     <h3 id="quality-filter">The filter rewards school-style explanation</h3>
@@ -372,9 +374,8 @@
         <text class="svg-v" x="558" y="240">2.83</text>
       </svg>
       <figcaption>
-        Rewriting the lead so it explains what the reader will learn is what moves a blog post over
-        the line. Stripping boilerplate moves nothing and makes the reference page worse. Genre sets
-        the ceiling.
+        Rewriting the lead to teach moves a blog post over the line. Stripping boilerplate moves
+        nothing, and hurts the reference page. Genre sets the ceiling.
       </figcaption>
     </figure>
 
@@ -401,29 +402,28 @@
     <ol class="learn__steps">
       <li><strong>The repo is public.</strong> Private content never enters a code corpus.</li>
       <li><strong id="software-heritage">The corpus collected it.</strong>
-        <a href="#the-stack">The Stack v2</a> was built from the
+        <a href="#the-stack">The Stack v2</a> came from the
         <a href="https://archive.softwareheritage.org/" rel="noopener">Software Heritage</a> archive,
         where archival is neither automatic nor star-driven: <code>workos/authkit</code> has 3.3k
-        stars, an MIT licence, and no record there. v3 crawls GitHub directly (GH Archive events
-        plus the SWH graph, cutoff 2025-08-07), so a repo public after that date waits for the next
-        snapshot no matter how it is licensed. Membership in v3 is directly checkable via the
+        stars, an MIT licence, and no record there. v3 crawled GitHub directly, cutoff 2025-08-07;
+        a repo public after that date waits for the next snapshot, whatever its licence. The
         official <a href="https://huggingface.co/spaces/HuggingFaceCode/in-the-stack"
-        rel="noopener">Am I in The Stack?</a> index, and opting out works: the <code>rspec</code>
-        and <code>bridgetownrb</code> orgs asked out and are absent org-wide.</li>
-      <li><strong id="licenses">The licence is not disqualifying.</strong> v2 and v3 keep
-        <code>permissive</code> <em>and</em> <code>no_license</code>, and drop
-        <code>non_permissive</code>: GPL and similar, all-rights-reserved, and source-available
-        licences such as BUSL, FSL and SSPL
+        rel="noopener">Am I in The Stack?</a> index answers membership repo by repo. Opting out
+        works: the <code>rspec</code> and <code>bridgetownrb</code> orgs asked out and are gone
+        org-wide.</li>
+      <li><strong id="licenses">Only non-permissive licences are dropped.</strong> v2 and v3 keep
+        <code>permissive</code> <em>and</em> <code>no_license</code> files: what goes is GPL and
+        kin, all-rights-reserved, and source-available terms like BUSL, FSL and SSPL
         (<a href="https://arxiv.org/abs/2402.19173" rel="noopener">StarCoder2 / The Stack v2</a>).
         v1 dropped unlicensed files; that rule is three dataset generations old.</li>
     </ol>
     <p class="learn__note">
       GitHub reports <code>NOASSERTION</code> for every licence it cannot match, so
-      <code>spdx_id</code> cannot separate an Elastic-licensed repo from an unlicensed weekend
-      project. Our check reads the LICENSE text, and treats the observed index as the last word:
-      v3 filters file by file, and its scanner's calls surprise in both directions
-      (<code>karafka/wiki</code> is in with an all-rights-reserved licence file;
-      <code>karafka/karafka</code>, LGPL, is out; <code>sidekiq/sidekiq</code>, also LGPL, is in).
+      <code>spdx_id</code> cannot tell an Elastic-licensed repo from an unlicensed weekend project.
+      Our check reads the LICENSE text, and the observed index gets the last word: v3 decides file
+      by file, and its calls surprise both ways. <code>karafka/wiki</code> is in with an
+      all-rights-reserved licence file; <code>karafka/karafka</code>, LGPL, is out;
+      <code>sidekiq/sidekiq</code>, also LGPL, is in.
     </p>
 
     <details class="learn__ev">
@@ -446,7 +446,7 @@
       </p>
     </details>
 
-    <h3 id="copies">Copies predict recall; stars do not</h3>
+    <h3 id="copies">Copies predict recall. Stars predict nothing</h3>
     <div class="learn__tablewrap">
       <table class="learn__table">
         <thead><tr><th>Predictor</th><th>Spearman ρ vs hit rate</th><th>p</th></tr></thead>
@@ -467,7 +467,7 @@
       <li><code>tailwindlabs/tailwindcss.com</code>: no licence, ~140 stars, 68 independent copies,
         most memorized repo in that sample.</li>
       <li>MinHash-LSH removed about <strong>40%</strong> of permissively licensed files in The Stack
-        v2, which is why mirroring your own docs adds nothing.</li>
+        v2 as duplicates. Mirroring your own docs adds nothing.</li>
     </ul>
 
     <h3 id="memorization">Verbatim recall proves inclusion; silence proves nothing</h3>
@@ -492,11 +492,11 @@
       </table>
     </div>
     <p class="learn__note">
-      Both failed the web filter and reached training through the code channel:
+      Both failed the web filter and reached training through code:
       <a href="https://github.com/supabase/supabase" rel="noopener">supabase/supabase</a> under
-      Apache-2.0, and <a href="https://github.com/resend/resend-node" rel="noopener">resend-node</a>
-      under MIT, copied into roughly 1,840 repositories. Supabase's Row Level Security guide sits in
-      the same repo with no recall, because prose gets paraphrased instead of copied.
+      Apache-2.0, <a href="https://github.com/resend/resend-node" rel="noopener">resend-node</a>
+      under MIT, copied into roughly 1,840 repositories. Supabase's Row Level Security guide sits
+      in the same repo with no recall. Snippets get copied; prose gets paraphrased.
     </p>
   </section>
 
@@ -504,7 +504,7 @@
   <section id="retrieval">
     <h2>Retrieval: what an agent fetches today</h2>
 
-    <h3 id="crawlers">One decision per crawler, not per company</h3>
+    <h3 id="crawlers">Nine crawlers, three jobs, one decision each</h3>
     <div class="learn__tablewrap">
       <table class="learn__table">
         <thead>
@@ -547,7 +547,7 @@
       <li>We fetch with a crawler user agent and report the status code that comes back.</li>
     </ul>
 
-    <h3 id="clean-text">Serve source text, not rendered HTML</h3>
+    <h3 id="clean-text">Markdown lets an agent read your sentences</h3>
     <ul class="learn__facts">
       <li><strong>Content negotiation:</strong> return <code>text/markdown</code> for
         <code>Accept: text/markdown</code>.</li>
@@ -585,8 +585,8 @@
     </p>
 
     <p class="learn__note">
-      These are mechanisms, not measurements. The crawler and corpus numbers above are measured; the
-      repo signals below are how GitHub's own search and licence tooling work.
+      The crawler and corpus numbers above are measured. The rows below are mechanisms: how
+      GitHub's own search and licence tooling behaves.
     </p>
 
     <div class="learn__tablewrap">
@@ -595,9 +595,9 @@
         <tbody>
           <tr>
             <th scope="row" id="repo-readme">README</th>
-            <td>An agent reproduces your description from it: the text GitHub serves on the repo
-              page, and the file shipped in every package. Badges, a logo and a table of contents
-              give it nothing to quote.</td>
+            <td>The text GitHub serves on the repo page and ships in every package; agents quote
+              it as your description. Badges, a logo and a table of contents give them nothing to
+              quote.</td>
             <td>Open with what the project does and who it is for, in sentences.</td>
           </tr>
           <tr>
@@ -660,9 +660,9 @@
     </div>
 
     <p class="learn__note">
-      <%= Analyzer::License::NOT_ADVICE %> The classification on /test reads the actual
-      <code>LICENSE</code> text rather than GitHub's <code>spdx_id</code>, because every
-      source-available licence reports as <code>NOASSERTION</code> in that field.
+      <%= Analyzer::License::NOT_ADVICE %> The classification on /test reads the
+      <code>LICENSE</code> text itself, for the <code>NOASSERTION</code> reason
+      <a href="#code-channel">above</a>.
     </p>
   </section>
 
@@ -717,8 +717,8 @@
     </figure>
 
     <p class="learn__note">
-      The quality filter classifies genre, not craft. A reference page scoring 1.6 is written fine
-      and aimed at a classifier tuned on school material. The code channel exists to carry it.
+      The quality filter classifies genre. A reference page scoring 1.6 is written fine; it is
+      aimed at a classifier tuned on school material. The code channel exists to carry it.
     </p>
   </section>
 
@@ -748,8 +748,8 @@
       </table>
     </div>
     <p class="learn__note">
-      Score the page rather than judging it by eye. In the
-      <a href="https://www.youtube.com/watch?v=IsNqSmTPiWQ" rel="noopener">DCLM keynote</a> Ludwig
+      Score the page; eyes mislead. In the
+      <a href="https://www.youtube.com/watch?v=IsNqSmTPiWQ" rel="noopener">DCLM keynote</a>, Ludwig
       Schmidt found hand-labelers could not tell the best classifier variants apart, and Ari Morcos
       <a href="https://www.youtube.com/watch?v=yXPPcBlcF8U" rel="noopener">reports</a> NLP graduate
       students could not predict DCLM's classifier above chance.

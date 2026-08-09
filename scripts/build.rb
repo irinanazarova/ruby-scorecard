@@ -122,7 +122,7 @@ NOASSERT_TIP = "GitHub's API reports spdx_id NOASSERTION (name \"Other\") for ev
 V3_TIP = "The Stack v3 train set (a direct GitHub crawl, cutoff 2025-08-07, license-filtered per " \
          "file), checked against the official Am-I-in-The-Stack index"
 
-def cell_code(rp, note = nil, st = nil, snote = nil)
+def cell_code(rp, note = nil, st = nil, snote = nil, sw = nil)
   return %(<span class="cc-na" title="no public docs repo found">&mdash;</span>) unless rp && rp["docs_repo"]
 
   raw = rp["docs_license"]
@@ -131,6 +131,11 @@ def cell_code(rp, note = nil, st = nil, snote = nil)
   lic_html = note ? %(#{esc(label)} <em>= #{esc(note["actual"])}</em>) : esc(label)
   cls = note ? "sub lic lic--read" : (raw == "NOASSERTION" ? "sub lic lic--vague" : "sub lic")
   reading = note ? " Reading #{esc(note["file"])}: #{esc(note["actual"])} (#{esc(note["class"])}). #{esc(note["note"])}" : ""
+  # The dedicated SWH column is gone; the fact survives here, on the rows where it still says
+  # something (an absence): SWH was the v2 collection path and the one archival a maintainer can
+  # trigger themselves.
+  swh_bit = sw && sw["archived"] == false ? " Software Heritage has no record of it either; " \
+            "request archival at archive.softwareheritage.org/save/." : ""
 
   case st && st["in_stack"]
   when true
@@ -138,7 +143,7 @@ def cell_code(rp, note = nil, st = nil, snote = nil)
     OK + %(<span class="#{cls}" title="#{tip}">#{lic_html}</span>)
   when false
     why, sub = absence_reason(st, snote)
-    tip = "Observed: github.com/#{repo} is NOT in #{V3_TIP}. #{why}#{reading}"
+    tip = "Observed: github.com/#{repo} is NOT in #{V3_TIP}. #{why}#{reading}#{swh_bit}"
     BAD + %(<span class="#{cls}" title="#{tip}">#{sub || lic_html}</span>)
   else
     # No observed answer yet: infer from the license and say so, never dressing a guess as a fact.
@@ -182,21 +187,6 @@ def code_in_stack?(rp, note = nil)
   return note["stack_eligible"] unless note.nil? || note["stack_eligible"].nil?
 
   rp && rp["docs_in_stack"] == "yes"
-end
-
-# Collection evidence: The Stack v2 was built from the Software Heritage archive, so SWH decided
-# collection for v2. v3 crawls GitHub directly (GH Archive + the SWH graph), so for v3 this column
-# is supporting evidence rather than the gate; the observed-membership column is the verdict.
-def cell_swh(sw, rp)
-  return %(<span class="cc-na" title="no public docs repo found">&mdash;</span>) unless rp && rp["docs_repo"]
-  return %(<span class="cc-na" title="not checked yet">&mdash;</span>) if sw.nil? || sw["archived"].nil?
-
-  slug = esc(sw["repo"])
-  if sw["archived"]
-    %(<span class="ok" title="github.com/#{slug} is in the Software Heritage archive, the source The Stack v2 was built from (v3 crawls GitHub directly)">&#10003;</span>)
-  else
-    %(<span class="bad" title="Software Heritage has no record of github.com/#{slug}; SWH-built corpora like The Stack v2 never saw it. Request archival at archive.softwareheritage.org/save/">&#10007;</span><span class="sub">not collected</span>)
-  end
 end
 
 # Web channel, Gate 2: best of up to 5 sampled pages (FineWeb-Edu; keeps int_score >= 3, raw >= 2.5).
@@ -261,7 +251,7 @@ stk_in      = stack.values.count { |v| v["in_stack"] }
 present_cats = CAT_ORDER.select { |c| rows.any? { |r| r["category"] == c } }
 trows = []
 present_cats.each do |cat|
-  trows << %(<tr class="grp" data-grp="#{slug(cat)}"><td colspan="11">#{esc(CAT_LABEL[cat])}</td></tr>)
+  trows << %(<tr class="grp" data-grp="#{slug(cat)}"><td colspan="10">#{esc(CAT_LABEL[cat])}</td></tr>)
   rows.select { |r| r["category"] == cat }.each do |r|
     c = coverage[r["name"]]
     rp = repos[r["name"]]
@@ -285,8 +275,7 @@ present_cats.each do |cat|
       "<td>#{cell_robots(r)}</td><td>#{cell_bot(r)}</td>" \
       "<td>#{mark(r["sitemap"])}</td><td>#{mark(r["llms_txt"])}</td>" \
       "<td>#{mark(r["content_neg"])}</td><td>#{mark(r["md_route"])}</td>" \
-      "<td class=\"train train--code\">#{cell_code(rp, note, st, snote)}</td>" \
-      "<td class=\"train\">#{cell_swh(sw, rp)}</td>" \
+      "<td class=\"train train--code\">#{cell_code(rp, note, st, snote, sw)}</td>" \
       "<td class=\"train cc#{mute}\"#{muted_tip}>#{cov_cell(c, scoped: !r["cc_scope"].to_s.empty?)}</td>" \
       "<td class=\"train#{mute}\"#{muted_tip}>#{cell_quality(qs)}</td></tr>"
   end
@@ -325,10 +314,9 @@ CONTENT_GAP = if content_gap
   end.join("\n      ")
   <<CG
 <h4 class="cg-title">Publish the missing comparisons</h4>
-<p class="cg-metric">Why: a model reaches for what the corpus argues for, and today almost nothing argues,
-with numbers, that Rails is the better build for these product shapes. <strong>#{solid} of #{cells.size}</strong>
-comparisons are <em>solid</em> (current, task-specific, with real numbers); the rest are generic framework
-takes or absent.</p>
+<p class="cg-metric">A model argues for what its corpus argues for, and almost nothing argues, with
+numbers, that Rails is the better build for these products. <strong>#{solid} of #{cells.size}</strong>
+comparisons are <em>solid</em>; the rest are generic takes or missing.</p>
 <div class="table-scroll">
 <table class="cg-table">
   <thead><tr><th scope="col">Build &hellip; in Rails</th>#{heads}</tr></thead>
@@ -338,10 +326,10 @@ takes or absent.</p>
 </table>
 </div>
 #{sources}
-<p class="note">Snapshot #{esc(content_gap["updated"])}, by web search per task &times; stack, then judged.
-<span class="cg-k cg-solid">solid</span> current + task-specific + numbers &middot;
-<span class="cg-k cg-generic">generic</span> framework pros/cons or boilerplates &middot;
-<span class="cg-k cg-missing">missing</span> nothing credible. It's a web search, refreshed each pass.</p>
+<p class="note">Snapshot #{esc(content_gap["updated"])}: one web search per task and stack, then judged.
+<span class="cg-k cg-solid">solid</span> current, task-specific, with numbers &middot;
+<span class="cg-k cg-generic">generic</span> framework pros and cons &middot;
+<span class="cg-k cg-missing">missing</span> nothing credible.</p>
 CG
 else
   ""
@@ -360,22 +348,15 @@ QUALITY = if quality_sample && !quality_sample.empty?
   top = ok.sort_by { |_, v| -v["best"] }.first(3)
         .map { |k, v| "#{esc(k)} #{format('%.1f', v['best'])}" }.join(", ")
   <<QUAL
-<h3 class="cg-title">The second gate: would the docs survive the quality filter?</h3>
-<p class="note">Being crawled is the first gate. The second is a quality classifier. We scored up to five
-pages per resource with the open <a href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier">FineWeb-Edu</a>
-filter (kept at score&nbsp;&ge;&nbsp;3). Even counting each resource's <em>best</em> page, only
-<strong>#{keep_res} of #{total_res}</strong> clear the bar (top: #{top}); for <strong>#{best_below2}</strong>
-the best of five scores below&nbsp;2. The filter rewards educational prose and penalizes reference and code,
-exactly the docs developers need.</p>
-<p class="note">There is a way around it. Docs in a <strong>public repo</strong> reach
-the code corpus (<a href="https://huggingface.co/datasets/HuggingFaceCode/stack-v3-train">The Stack v3</a>,
-a direct GitHub crawl with an August 2025 cutoff) and <strong>skip the quality filter entirely</strong>;
-the "in The Stack v3" column shows the observed answer per docs repo. A permissive license is the safe
-choice, and a <em>missing</em> one is no barrier: v3 filters file by file, keeps permissive and unlicensed
-files, and drops only files whose detected license is non-permissive. And
-once a snippet is in public code and copied widely, models reproduce it verbatim: Supabase Auth and
-Resend's quickstart both <em>fail</em> this filter yet Claude recites them from memory.
-<a href="/learn#code-channel">Why the code channel decides this &rarr;</a></p>
+<h3 class="cg-title">The second gate: a quality filter</h3>
+<p class="note">Being crawled is the first gate. A classifier is the second. We scored up to five pages
+per resource with the open
+<a href="https://huggingface.co/HuggingFaceFW/fineweb-edu-classifier">FineWeb-Edu</a> filter, which keeps
+score&nbsp;&ge;&nbsp;3. Counting each resource's <em>best</em> page, <strong>#{keep_res} of
+#{total_res}</strong> clear the bar (top: #{top}); for <strong>#{best_below2}</strong> even the best of
+five scores below&nbsp;2. The filter rewards tutorial prose and penalizes reference docs and code,
+exactly what developers need most. Docs in a public repo skip this filter entirely; that is what the
+"in The Stack v3" column measures. <a href="/learn#code-channel">Why the code channel decides this &rarr;</a></p>
 QUAL
 else
   ""
@@ -388,51 +369,29 @@ end
 LICENSES = begin
   seen = rows.filter_map { |r| repos[r["name"]] }.select { |rp| rp["docs_repo"] }
   tally = seen.group_by { |rp| rp["docs_license"] }.transform_values(&:size).sort_by { |lic, cnt| [ lic.nil? ? 1 : 0, -cnt ] }
-  vague = tally.to_h["NOASSERTION"].to_i
-  observed = stack.values.to_h { |v| [ v["repo"].to_s.downcase, v["in_stack"] ] }
-  read = license_notes.map do |slug, nt|
-    outcome = case observed[slug.downcase]
-    when true  then "and the repo <strong>is</strong> observed in the v3 train set"
-    when false then "and the repo is observed <strong>absent</strong> from the v3 train set"
-    else "and the repo has no observed answer yet"
-    end
-    %(<li><code>#{esc(slug)}</code> reports <strong>NOASSERTION</strong>, and its #{esc(nt["file"])} is the
-      <strong>#{esc(nt["actual"])}</strong>: #{esc(nt["note"])} That makes it
-      <em>#{esc(nt["class"])}</em> by the text, #{outcome}.</li>)
-  end.join("\n    ")
   items = tally.map do |lic, cnt|
     label = GH_META.fetch(lic, lic)
     extra = lic == "NOASSERTION" ? %( <span class="lic-note">any custom or source-available terms</span>) : ""
     %(<li><code>#{esc(label)}</code> <span class="lic-n">#{cnt}</span>#{extra}</li>)
   end.join("\n    ")
   <<LIC
-<h3 class="cg-title">What GitHub's license metadata actually says</h3>
-<p class="note">The code-corpus column reports the license string GitHub's API returns, verbatim, because
-that string is what tooling reads, and it is lossier than it looks. GitHub identifies a license by matching
-the file against a known list; anything it cannot match becomes <code>spdx_id: NOASSERTION</code>
-(<code>name: "Other"</code>). <strong>Every source-available license looks identical in that metadata</strong>,
-and so does a bespoke permissive one. Across the #{seen.size} resources with a public docs repo:</p>
+<h3 class="cg-title">Licenses, as GitHub reports them</h3>
+<p class="note">The cell prints the license string GitHub's API returns, verbatim, because that string is
+what tooling reads. It is lossy: every license GitHub cannot match becomes <code>NOASSERTION</code>
+("Other"), so a bespoke permissive license and a source-available one look identical there. Across the
+#{seen.size} resources with a public docs repo:</p>
 <ul class="lic-tally">
     #{items}
 </ul>
-<p class="note">#{vague} of them sit in that <code>NOASSERTION</code> bucket, where the terms can only be
-established by opening the file. Where we have done so:</p>
-<ul class="lic-read">
-    #{read}
-</ul>
-<p class="note">This matters because the corpus builders read the license <em>text</em>, not GitHub's label:
-a repo that looks merely "custom" in the metadata can be firmly excluded, or firmly fine. Treat
-<code>NOASSERTION</code> as "unknown", never as "probably OK".</p>
-<p class="note"><strong>The reading predicts; the train set decides.</strong> The Stack v3 filters
-file by file with an automated scanner, and its decisions are observable only in the result:
-<code>karafka/wiki</code>, whose license text says "All Rights Reserved", is in the train set, while
-<code>karafka/karafka</code> (LGPL) is out and <code>sidekiq/sidekiq</code> (also LGPL) is in. So this page
-reports membership as measured against the official
-<a href="https://huggingface.co/spaces/HuggingFaceCode/in-the-stack">Am I in The Stack?</a> index and keeps
-the license reading as the explanation and the forecast for the next snapshot.
-<strong>Opting out works</strong>: the <code>rspec</code> and <code>bridgetownrb</code> orgs
+<p class="note"><strong>The reading predicts; the train set decides.</strong> The Stack v3 filters file
+by file, and only the result is observable: <strong>#{stk_in} of #{stk_checked}</strong> docs repos are
+in, including <code>karafka/wiki</code>, whose license file says "All Rights Reserved", while
+<code>karafka/karafka</code> (LGPL) is out and <code>sidekiq/sidekiq</code> (also LGPL) is in. A missing
+license is no barrier: The Stack keeps unlicensed files. <strong>Opting out works</strong>: the
+<code>rspec</code> and <code>bridgetownrb</code> orgs
 <a href="https://github.com/bigcode-project/opt-out-v2/issues/985">asked to be removed</a> and are absent
-from v3 org-wide, permissive licenses and all.</p>
+org-wide. Where we read a license file ourselves, that row's tooltip carries the terms.
+<a href="/learn#licenses">The full license guide &rarr;</a></p>
 LIC
 end
 
@@ -465,11 +424,10 @@ PAGE = <<HTML
     </div>
     <h1>Ruby &amp; Rails LLM discoverability scorecard</h1>
     <p class="lede"><strong>Ruby and Rails are a great default, for humans and AI agents alike.</strong>
-    Yet models rarely reach for them: across the open whichlang benchmark, 13 models picked Ruby
-    <strong>0 times in 1,267 solutions</strong>. That is a discoverability problem, and it starts with the
-    docs. We score #{n} ecosystem resources on whether agents can <strong>find</strong> them and whether
-    they would reach a model's <strong>training</strong> data. <a href="/learn">How docs get into training
-    &rarr;</a></p>
+    Yet given a free choice, 13 models picked Ruby <strong>0 times in 1,267 solutions</strong> (the open
+    whichlang benchmark). Models reach for what they can see. So we score #{n} ecosystem resources on two
+    questions: can an agent <strong>find</strong> the docs, and would they reach a model's
+    <strong>training</strong> data? <a href="/learn">How docs get into training &rarr;</a></p>
     <div class="stats">
       <stat-counter class="stat" value="#{llms}" total="#{n}"><b class="stat__num" data-ref="num">#{llms}/#{n}</b><span>ship an llms.txt</span></stat-counter>
       <stat-counter class="stat" value="#{neg}" total="#{n}"><b class="stat__num" data-ref="num">#{neg}/#{n}</b><span>do content negotiation</span></stat-counter>
@@ -485,15 +443,13 @@ PAGE = <<HTML
 <section>
 <h2><span class="num">01</span>The scorecard</h2>
 <p class="note">Measured over HTTP, June 2026, against each project's <strong>documentation page</strong>
-(<span class="ok">&#10003;</span> good, <span class="bad">&#10007;</span> missing). Columns split into two
-questions: <strong>Retrieval</strong>, can an agent find the docs at request time, and
-<strong>Training</strong>, would they reach a model's corpus, either through the <strong>code corpus</strong>
-or the <strong>web corpus</strong> (Common Crawl coverage, then best-of-5 FineWeb-Edu quality). The code
-column is <strong>observed, not inferred</strong>: each docs repo is checked against the official
-<a href="https://huggingface.co/spaces/HuggingFaceCode/in-the-stack">Am I in The Stack?</a> index for
-<a href="https://huggingface.co/datasets/HuggingFaceCode/stack-v3-train">The Stack v3</a> train set, the
-corpus that skips the web filters (#{stk_in} of #{stk_checked} checked repos are in). Where code from the
-repo is already in, the web cells are <span style="opacity:.45">dimmed</span> as secondary. Click any heading to sort;
+(<span class="ok">&#10003;</span> good, <span class="bad">&#10007;</span> missing).
+<strong>Retrieval</strong>: can an agent read the docs at request time?
+<strong>Training</strong>: would they reach a model's corpus, through code or through the web?
+The code column holds the corpus's own answer: every docs repo is checked against the official
+<a href="https://huggingface.co/spaces/HuggingFaceCode/in-the-stack">Am I in The Stack?</a> index. A repo
+already in The Stack skips the web filters, so its web cells
+<span style="opacity:.45">dim</span>. Click any heading to sort;
 <a href="/learn#glossary">what each column means &rarr;</a></p>
 
 <scorecard-table>
@@ -510,7 +466,7 @@ repo is already in, the web cells are <span style="opacity:.45">dimmed</span> as
     <tr class="grouprow">
       <th class="res sortable" rowspan="2" data-col="0">Resource (docs) <span class="arrow">&#9650;</span></th>
       <th class="grouphead" colspan="6">Retrieval <span class="grouphead__sub">can an agent find it at request time</span></th>
-      <th class="grouphead grouphead--train" colspan="4">Training <span class="grouphead__sub">would it reach the corpus</span></th>
+      <th class="grouphead grouphead--train" colspan="3">Training <span class="grouphead__sub">would it reach the corpus</span></th>
     </tr>
     <tr class="colrow">
       <th class="sortable" data-col="1">robots<br>allows AI <span class="arrow">&#9650;</span></th>
@@ -520,9 +476,8 @@ repo is already in, the web cells are <span style="opacity:.45">dimmed</span> as
       <th class="sortable" data-col="5">content<br>negotiation <span class="arrow">&#9650;</span></th>
       <th class="sortable" data-col="6">.md<br>routes <span class="arrow">&#9650;</span></th>
       <th class="sortable train" data-col="7">in The Stack v3<br><span class="th-sub">observed; docs repo license</span> <span class="arrow">&#9650;</span></th>
-      <th class="sortable train" data-col="8">Software<br>Heritage <span class="th-sub">archived (v2 source)</span> <span class="arrow">&#9650;</span></th>
-      <th class="sortable train" data-col="9">Common<br>Crawl <span class="arrow">&#9650;</span></th>
-      <th class="sortable train" data-col="10">quality<br><span class="th-sub">best of 5, &ge;3</span> <span class="arrow">&#9650;</span></th>
+      <th class="sortable train" data-col="8">Common<br>Crawl <span class="arrow">&#9650;</span></th>
+      <th class="sortable train" data-col="9">quality<br><span class="th-sub">best of 5, &ge;3</span> <span class="arrow">&#9650;</span></th>
     </tr></thead>
     <tbody>
 #{TABLE}
@@ -538,35 +493,34 @@ repo is already in, the web cells are <span style="opacity:.45">dimmed</span> as
 
 <section>
 <h2><span class="num">02</span>What will move the needle</h2>
-<p>Four levers, ordered by depth, each acting on the same number. Rails is plural by design (omakase
-defaults and swappable adapters), so the job is to strengthen the default and agree on
-shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; together they feed the
-<strong>final boss</strong> below.</p>
+<p>Four levers, ordered by depth, all pushing the same number. Rails is plural by design, so the work
+is shared defaults and shared conventions. Each layer shows its <strong>goal</strong> as a live gauge;
+all of them feed the <strong>final boss</strong> below.</p>
 
 <div class="layer">
   <h3><span class="lname">Layer 0: get into the corpus at all</span> <span class="tag now">ship now</span></h3>
   <div class="goals">#{GOALS_L0}</div>
   <ul>
     <li>Unblock AI crawlers (CCBot, GPTBot, ClaudeBot, Google-Extended) in robots.txt and at the WAF.
-      The RubyEvents one-line fix alone unlocks ~15,775 pages of talks.</li>
-    <li>Add sitemaps, server-render, link internally, earn high-authority backlinks.</li>
-    <li>CC-license and transcribe conference video; Google trains Gemini on YouTube transcripts and
-      CC-licensed talks flow into open corpora.</li>
+      One line at RubyEvents frees ~15,775 pages of talks.</li>
+    <li>Add sitemaps, server-render, link internally, earn backlinks.</li>
+    <li>CC-license conference video and publish transcripts: Gemini trains on YouTube, and CC-licensed
+      talks flow into open corpora.</li>
   </ul>
 </div>
 <div class="layer">
   <h3><span class="lname">Layer 1: win retrieval and publish comparisons (content)</span> <span class="tag now">ship now</span></h3>
 
   <h4 class="cg-title">Win retrieval</h4>
-  <p class="note">Why: an agent fetching a Rails or gem doc at request time should get current Markdown it
-    can read, instead of HTML it has to scrape.</p>
+  <p class="note">Why: an agent fetching a doc should get Markdown it can read. Today it gets HTML to
+    scrape.</p>
   <div class="goals">#{GOALS_L1}</div>
   <ul>
-    <li>Serve Markdown via content negotiation and <code>.md</code> routes
-      (<code>Mime::Type.register "text/markdown", :md</code>). A real HTTP standard agents already use,
-      the durable bet. Ship llms.txt too, cheaply.</li>
-    <li>Make <strong>rdoc</strong> emit Markdown + content negotiation by default; the keystone that lifts
-      every gem at once.</li>
+    <li>Serve Markdown by content negotiation and <code>.md</code> routes
+      (<code>Mime::Type.register "text/markdown", :md</code>). Plain HTTP, already used by agents, the
+      durable bet. Ship llms.txt too; it is cheap.</li>
+    <li>Teach <strong>rdoc</strong> to emit Markdown and content negotiation by default: one change that
+      lifts every gem at once.</li>
   </ul>
 
   #{CONTENT_GAP}
@@ -575,90 +529,73 @@ shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; 
   <h3><span class="lname">Layer 2: make agents fluent in the gems (tools)</span> <span class="tag now">ship now</span></h3>
   <div class="goals">#{GOALS_L2}</div>
   <ul>
-    <li>Agree a convention so any gem maintainer ships agent-discoverable tooling, an MCP endpoint or a
-      skill, the way they already ship a README.</li>
-    <li>Converge a Rails MCP server: let agents introspect the app (gems, versions, schema, routes) and
-      pull current per-gem docs on demand.</li>
-    <li>Agree a shared Agent Skills convention so skill packs interoperate.</li>
-    <li>Copy <a href="https://github.com/laravel/boost">Laravel Boost</a> (official MCP, version-pinned
-      guidelines, on-demand skills, tools). Rails has the parts
+    <li>Agree on a convention so a gem ships agent tooling (an MCP endpoint, a skill) the way it ships
+      a README.</li>
+    <li>Converge on one Rails MCP server: agents introspect the app (gems, versions, schema, routes)
+      and pull current docs on demand.</li>
+    <li>Agree on a shared Agent Skills convention so skill packs interoperate.</li>
+    <li>Copy <a href="https://github.com/laravel/boost">Laravel Boost</a>: official MCP, version-pinned
+      guidelines, on-demand skills. Rails has the parts
       (<a href="https://github.com/yjacquin/fast-mcp">fast-mcp</a>,
       <a href="https://tidewave.ai/">Tidewave</a>,
-      <a href="https://github.com/maquina-app/rails-mcp-server">rails-mcp-server</a>) on the official Ruby
-      <a href="https://github.com/modelcontextprotocol/ruby-sdk">MCP SDK</a>, and a Boost-shaped bundle of
-      MCP + skills + guidelines is emerging in
+      <a href="https://github.com/maquina-app/rails-mcp-server">rails-mcp-server</a>, the official Ruby
+      <a href="https://github.com/modelcontextprotocol/ruby-sdk">MCP SDK</a>), and a Boost-shaped bundle
+      is emerging in
       <a href="https://github.com/Bakaface/rails-hyperdrive">rails-hyperdrive</a> <span class="tag new">new</span>.</li>
   </ul>
-  <p class="note">Why: standard Rails is in the training set; the gems, and anything past the cutoff, are
-    where agents guess. A maintainer convention is what scales the fix across that long tail.</p>
+  <p class="note">Why: models know standard Rails. The gems, and anything past the training cutoff, are
+    where agents guess. A convention scales the fix across that long tail.</p>
 </div>
 <div class="layer">
   <h3><span class="lname">Layer 3: change the training default</span> <span class="tag slow">long game</span></h3>
   <div class="goals">#{GOALS_L3}</div>
   <ul>
     <li>Contribute real Rails repos to
-      <a href="https://github.com/multi-swe-bench/multi-swe-bench">Multi-SWE-bench</a> (the repo-level
-      agentic benchmark, which takes open contributions) and publish an open idiomatic-Rails eval. Ruby is
-      in <a href="https://github.com/nuprl/MultiPL-E">MultiPL-E</a>'s HumanEval/MBPP puzzles but absent from
-      the agentic benchmarks, where modern coding ability is measured; adding a language to an eval
-      measurably improves models on it (<a href="https://github.com/nuprl/MultiPL-T">MultiPL-T</a>,
+      <a href="https://github.com/multi-swe-bench/multi-swe-bench">Multi-SWE-bench</a> and publish an
+      open idiomatic-Rails eval. Agentic benchmarks are where coding ability is now measured, Ruby is
+      absent from them, and adding a language to an eval measurably lifts models on it
+      (<a href="https://github.com/nuprl/MultiPL-T">MultiPL-T</a>,
       <a href="https://arxiv.org/abs/2410.18957">Bridge-Coder</a>).</li>
-    <li>Grow Ruby's share of the training corpus. Code models also learn from curated GitHub corpora
-      (<a href="https://huggingface.co/datasets/HuggingFaceCode/stack-v3-train">The Stack v3</a> today;
-      <a href="https://huggingface.co/datasets/bigcode/the-stack-v2">v2</a> was built from Software
-      Heritage), where Ruby in v2 is ~6.8&nbsp;GB against Python's ~60 and JavaScript's ~65, and capability
-      tracks that share.
-      Publish an open, idiomatic-Rails instruction dataset and contribute permissively-licensed Ruby to open
-      corpora like <a href="https://huggingface.co/datasets/PleIAs/common_corpus">Common Corpus</a>;
-      rebalancing a corpus toward under-represented languages measurably lifts them.</li>
-    <li>Keep the public <a href="https://github.com/chad/whichlang">whichlang benchmark</a> as the
-      scoreboard for the final boss below, and re-run it on each new model.</li>
+    <li>Grow Ruby's share of the corpus. In
+      <a href="https://huggingface.co/datasets/bigcode/the-stack-v2">The Stack v2</a>, Ruby is
+      ~6.8&nbsp;GB to Python's ~60, and capability tracks share. Publish an open idiomatic-Rails
+      instruction dataset; contribute permissive Ruby to open corpora like
+      <a href="https://huggingface.co/datasets/PleIAs/common_corpus">Common Corpus</a>.</li>
+    <li>Re-run the public <a href="https://github.com/chad/whichlang">whichlang benchmark</a> on each
+      new model; it is the scoreboard below.</li>
   </ul>
 </div>
 
 <div class="panel target boss">
   <p class="label">&#9733; The final boss</p>
-  <p><strong>Frontier models reach for Ruby more often.</strong> The single metric every layer above
-  serves, measured by the public <a href="https://github.com/chad/whichlang">whichlang benchmark</a>: given
-  a free choice of language across 13 models, Ruby was picked <strong>0 times in 1,267 generated
-  solutions</strong> (the defaults are Python, JavaScript, and Go). Win condition: that zero starts climbing,
-  model after model, as agents pick Ruby whenever it is the better fit.</p>
+  <p><strong>Frontier models reach for Ruby more often.</strong> One metric, fed by every layer above:
+  given a free choice, 13 models picked Ruby <strong>0 times in 1,267 solutions</strong> (they default
+  to Python, JavaScript, and Go). Win condition: the zero starts climbing, model after model.</p>
   <div class="goals goals--boss">#{BOSS_METERS}</div>
 </div>
 </section>
 
 <section>
 <h2><span class="num">03</span>Methodology</h2>
-<p class="note">All indicators probed over HTTP, June 2026, against each project's documentation URL:
-robots.txt parsed for AI user-agents (CCBot, GPTBot, ClaudeBot, Google-Extended) with
-<code>Disallow: /</code>; crawlability tested by fetching as CCBot (to catch Cloudflare/WAF blocks); content
-negotiation via <code>Accept: text/markdown</code>; <code>.md</code> routes and llms.txt checked for a 200.
-The Stack v3 membership checked per docs repo against the official
-<a href="https://huggingface.co/spaces/HuggingFaceCode/in-the-stack">Am I in The Stack?</a> index (one
-lookup per repo owner); absences are attributed only where the reason is verified (an opt-out issue, a
-repo public only after the 2025-08-07 crawl cutoff), and say "not established" otherwise.
-Software Heritage archival checked per docs repo via the archive's public
-<a href="https://archive.softwareheritage.org/api/">origin API</a> (SWH was the source of The Stack v2;
-v3 crawls GitHub directly); a missing repo can be submitted at
-<a href="https://archive.softwareheritage.org/save/">Save Code Now</a>.
-The language-choice figure is from the open whichlang benchmark (13 models, 1,267 classified solutions, 0
-Ruby; <a href="https://github.com/chad/whichlang">github.com/chad/whichlang</a>). That the same models write
-Rails competently when instructed is our own informal observation.</p>
-<p class="note"><strong>Why Common Crawl?</strong> It's the open web crawl that seeds most LLM pretraining
-corpora (C4, RefinedWeb, FineWeb, behind GPT, Llama, and others). Common Crawl is a sampled, English-biased
-slice of the web: it picks domains and pages by
-<a href="https://facctconference.org/static/papers24/facct24-148.pdf">harmonic centrality under a fixed
-budget</a>, so a project's CC coverage is a proxy for whether a model has seen its docs at all. Inclusion is
-necessary but not sufficient: the corpora are built from heavily filtered, deduplicated derivatives, so a
-crawled page must also clear a quality filter to reach training. It's the one column you cannot fix this
-quarter (it reflects crawls already taken), which is why getting in, via sitemaps, internal links, backlinks,
-and unblocking bots, is Layer 0.</p>
+<p class="note">Probed over HTTP, June 2026, against each project's documentation URL: robots.txt parsed
+for AI user-agents; crawlability fetched as CCBot, which catches WAF blocks; content negotiation asked
+with <code>Accept: text/markdown</code>; <code>.md</code> routes and llms.txt checked for a 200.
+The Stack v3 membership is read from the official
+<a href="https://huggingface.co/spaces/HuggingFaceCode/in-the-stack">Am I in The Stack?</a> index, one
+lookup per repo owner. An absence is attributed only when the reason is verified (an opt-out issue, a
+repo public after the 2025-08-07 crawl cutoff) and says "not established" otherwise. The language-choice
+figure is <a href="https://github.com/chad/whichlang">whichlang</a>'s: 13 models, 1,267 classified
+solutions, 0 Ruby.</p>
+<p class="note"><strong>Why Common Crawl?</strong> It seeds most open web corpora (C4, FineWeb, behind
+GPT and Llama), samples by domain centrality, and never copies a site in full, so coverage is a proxy for
+whether a model saw the docs at all. It also reflects crawls already taken: the one column you cannot fix
+this quarter, which is why Layer 0 exists. <a href="/learn#common-crawl">How it samples &rarr;</a></p>
 </section>
 
 <footer>
   <span class="label">Evil Martians</span>
-  <p>Built by Evil Martians. A living scorecard, re-run the probes to update it. Read more: our
-  <a href="/learn">guide to how devtooling docs get into training data</a>, plus
+  <p>Built by Evil Martians. A living scorecard: the probes re-run and the numbers move. Read more:
+  <a href="/learn">how docs get into training data</a>, plus
   <a href="https://evilmartians.com/chronicles/how-to-make-your-website-visible-to-llms">&ldquo;How to make
   your website visible to LLMs&rdquo;</a> and
   <a href="https://evilmartians.com/chronicles/3-rules-for-getting-ai-agents-to-find-use-and-not-exploit-your-devtool">&ldquo;3
