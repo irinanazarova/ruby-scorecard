@@ -78,7 +78,7 @@ class Analysis < ApplicationRecord
   end
 
   def self.free_remaining(session_token)
-    [ AnalyzerConfig::FREE_ANALYSES_PER_SESSION - free_used(session_token), 0 ].max
+    [ AnalyzerConfig.free_analyses_per_session - free_used(session_token), 0 ].max
   end
 
   private

@@ -42,7 +42,7 @@ class AnalysisPolicy
       return nil if Analysis.free_remaining(session_token).positive?
 
       Denial.new(reason: :free_allowance_exhausted,
-                 limit: AnalyzerConfig::FREE_ANALYSES_PER_SESSION)
+                 limit: AnalyzerConfig.free_analyses_per_session)
     elsif user.budget_exhausted?
       Denial.new(reason: :budget_exhausted, limit: user.budget_dollars)
     end

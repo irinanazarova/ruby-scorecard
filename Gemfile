@@ -44,6 +44,7 @@ gem "thruster", require: false
 gem "ruby_llm"                      # Claude + OpenAI behind one interface, with per-message cost
 gem "omniauth-github"               # sign-in, so per-user spend can be capped
 gem "omniauth-rails_csrf_protection"
+gem "anyway_config", "~> 2.6"       # typed, source-agnostic settings instead of ENV.fetch + Integer()
 
 # --- shared with the static generators in scripts/ ---
 gem "nokogiri"                      # main-content extraction, used by the site build and by /test

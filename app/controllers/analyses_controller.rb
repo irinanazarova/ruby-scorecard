@@ -15,15 +15,15 @@ class AnalysesController < ApplicationController
   # drain anything: the listed examples and anything whose probe is already cached. `rate_limit`
   # forwards extra options to before_action, which is what makes `unless:` work here. Without it a
   # visitor clicking the four examples in a row could be told to slow down for costing us nothing.
-  rate_limit to: AnalyzerConfig::RATE_LIMIT_PER_IP[:count],
-             within: AnalyzerConfig::RATE_LIMIT_PER_IP[:within],
+  rate_limit to: AnalyzerConfig.rate_limit_per_ip[:count],
+             within: AnalyzerConfig.rate_limit_per_ip[:within],
              only: :create,
              unless: -> { free_run? },
              by: -> { request.remote_ip },
              with: -> { too_many_requests("You are going a bit fast. Try again in a few minutes.") }
 
-  rate_limit to: AnalyzerConfig::RATE_LIMIT_PER_IP_DAILY[:count],
-             within: AnalyzerConfig::RATE_LIMIT_PER_IP_DAILY[:within],
+  rate_limit to: AnalyzerConfig.rate_limit_per_ip_daily[:count],
+             within: AnalyzerConfig.rate_limit_per_ip_daily[:within],
              only: :create,
              unless: -> { free_run? },
              by: -> { "daily:#{request.remote_ip}" },
@@ -31,7 +31,7 @@ class AnalysesController < ApplicationController
 
   def new
     @recent = Analysis.where(session_token: session_token).recent.limit(5)
-    @examples = AnalyzerConfig::EXAMPLES
+    @examples = Analyzer::Example.all
   end
 
   def create

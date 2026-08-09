@@ -58,13 +58,13 @@ module Analyzer
     # Only probe providers we actually hold a key for, so a missing key degrades the panel instead
     # of erroring every probe.
     def self.available_models
-      MODELS.select { |_k, spec| AnalyzerConfig.key_for?(spec[:key]) }.keys
+      MODELS.select { |_k, spec| Analyzer::ApiKeys.for?(spec[:key]) }.keys
     end
 
     def initialize(passages, models: MODELS.keys, max_calls: nil)
       @passages = Array(passages)
       @models = models
-      @max_calls = max_calls || AnalyzerConfig::MAX_MODEL_CALLS_PER_ANALYSIS
+      @max_calls = max_calls || AnalyzerConfig.max_model_calls_per_analysis
     end
 
     # Probes every passage against every model, capped by BOTH a call budget and a wall-clock
@@ -76,7 +76,7 @@ module Analyzer
     def call
       results = []
       calls = 0
-      deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + AnalyzerConfig::MEMORIZATION_DEADLINE
+      deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + AnalyzerConfig.memorization_deadline_seconds
 
       @passages.each do |passage|
         next unless passage&.ok

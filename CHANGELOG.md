@@ -11,6 +11,21 @@ Two kinds of entry appear here, and they mean different things:
 
 ## [Unreleased]
 
+### Changed
+
+- **Settings env vars are now prefixed.** `FREE_ANALYSES_PER_SESSION` became
+  `ANALYZER_FREE_ANALYSES_PER_SESSION`, and the same for `BUDGET_CENTS_PER_USER`,
+  `RATE_LIMIT_IP_COUNT`, `RATE_LIMIT_IP_DAILY`, `MAX_MODEL_CALLS_PER_ANALYSIS`,
+  `MEMORIZATION_DEADLINE` and `QUALITY_API`. They are typed through
+  [anyway_config](https://github.com/palkan/anyway_config) and can now come from an env var,
+  `config/analyzer.yml` or credentials. Safe to change because nothing set them: production runs on
+  the defaults, and every default is unchanged. **If you set any of these locally, add the
+  `ANALYZER_` prefix.**
+- Code is organised in [layered Rails](https://github.com/palkan/layered-rails) directories:
+  `app/presenters` (read a finished run and decide what it says), `app/policies` (who may do what),
+  `app/services` (measure and orchestrate), `app/infrastructure` (HTTP, cache, API keys),
+  `app/configs`. No behaviour changed and no public constant was renamed.
+
 ### Added
 
 - MIT licence, contribution guide, code of conduct and this changelog.

@@ -59,7 +59,7 @@
       $<%= current_user.spent_dollars %> of $<%= current_user.budget_dollars %> used.
     <% else %>
       <strong><%= free_remaining %></strong> of
-      <%= AnalyzerConfig::FREE_ANALYSES_PER_SESSION %> free checks left.
+      <%= AnalyzerConfig.free_analyses_per_session %> free checks left.
       Re-running a pair you already checked is free and never uses one up.
       <%= button_to "Sign in with GitHub", "/auth/github", method: :post, class: "analyzer__linkbtn",
                     data: { turbo: false } %>

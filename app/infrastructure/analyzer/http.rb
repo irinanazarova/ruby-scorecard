@@ -52,7 +52,7 @@ module Analyzer
     # into nil: the code-channel card rendered fine while passage selection quietly found no repo
     # and reported "no testable prose found" about a repo full of prose.
     def github_headers
-      t = AnalyzerConfig.github_token.to_s
+      t = Analyzer::ApiKeys.github_token.to_s
       t.empty? ? {} : { "Authorization" => "Bearer #{t}" }
     end
 

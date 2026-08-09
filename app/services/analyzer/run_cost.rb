@@ -17,7 +17,7 @@ module Analyzer
   class RunCost
     def self.free?(target)
       return false unless target&.valid?
-      return true if AnalyzerConfig.example?(target.url, target.repo)
+      return true if Analyzer::Example.match?(target.url, target.repo)
 
       Cache.warm?(:memorization, target.cache_key)
     end

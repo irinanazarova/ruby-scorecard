@@ -8,7 +8,7 @@ namespace :analyzer do
       if args[:docs].present? || args[:repo].present?
         [ Analyzer::Target.new(docs_url: args[:docs], repo: args[:repo]) ]
       else
-        AnalyzerConfig::EXAMPLES.map { |e| Analyzer::Target.new(docs_url: e[:docs], repo: e[:repo]) }
+        Analyzer::Example.all.map { |e| Analyzer::Target.new(docs_url: e[:docs], repo: e[:repo]) }
       end
 
     targets.each do |target|
@@ -34,7 +34,7 @@ namespace :analyzer do
     models = Analyzer::Memorization.available_models
     abort "no model API keys configured" if models.empty?
 
-    AnalyzerConfig::REFERENCES.each do |config|
+    Analyzer::ReferencePage.all.each do |config|
       result = Analyzer::References.one(config, models: models, refresh: true)
       if result.nil? || result[:error]
         warn format("  %-24s ERROR: %s", config[:label], result&.dig(:error) || "no result")

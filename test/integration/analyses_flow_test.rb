@@ -71,7 +71,7 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
   # The allowance is the thing that stops a stranger spending the account's money, so it needs a
   # test that actually exhausts it rather than trusting the counter.
   test "anonymous visitors are cut off after the free allowance" do
-    AnalyzerConfig::FREE_ANALYSES_PER_SESSION.times do |i|
+    AnalyzerConfig.free_analyses_per_session.times do |i|
       post "/analyses", params: { input: "https://example.com/docs/#{i}" }
       assert_redirected_to analysis_path(Analysis.last)
     end
@@ -79,13 +79,13 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
     post "/analyses", params: { input: "https://example.com/docs/one-too-many" }
     assert_redirected_to test_path
     assert_match(/free checks/i, flash[:alert])
-    assert_equal AnalyzerConfig::FREE_ANALYSES_PER_SESSION, Analysis.count
+    assert_equal AnalyzerConfig.free_analyses_per_session, Analysis.count
   end
 
   # Cached runs cost nothing to serve, so charging an allowance slot for one would punish exactly
   # the behaviour we want to encourage (re-checking a link you already ran).
   test "cached re-runs do not consume the free allowance" do
-    AnalyzerConfig::FREE_ANALYSES_PER_SESSION.times do |i|
+    AnalyzerConfig.free_analyses_per_session.times do |i|
       post "/analyses", params: { input: "https://example.com/docs/#{i}" }
     end
     assert_equal 0, Analysis.free_remaining(session_token_from_cookie)
@@ -100,7 +100,7 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
   end
 
   test "signed-in users are blocked once the budget is spent" do
-    sign_in_via_github(spent_millicents: AnalyzerConfig::BUDGET_CENTS_PER_USER * 10)
+    sign_in_via_github(spent_millicents: AnalyzerConfig.budget_cents_per_user * 10)
 
     post "/analyses", params: { input: "https://example.com/docs/over-budget" }
     assert_redirected_to test_path
@@ -109,13 +109,13 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
   end
 
   test "signing in carries anonymous runs over and lifts the allowance" do
-    (AnalyzerConfig::FREE_ANALYSES_PER_SESSION + 1).times do |i|
+    (AnalyzerConfig.free_analyses_per_session + 1).times do |i|
       post "/analyses", params: { input: "https://example.com/docs/pre-#{i}" }
     end
-    assert_equal AnalyzerConfig::FREE_ANALYSES_PER_SESSION, Analysis.count, "the last one is blocked"
+    assert_equal AnalyzerConfig.free_analyses_per_session, Analysis.count, "the last one is blocked"
 
     user = sign_in_via_github
-    assert_equal AnalyzerConfig::FREE_ANALYSES_PER_SESSION, user.analyses.count,
+    assert_equal AnalyzerConfig.free_analyses_per_session, user.analyses.count,
                  "anonymous history should follow the visitor in"
 
     post "/analyses", params: { input: "https://example.com/docs/after-signin" }
@@ -300,12 +300,12 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
   # The listed examples are the tour: clicking all four must never cost a visitor their allowance
   # or trip the per-IP limit, however cold the cache is.
   test "listed examples never consume the free allowance" do
-    AnalyzerConfig::FREE_ANALYSES_PER_SESSION.times do |i|
+    AnalyzerConfig.free_analyses_per_session.times do |i|
       post "/analyses", params: { input: "https://example.com/docs/spend-#{i}" }
     end
     assert_equal 0, Analysis.free_remaining(session_token_from_cookie), "allowance is spent"
 
-    AnalyzerConfig::EXAMPLES.each do |example|
+    Analyzer::Example.all.each do |example|
       post "/analyses", params: { docs_url: example[:docs], repo: example[:repo] }
       assert_redirected_to analysis_path(Analysis.last),
                            "#{example[:label]} must run even with no allowance left"
@@ -317,7 +317,7 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
     pair = Analyzer::Target.new(docs_url: docs, repo: "acme/probed")
     Analyzer::Cache.fetch(:memorization, pair.cache_key) { { summary: { verdict: "none" } } }
 
-    AnalyzerConfig::FREE_ANALYSES_PER_SESSION.times do |i|
+    AnalyzerConfig.free_analyses_per_session.times do |i|
       post "/analyses", params: { input: "https://example.com/docs/burn-#{i}" }
     end
     assert_equal 0, Analysis.free_remaining(session_token_from_cookie)
@@ -329,16 +329,16 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
   # Both halves are filled in for every listed example, which is the point of the pair: the demo
   # should never show the tool working one out from the other.
   test "every listed example fills in both fields and carries a note" do
-    AnalyzerConfig::EXAMPLES.each do |example|
+    Analyzer::Example.all.each do |example|
       target = Analyzer::Target.new(docs_url: example[:docs], repo: example[:repo])
       assert target.valid?, "#{example[:label]} does not parse: #{target.error}"
       assert_equal :both, target.kind, "#{example[:label]} is missing one half of the pair"
       assert example[:note].present?, "#{example[:label]} has no note"
-      assert AnalyzerConfig.example?(example[:docs], example[:repo])
-      assert AnalyzerConfig.example?("#{example[:docs]}/", example[:repo]),
+      assert Analyzer::Example.match?(example[:docs], example[:repo])
+      assert Analyzer::Example.match?("#{example[:docs]}/", example[:repo]),
              "trailing slash should still match"
     end
-    assert_not AnalyzerConfig.example?("https://example.com/docs/not-listed", "acme/nope")
+    assert_not Analyzer::Example.match?("https://example.com/docs/not-listed", "acme/nope")
   end
 
   # The job used to recompute from_cache over EVERY step including `target`, which is the parsed
@@ -353,7 +353,7 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
     perform_enqueued_jobs
 
     assert analysis.reload.from_cache, "a warm run must be recorded as cached, not billable"
-    assert_equal AnalyzerConfig::FREE_ANALYSES_PER_SESSION,
+    assert_equal AnalyzerConfig.free_analyses_per_session,
                  Analysis.free_remaining(session_token_from_cookie),
                  "a cached run must not consume the allowance"
   end

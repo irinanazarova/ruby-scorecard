@@ -101,7 +101,7 @@ module Analyzer
       ok = passages.select(&:ok)
       return { error: passages.first&.error || "No testable prose found" } if ok.empty?
 
-      unless AnalyzerConfig.any_model_key?
+      unless Analyzer::ApiKeys.any?
         return { error: "No model API keys configured", passages: ok.map(&:to_h) }
       end
 

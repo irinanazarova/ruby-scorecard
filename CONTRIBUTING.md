@@ -56,12 +56,26 @@ bespoke permissive licence from a source-available one. Open the file; do not in
 The app follows [layered Rails](https://github.com/palkan/layered-rails): presentation, application,
 domain, infrastructure, with dependencies pointing downward only. Practically:
 
-- `app/presenters/` shape results for the screen. They never fetch anything.
-- `app/services/analyzer/` runs the probes and orchestrates a run.
-- `app/models/` holds domain logic and persistence.
-- Controllers do HTTP and nothing else.
+| Directory | Holds | Rule |
+| --- | --- | --- |
+| `app/presenters` | Verdict, Actions, Funnel, RecallGrid, Discoverability, Steps | Reads a finished run and decides what it says. **Never fetches anything.** |
+| `app/policies` | AnalysisPolicy | Who may run and who may read. Returns symbols, never sentences. |
+| `app/services` | The probes, Run, StartRun, RunCost | Measures and orchestrates. May do I/O. |
+| `app/models` | Analysis, User, Example, ReferencePage | Domain logic, persistence, curated data. |
+| `app/infrastructure` | Http, Cache, ApiKeys | Talks to the outside world. |
+| `app/configs` | AnalyzerConfig | Typed settings, via anyway_config. |
 
-Adding a probe means a service plus a presenter, not one object that does both.
+Controllers do HTTP and nothing else. Dependencies point downward: a service may use
+infrastructure, a presenter may not use a service.
+
+The line that decides where something goes is **does it measure, or does it read?** `References`
+lives in `app/services` despite appearing on the same screen as the presenters, because it probes
+real pages against real models and costs money. `Verdict` reads five stored payloads and writes a
+sentence. Adding a probe means a service plus a presenter, not one object doing both.
+
+Settings come from `AnalyzerConfig`, which reads `ANALYZER_`-prefixed env vars,
+`config/analyzer.yml`, or credentials, whichever is present. Add a knob by declaring it once in
+`app/configs/analyzer_config.rb` with a default and a type.
 
 ## Refreshing the published data
 

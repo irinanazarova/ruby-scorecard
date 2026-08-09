@@ -50,7 +50,7 @@ class AnalysisPolicyTest < ActiveSupport::TestCase
   # --- run ----------------------------------------------------------------------------------
 
   test "a free run is allowed even with the allowance spent" do
-    AnalyzerConfig::FREE_ANALYSES_PER_SESSION.times { |i| run_by(session: "abc", input: "u#{i}") }
+    AnalyzerConfig.free_analyses_per_session.times { |i| run_by(session: "abc", input: "u#{i}") }
 
     assert_nil policy(session: "abc").run(free: true),
                "a cached run costs nothing, so nothing needs protecting from it"
@@ -61,15 +61,15 @@ class AnalysisPolicyTest < ActiveSupport::TestCase
   end
 
   test "an anonymous visitor is denied once the allowance is spent" do
-    AnalyzerConfig::FREE_ANALYSES_PER_SESSION.times { |i| run_by(session: "abc", input: "u#{i}") }
+    AnalyzerConfig.free_analyses_per_session.times { |i| run_by(session: "abc", input: "u#{i}") }
 
     denial = policy(session: "abc").run(free: false)
     assert_equal :free_allowance_exhausted, denial.reason
-    assert_equal AnalyzerConfig::FREE_ANALYSES_PER_SESSION, denial.limit
+    assert_equal AnalyzerConfig.free_analyses_per_session, denial.limit
   end
 
   test "cached runs do not count against the allowance" do
-    AnalyzerConfig::FREE_ANALYSES_PER_SESSION.times do |i|
+    AnalyzerConfig.free_analyses_per_session.times do |i|
       run_by(session: "abc", input: "u#{i}", from_cache: true)
     end
 
@@ -78,7 +78,7 @@ class AnalysisPolicyTest < ActiveSupport::TestCase
   end
 
   test "a signed-in user over budget is denied" do
-    user = user_with(spent: AnalyzerConfig::BUDGET_CENTS_PER_USER * 10)
+    user = user_with(spent: AnalyzerConfig.budget_cents_per_user * 10)
 
     denial = policy(session: "abc", user: user).run(free: false)
     assert_equal :budget_exhausted, denial.reason
@@ -86,7 +86,7 @@ class AnalysisPolicyTest < ActiveSupport::TestCase
   end
 
   test "signing in lifts the anonymous allowance" do
-    AnalyzerConfig::FREE_ANALYSES_PER_SESSION.times { |i| run_by(session: "abc", input: "u#{i}") }
+    AnalyzerConfig.free_analyses_per_session.times { |i| run_by(session: "abc", input: "u#{i}") }
     user = user_with(spent: 0)
 
     assert_nil policy(session: "abc", user: user).run(free: false)
@@ -95,7 +95,7 @@ class AnalysisPolicyTest < ActiveSupport::TestCase
   # A denial is a symbol plus a number, never a sentence: the wording is the caller's, so the policy
   # never has to be edited to reword a flash message.
   test "denials carry no user-facing copy" do
-    AnalyzerConfig::FREE_ANALYSES_PER_SESSION.times { |i| run_by(session: "abc", input: "u#{i}") }
+    AnalyzerConfig.free_analyses_per_session.times { |i| run_by(session: "abc", input: "u#{i}") }
 
     denial = policy(session: "abc").run(free: false)
     assert_kind_of Symbol, denial.reason

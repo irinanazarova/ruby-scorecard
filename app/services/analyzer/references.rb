@@ -30,7 +30,7 @@ module Analyzer
 
     class << self
       def all(models: Memorization.available_models)
-        AnalyzerConfig::REFERENCES.filter_map { |config| one(config, models: models) }
+        Analyzer::ReferencePage.all.filter_map { |config| one(config, models: models) }
       end
 
       def one(config, models: Memorization.available_models, refresh: false)

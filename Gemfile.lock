@@ -472,6 +472,7 @@ PLATFORMS
 
 DEPENDENCIES
   anycable-rails (~> 1.6)
+  anyway_config (~> 2.6)
   bootsnap
   brakeman
   debug

@@ -6,7 +6,7 @@ class User < ApplicationRecord
   # Spend is tracked in tenths of a cent against RubyLLM's reported per-message cost, not an
   # estimate from token counts. A probe costs ~0.3c, so whole-cent accounting would round most of
   # the bill to zero and the cap would never fire.
-  def budget_millicents = AnalyzerConfig::BUDGET_CENTS_PER_USER * 10
+  def budget_millicents = AnalyzerConfig.budget_cents_per_user * 10
 
   def remaining_millicents = [ budget_millicents - spent_millicents, 0 ].max
 
