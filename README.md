@@ -1,152 +1,187 @@
 # ruby-scorecard
 
-A measured scorecard of how discoverable the Ruby & Rails ecosystem's **documentation** is to LLMs and
-AI coding agents, and what the community can do about it. Builds a deployable `dist/` for
-**ruby.evilmartians.com** in the Evil Martians design system.
+Measures how discoverable the Ruby and Rails ecosystem's **documentation** is to LLMs and AI coding
+agents, and what maintainers can do about it. Runs at **[ruby.evilmartians.com](https://ruby.evilmartians.com)**.
+
+Two halves, one repo:
+
+- **The scorecard**, a generated page grading 94 ecosystem resources. Built by `scripts/` into
+  `dist/`, server-rendered, crawlable with JavaScript off.
+- **The analyzer**, a Rails app at [`/test`](https://ruby.evilmartians.com/test) that runs the same
+  checks against any URL or repo you give it, live, and streams results as they land.
 
 ## Why
 
-Frontier models do not reach for Rails on product work (0 Rails in 210 product-task samples across 7
-models; 0/30 on the newest model). It is a discoverability gap, not a capability one: forced to use Rails,
-the same models write idiomatic Rails (~4.2/5). This project tracks the fixable, checkable signals.
+Given a free choice, 13 models picked Ruby **0 times in 1,267 classified solutions** on the open
+[whichlang](https://github.com/chad/whichlang) benchmark. Models reach for what they can see. This
+project measures the visible part and tracks whether it improves.
 
 ## What it measures
 
-Per resource, against its **documentation URL** (not the landing page):
+Two questions, asked separately, because they have different answers and different fixes.
+
+**Retrieval: can an agent find and read it today?** Checked against the resource's *documentation*
+URL, never its landing page.
 
 | Indicator | Why it matters |
 | --- | --- |
-| robots allows AI | Are CCBot/GPTBot/ClaudeBot/Google-Extended permitted |
-| crawlable (no WAF block) | Cloudflare/WAF can block bots even when robots allows |
-| sitemap | Crawlers capture little without one |
-| llms.txt | LLM-readable doc index |
-| content negotiation | Serve Markdown on `Accept: text/markdown` (the durable, agent-used standard) |
-| .md routes | Markdown twin of each doc page |
+| robots allows AI | Whether CCBot, GPTBot, ClaudeBot and Google-Extended are permitted |
+| crawlable, no WAF | A CDN or bot rule can block a crawler that `robots.txt` allows |
+| sitemap | Crawlers reach deep pages far less often without one |
+| `llms.txt` | Reported as informational: no major AI system uses it |
+| content negotiation | Serves Markdown on `Accept: text/markdown` |
+| `.md` routes | A Markdown twin of each docs page |
 
-Plus a sampled Common Crawl page count (the corpus most models train on).
+**Training: would it reach a corpus at all?**
+
+| Indicator | Why it matters |
+| --- | --- |
+| in The Stack v3 | **Observed**, queried from the official Am-I-in-The-Stack index, never inferred from a licence |
+| Common Crawl | Sampled page count against the sitemap total |
+| quality | FineWeb-Edu score, best of 5, kept at ≥ 3 |
+
+The reasoning behind all of it, with sources, is at
+[/learn](https://ruby.evilmartians.com/learn).
+
+## Architecture
+
+The Rails app follows the layered architecture from Vladimir Dementyev's *Layered Design for Ruby on
+Rails Applications* ([rules as a plugin](https://github.com/palkan/layered-rails-plugin)).
+Dependencies point downward only.
+
+| Directory | Holds | Rule |
+| --- | --- | --- |
+| `app/presenters` | Verdict, Actions, Funnel, RecallGrid, Discoverability, Steps | Reads a finished run and decides what it says. **Never fetches.** |
+| `app/policies` | AnalysisPolicy | Who may run, who may read. Returns symbols, never sentences. |
+| `app/services` | The probes, Run, StartRun, RunCost | Measures and orchestrates. May do I/O. |
+| `app/models` | Analysis, User, Example, ReferencePage | Domain logic, persistence, curated data. |
+| `app/infrastructure` | Http, Cache, ApiKeys | Talks to the outside world. |
+| `app/configs` | AnalyzerConfig | Typed settings via `anyway_config`. |
+
+The line that decides where code goes is **does it measure, or does it read?** `References` sits in
+`app/services` despite rendering on the same screen as the presenters, because it probes real pages
+against real models and costs money.
 
 ## Layout
 
 ```
-data/scorecard.json        # probe output (the data the page is built from)
-data/coverage.json         # per-resource Common Crawl pages vs sitemap totals (optional)
-data/content_gap.json      # "Rails vs the field" comparison-content matrix (search-refreshed, see below)
+app/                       # the Rails analyzer (see Architecture above)
+config/                    # routes, initializers, credentials
+data/scorecard.json        # probe output: the data the page is built from
+data/coverage.json         # per-resource Common Crawl pages vs sitemap totals
+data/stack.json            # observed The Stack v3 membership
+data/license_notes.json    # hand-read licences, never script-written
+data/content_gap.json      # "Rails vs the field" comparison matrix
 scripts/probe.rb           # gather indicators over HTTP -> data/scorecard.json
 scripts/coverage.rb        # CC page counts + sitemap totals -> data/coverage.json
-scripts/build.rb           # render dist/scorecard.html (+ benchmark constants)
-scripts/site_size.rb       # ad-hoc Common Crawl coverage denominators (spot checks)
-src/styles/                # design tokens, fonts (@font-face), base layout
-src/js/                    # nanotags web components (theme, filter/sort, counters)
-src/fonts/                 # self-hosted Martian Grotesk + Martian Mono (woff2)
-build.sh                   # one-shot build: assets (esbuild) + HTML (build.rb) -> dist/
-package.json               # esbuild (dev) + nanotags/nanostores
-dist/                      # generated, deployable (HTML + assets/ + fonts/)
+scripts/stack_check.rb     # Am-I-in-The-Stack lookups -> data/stack.json
+scripts/swh_check.rb       # Software Heritage archival -> data/swh.json
+scripts/build.rb           # render dist/scorecard.html
+src/                       # design tokens, fonts, nanotags web components
+build.sh                   # assets (esbuild) + HTML (build.rb) -> dist/ -> public/
+dist/                      # generated, committed, deployable
+web/                       # standalone Sinatra FineWeb-Edu scorer (ruby-quality-api)
 ```
 
-The page is **progressively enhanced**: `build.rb` server-renders the full table and all prose, so it is
-complete and crawlable with JavaScript off. The nanotags components only enhance the existing DOM (theme
-toggle, search/category filter, column sort, animated stat counters).
+The generated page is **progressively enhanced**: `build.rb` server-renders the full table and all
+prose; the components in `src/js/` only add the theme toggle, filter, sort and stat counters.
 
 ## Requirements
 
-- **Ruby** (stdlib only, plus `curl`) for the probe and the HTML renderer.
-- **Node + npm** for the front-end bundle (esbuild bundles nanotags into `dist/assets/app.js`).
+- **Ruby 3.4** and Bundler for the app, the probes and the renderer.
+- **Node and npm** for the front-end bundle (esbuild bundles nanotags into `dist/assets/app.js`).
+- **flyctl**, only to deploy or to run a probe from a disposable IP.
 
-## Build
+The FineWeb-Edu ONNX model (`vendor/fwedu/`, 419 MB) is gitignored. Only
+`scripts/quality_core.rb` needs it; the app and the test suite do not.
 
-From the project root:
-
-```bash
-./build.sh          # installs JS deps on first run, bundles assets, renders dist/scorecard.html
-```
-
-Or run the steps individually:
+## Run it
 
 ```bash
-npm install         # first time only
-npm run build:assets   # JS + CSS + fonts -> dist/assets/
-ruby scripts/build.rb  # data/scorecard.json -> dist/scorecard.html
+bundle install
+bin/rails db:prepare
+./build.sh                 # installs JS deps on first run, then assets + dist/ -> public/
+bin/rails server           # http://localhost:3000
 ```
 
-Preview locally:
+`/` serves the generated scorecard, `/test` is the live analyzer, `/learn` is the guide.
+
+The analyzer works without model API keys; the memorization probe is the only step that needs them
+and it reports honestly when they are absent.
+
+## Tests and checks
 
 ```bash
-ruby -run -e httpd dist -p 8911    # open http://localhost:8911/scorecard.html
+bin/rails test             # 130 runs
+bundle exec rubocop        # rubocop-rails-omakase
+bundle exec brakeman
 ```
+
+CI runs all three on every push and pull request, plus a fourth job asserting that `dist/`
+regenerates unchanged from `data/` and `src/`. That last one catches a generator edited without a
+rebuild, which nothing else would notice until the deployed pages disagreed with their source.
 
 ## Update the data
 
-```bash
-ruby scripts/probe.rb       # re-probe every resource over HTTP -> data/scorecard.json
-./build.sh                  # rebuild dist/
-```
-
-To add or remove a resource, edit the `RESOURCES` list at the top of `scripts/probe.rb` (use the **docs**
-URL, not the marketing landing page), then re-probe and rebuild. Full instructions:
-`.claude/skills/update-scorecard/SKILL.md`.
-
-### Common Crawl coverage (optional)
+Refreshing re-probes 94 third-party sites, so it is a deliberate act rather than part of a deploy.
 
 ```bash
-ruby scripts/coverage.rb     # sitemap totals now + CC page counts -> data/coverage.json
-./build.sh                   # renders the "Corpus coverage" chart from it
+ruby scripts/probe.rb      # indicators -> data/scorecard.json
+ruby scripts/coverage.rb   # CC counts + sitemap totals -> data/coverage.json
+ruby scripts/stack_check.rb   # observed Stack v3 membership -> data/stack.json
+./build.sh                 # rebuild dist/
 ```
 
-This fills the per-resource **pages-in-Common-Crawl vs sitemap-total** chart. Notes:
+Add or remove a resource in the `RESOURCES` list at the top of `scripts/probe.rb`, using the **docs**
+URL. Full instructions live in `.claude/skills/update-scorecard/SKILL.md`.
 
-- **No API key exists.** Common Crawl's CDX index is unauthenticated and **IP rate-limited**. The script is
-  polite by construction (single serial thread, a sleep between calls, a descriptive User-Agent, a per-host
-  cap), per <https://commoncrawl.org/faq>. An HTTP **503** means slow down; a temporary IP block clears
-  after **24h**.
-- The index server (`index.commoncrawl.org`) has **frequent outages**. A `Couldn't connect` / connection
-  refused is an outage, *not* a ban (a ban returns 503). When it is down, `coverage.rb` still fills sitemap
-  totals and keeps known CC numbers; CC counts fill in on a later run.
-- Unknown values stay **"not sampled"** (never shown as 0). `coverage.json` lives separately so re-running
-  `probe.rb` never clobbers it; `build.rb` merges the two by resource name.
-- For all 54 at once (instead of serial CDX), CC recommends the columnar URL index via **Amazon Athena**;
-  that path needs an AWS account and is not wired up here.
+### Run the probes from a disposable IP
 
-### Run the fetch from a disposable IP (Fly)
-
-CC's index is IP rate-limited, so a throttled run can briefly block the IP it came from. To keep your own
-IP safe (and make retries free), run the probe from a throwaway Fly machine:
+Common Crawl's CDX index is IP rate-limited, so a throttled run can briefly block the IP it came
+from. Running from a throwaway Fly machine keeps your own IP clean and makes retries free:
 
 ```bash
-./fetch/run-on-fly.sh        # creates a temp Fly app, runs the probe, captures data/coverage.json, destroys it
-fly deploy                   # publish the rebuilt page (run from repo root)
+./fetch/run-on-fly.sh      # temp Fly app, both probes, captures JSON, rebuilds dist/, tears down
 ```
 
-It spins up `ruby-scorecard-fetch` (worker, no HTTP), runs `scripts/coverage.rb --print` over `fly ssh`
-capturing clean JSON, rebuilds `dist/`, then tears the app down. If a run is ever throttled, just run it
-again, it gets a fresh IP. (`--print` emits JSON to stdout and progress to stderr, so it also works locally:
-`ruby scripts/coverage.rb --print > data/coverage.json`.)
+**Common Crawl notes, all learned the hard way:**
 
-### Per-page detail (which exact pages are / are not in CC)
+- **No API key exists.** The CDX index is unauthenticated and IP rate-limited, per
+  [their FAQ](https://commoncrawl.org/faq). The scripts are polite by construction: serial, with a
+  sleep between calls, a descriptive User-Agent and a per-host cap. A **503** means slow down; a
+  temporary block clears after 24h.
+- **A connection refused is an outage, not a ban.** `index.commoncrawl.org` goes down often. When it
+  does, `coverage.rb` still fills sitemap totals and keeps known counts.
+- **Never show a 0 you could not measure.** Unknown values render as "not sampled". `probe.rb`
+  aborts rather than writing a run where more than 15% of resources were unreachable, because that
+  is a broken instrument rather than a finding.
+- For all 94 at once, Common Crawl recommends the columnar index via Amazon Athena. That needs an
+  AWS account and is not wired up here.
 
-For a specific resource, list the exact documentation pages present in Common Crawl vs missing. Projects
-without a sitemap are enumerated by crawling the live docs site, then diffed against CC:
+### Per-page detail
+
+Which exact documentation pages are in Common Crawl and which are missing:
 
 ```bash
-./fetch/details-on-fly.sh "Inertia Rails" "AnyCable"   # default targets if none given
+./fetch/details-on-fly.sh "Inertia Rails" "AnyCable"
 ```
 
-Writes `data/coverage_details.json` and renders shareable `data/coverage_details/<slug>.md` (an "In Common
-Crawl" list and a "NOT in Common Crawl" list) via `scripts/coverage_details.rb` + `scripts/coverage_details_report.rb`.
-
-## Content-gap matrix
-
-The Layer 1 sub-block "the comparison content to write" tracks, per product-shaped task (from whichlang's
-`fullstack` tier) × competing stack (JS fullstack, Python), whether a **current, task-specific,
-numbers-backed** Rails comparison exists (`solid`), only generic framework takes exist (`generic`), or
-nothing (`missing`). It lives in `data/content_gap.json` and is **search-refreshed, not hand-audited**:
-existence is found by web search per task × stack, then judged for recency/specificity/numbers. A keyless
-Ruby script can't web-search, so refresh it from an agent run (this is what the `update-scorecard` skill
-does) or wire a search API. Then rebuild.
+Writes `data/coverage_details.json` plus a shareable Markdown report per resource.
 
 ## Deploy
 
-`dist/` is self-contained. Copy the whole folder to the ruby.evilmartians.com host, e.g.
-`rsync -a dist/ <host>`.
+**Push to `main`.** CI runs RuboCop, Brakeman, the tests and the `dist/` freshness check, and the
+Fly deploy runs only if all four pass. A red check stops the release.
+
+For a redeploy that carries no commit (rollback, restart, or after a secret changes), run the
+**Fly Deploy (manual)** workflow from the Actions tab.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). The bar is slightly unusual for a repo that publishes
+measurements: **a number goes on the site only if a stranger can reproduce it from `scripts/` and
+`data/`.** Changes are recorded in [CHANGELOG.md](CHANGELOG.md), which separates code changes from
+data refreshes so any figure quoted from the site can be traced to the run that produced it.
 
 ## License
 

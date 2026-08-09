@@ -53,7 +53,7 @@ bespoke permissive licence from a source-available one. Open the file; do not in
 
 ## Architecture
 
-The app follows [layered Rails](https://github.com/palkan/layered-rails): presentation, application,
+The app follows [layered Rails](https://github.com/palkan/layered-rails-plugin): presentation, application,
 domain, infrastructure, with dependencies pointing downward only. Practically:
 
 | Directory | Holds | Rule |
