@@ -368,7 +368,13 @@ end
 # holding every license GitHub could not identify.
 LICENSES = begin
   seen = rows.filter_map { |r| repos[r["name"]] }.select { |rp| rp["docs_repo"] }
-  tally = seen.group_by { |rp| rp["docs_license"] }.transform_values(&:size).sort_by { |lic, cnt| [ lic.nil? ? 1 : 0, -cnt ] }
+# The licence name is the final tiebreaker, and it has to be: five licences tie at one repo each,
+# and Ruby's sort_by is NOT stable, so without a total ordering their relative positions are
+# unspecified. The output was reproducible on one machine and different on a CI runner, which is
+# the worst version of this bug -- the committed page and a fresh build of the same data disagreed
+# for no reason anyone could see in the diff.
+tally = seen.group_by { |rp| rp["docs_license"] }.transform_values(&:size)
+            .sort_by { |lic, cnt| [ lic.nil? ? 1 : 0, -cnt, lic.to_s ] }
   items = tally.map do |lic, cnt|
     label = GH_META.fetch(lic, lic)
     extra = lic == "NOASSERTION" ? %( <span class="lic-note">any custom or source-available terms</span>) : ""

@@ -46,6 +46,9 @@ jobs:
         with:
           ruby-version: .ruby-version
           bundler-cache: true
+      # The integration suite renders "/", which serves public/scorecard.html. public/ is
+      # gitignored; populate it from the committed dist/ the same way fly-deploy.yml does.
+      - run: cp -R dist/. public/
       - run: bin/rails db:test:prepare
       - run: bin/rails test
 
