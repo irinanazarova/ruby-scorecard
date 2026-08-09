@@ -7,23 +7,37 @@ class Analysis < ApplicationRecord
 
   scope :recent, -> { order(created_at: :desc) }
 
-  # The listed examples are excluded by input rather than by faking from_cache on them, so
-  # from_cache keeps meaning "this run cost nothing" and stays usable for cost reporting. Clicking
-  # the examples is how a visitor learns what the tool does; charging an allowance slot for the
-  # tour is the wrong trade even on the one cold run that genuinely spends money.
-  scope :billable, -> { where(from_cache: false).where.not(input: AnalyzerConfig::DEMO_TARGETS) }
+  # `from_cache` is set when the analysis is CREATED, from the controller's free_run? decision, and
+  # the job only ever widens it. So the listed examples and any already-warm re-run are already
+  # excluded here and need no second clause: clicking the examples is how a visitor learns what the
+  # tool does, and charging an allowance slot for the tour is the wrong trade.
+  scope :billable, -> { where(from_cache: false) }
 
-  # The four checks, in the order they are argued: can an agent read it, could it ever be trained
-  # on, and did that actually happen.
+  # Rows created before the form had two fields carry everything in `input`. Splitting them here
+  # rather than backfilling keeps old permalinks working without a migration that has to guess.
+  def docs_url
+    self[:docs_url].presence || legacy_target.url
+  end
+
+  def repo
+    self[:repo].presence || legacy_target.repo
+  end
+
+  # The measurements, in the order the deck argues them: what an agent sees today, then whether
+  # either funnel is open, then whether recall actually happened.
   #
-  # Titled as measurements rather than as questions, because the two answer cards above them now ask
-  # the questions. Two boxes headed "Can agents retrieve it today?" and "Can an agent read this page
+  # Titled as measurements rather than as questions, because the slides above them ask the
+  # questions. Two boxes headed "Can agents retrieve it today?" and "Can an agent read this page
   # today?" on one screen read as the same thing asked twice.
+  #
+  # `references` is deliberately absent: it is the scale on the recall chart, not evidence about
+  # this target, and listing it here would invite reading it as one.
   STEPS = [
-    ["retrieval",     "What a crawler sees today",  "robots, crawlability, sitemap, markdown twins"],
-    ["code_channel",  "The code channel",           "public repo, collection, license"],
-    ["web_channel",   "The web channel",            "Common Crawl, then the quality filter"],
-    ["memorization",  "The memorization probe",     "the slow one: several passages against every model"]
+    ["retrieval",     "What a crawler sees on your docs", "robots, crawlability, sitemap, markdown twins"],
+    ["repo_signals",  "What an agent finds in your repo", "README, description, licence, releases, activity"],
+    ["code_channel",  "The code funnel",                  "public repo, Software Heritage, licence"],
+    ["web_channel",   "The web funnel",                   "Common Crawl, then the quality filter"],
+    ["memorization",  "The memorization probe",           "the slow one: both sources against every model"]
   ].freeze
 
   # Finished step payloads, keyed by step name, ready for the `analyses/step` partial.
@@ -33,15 +47,22 @@ class Analysis < ApplicationRecord
   # analysis rendered every box as "waiting": the results were on disk, the page just never looked
   # at them and waited for a broadcast that had already happened.
   def step_payloads
-    return {} unless results.is_a?(Hash)
+    stored = results.is_a?(Hash) ? results : {}
 
-    results.each_with_object({}) do |(step, payload), acc|
+    payloads = stored.each_with_object({}) do |(step, payload), acc|
       next unless payload.is_a?(Hash)
 
       p = payload.deep_symbolize_keys
       p[:cached_at] = Time.zone.parse(p[:cached_at].to_s) rescue nil if p[:cached_at].present?
       acc[step.to_s] = p
     end
+
+    # Every region on the page has to know which of the two boxes was filled in, because that is
+    # what separates "this channel is closed" from "we never looked". The run emits a target step
+    # first thing, so this only fills in for rows written before it did.
+    payloads["target"] ||= { result: { docs_url: docs_url, repo: repo, label: input },
+                             cache_hit: false, cached_at: nil }
+    payloads
   end
 
   # Were the RESULTS replayed, rather than measured just now? That is a different question from
@@ -63,5 +84,11 @@ class Analysis < ApplicationRecord
 
   def self.free_remaining(session_token)
     [AnalyzerConfig::FREE_ANALYSES_PER_SESSION - free_used(session_token), 0].max
+  end
+
+  private
+
+  def legacy_target
+    @legacy_target ||= Analyzer::Target.from_input(input)
   end
 end

@@ -1,0 +1,55 @@
+<%# The two pipelines drawn as funnels meeting at one apex. Rendered bare: this element carries the
+    id the broadcast replaces. %>
+<% f = Analyzer::Funnel.new(payloads) %>
+<% apex = f.apex %>
+<% marks = { pass: "✓", fail: "✗", unknown: "?", waiting: "…", missing: "–" } %>
+
+<div class="funnel" id="analysis_funnel">
+  <%# Apex first in the markup and at the top on screen: it is the outcome the two funnels lead to,
+      and reading order should match the picture. %>
+  <div class="funnel__apex">
+    <div class="tier tier--apex tier--<%= apex.status %>">
+      <span class="tier__mark" aria-hidden="true"><%= marks[apex.status] %></span>
+      <span class="tier__label"><%= apex.label %></span>
+      <span class="tier__detail"><%= apex.detail %></span>
+    </div>
+  </div>
+
+  <p class="funnel__connector">
+    <span class="funnel__arrow" aria-hidden="true">&uarr;</span>
+    <span class="funnel__mechanism"><%= Analyzer::Funnel::CONNECTOR %></span>
+    <a href="/learn#<%= Analyzer::Funnel::CONNECTOR_ANCHOR %>">Why copies and not stars &rarr;</a>
+  </p>
+
+  <div class="funnel__channels">
+    <% f.channels.each do |channel| %>
+      <section class="fchan fchan--<%= channel.key %>">
+        <%# Tiers are drawn narrowest first, so each channel reads top-down as a funnel: everything
+            enters at the wide base and a fraction of it reaches the tier above. %>
+        <% channel.tiers.reverse_each do |tier| %>
+          <div class="tier tier--<%= tier.status %>" style="--tier-w: <%= tier.width %>%">
+            <span class="tier__mark" aria-hidden="true"><%= marks[tier.status] %></span>
+            <span class="tier__label"><%= tier.label %></span>
+            <span class="tier__detail"><%= tier.detail %></span>
+            <a class="tier__why" href="/learn#<%= tier.anchor %>">Why &rarr;</a>
+          </div>
+        <% end %>
+        <p class="fchan__foot">
+          <%= channel.title %>
+          <% if channel.subject.present? %>
+            <span class="fchan__subject"><%= channel.subject.sub(%r{\Ahttps?://}, "") %></span>
+          <% else %>
+            <span class="fchan__subject fchan__subject--none">nothing given</span>
+          <% end %>
+        </p>
+      </section>
+    <% end %>
+  </div>
+
+  <p class="funnel__note">
+    Each tier keeps a fraction of what arrives at it. The web funnel discards most documentation at
+    the quality filter; the code funnel discards it at archival or at the licence. Nothing here is a
+    lab's actual pipeline, which no lab publishes.
+    <a href="/learn#training">How each gate works &rarr;</a>
+  </p>
+</div>

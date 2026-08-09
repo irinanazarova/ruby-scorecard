@@ -31,12 +31,11 @@ class AnalysesController < ApplicationController
 
   def new
     @recent = Analysis.where(session_token: session_token).recent.limit(5)
-    @demo_targets = AnalyzerConfig::DEMO_TARGETS
+    @examples = AnalyzerConfig::EXAMPLES
   end
 
   def create
-    input = params[:input].to_s.strip
-    target = Analyzer::Target.new(input)
+    target = build_target
     return redirect_to(test_path, alert: target.error) unless target.valid?
 
     # Free runs cost nothing to serve, so they neither consume the anonymous allowance nor require
@@ -53,7 +52,8 @@ class AnalysesController < ApplicationController
     end
 
     analysis = Analysis.create!(
-      user: current_user, session_token: session_token, input: input,
+      user: current_user, session_token: session_token,
+      input: target.label, docs_url: target.url, repo: target.repo,
       kind: target.kind.to_s, status: "pending", ip_hash: ip_hash, from_cache: cached
     )
     AnalyzeJob.perform_later(analysis.id)
@@ -78,13 +78,24 @@ class AnalysesController < ApplicationController
   def free_run?
     return @free_run unless @free_run.nil?
 
-    input = params[:input].to_s.strip
-    target = Analyzer::Target.new(input)
+    target = build_target
 
     @free_run =
       if !target.valid? then false
-      elsif AnalyzerConfig.example?(input) then true
-      else Analyzer::Cache.warm?(:memorization, target.url || target.repo)
+      elsif AnalyzerConfig.example?(target.url, target.repo) then true
+      else Analyzer::Cache.warm?(:memorization, target.cache_key)
+      end
+  end
+
+  # Two named fields now, and the form still accepts a single `input` so an old bookmark or a linked
+  # example keeps working. Memoized because both the rate-limit guard and #create ask for it, and
+  # parsing twice let them disagree about what was being run.
+  def build_target
+    @build_target ||=
+      if params[:input].present? && params[:docs_url].blank? && params[:repo].blank?
+        Analyzer::Target.from_input(params[:input])
+      else
+        Analyzer::Target.new(docs_url: params[:docs_url], repo: params[:repo])
       end
   end
 

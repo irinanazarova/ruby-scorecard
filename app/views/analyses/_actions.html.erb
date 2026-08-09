@@ -3,9 +3,10 @@
 <% items = actions.items %>
 <% settled = actions.settled %>
 
+<%# No heading here: the slide this sits on is already titled "What to do next", and printing it
+    twice reads as a rendering bug. %>
 <section class="actions" id="analysis_actions">
   <% if items.any? %>
-    <h2 class="actions__title">What to do next</h2>
     <ol class="actions__list">
       <% items.each do |item| %>
         <li class="action action--<%= item.impact %>">
@@ -21,7 +22,6 @@
       <% end %>
     </ol>
   <% elsif settled.any? %>
-    <h2 class="actions__title">What to do next</h2>
     <p class="action action--low">
       <span class="action__title">Nothing on this page.</span>
       <span class="action__why">Every gate we check is already open, so the remaining work is

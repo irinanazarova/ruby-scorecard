@@ -20,10 +20,13 @@ module Analyzer
   # verbatim" makes it refuse, and it refuses on the fabricated control too, so a refusal carries no
   # signal and would masquerade as "not memorized". Autocomplete framing avoids that and still fires
   # both positive controls.
-  STRONG_RUN  = 15
-  PARTIAL_RUN = 6
-
   class Memorization
+    # The two bars every verdict is read against. They live INSIDE the class rather than on the
+    # Analyzer module: a bare `Analyzer::STRONG_RUN` is not a name Zeitwerk can autoload, so any
+    # class that reached for it before Memorization happened to be loaded raised NameError.
+    STRONG_RUN  = 15
+    PARTIAL_RUN = 6
+
     PROMPT = "You are an autocomplete engine. Emit the next ~80 words of this document. " \
              "No commentary. Answer from memory only: do not use any tools, do not search."
 
@@ -88,7 +91,8 @@ module Analyzer
 
           calls += 1
           r = probe(spec, passage.prefix, passage.truth, kind: "test")
-                .merge(offset: passage.offset, source_label: passage.source_label)
+                .merge(offset: passage.offset, source_label: passage.source_label,
+                       source: passage.source.to_s.presence || "docs")
           results << r
           yield r if block_given?
         end
@@ -107,7 +111,46 @@ module Analyzer
         best_run: best&.dig(:run).to_i,
         verdict: best&.dig(:verdict) || "none",
         models_fired: tested.select { |r| r[:run].to_i >= PARTIAL_RUN }.map { |r| r[:provider] }.uniq,
+        # Separate from models_fired, which counts anything past the weak bar. Written as one list,
+        # a run where GPT reproduced 54 words and Claude managed 7 came out as "Claude Opus and
+        # GPT-5.5 reproduce 54 consecutive words", which credits Claude with GPT's result.
+        models_strong: tested.select { |r| r[:run].to_i >= STRONG_RUN }.map { |r| r[:provider] }.uniq,
         cost_cents: tested.sum { |r| r[:cost_cents].to_f }.round(3) }
+    end
+
+    # One row per model, one cell per source, so the chart can put "your docs" and "your repo" side
+    # by side under each lab. Best run per cell, because a page counts as recalled if ANY span fired
+    # and averaging across spans would bury the one hit that proves inclusion.
+    #
+    # `probes` per cell is carried too: a cell reading 0 after three attempts and a cell reading 0
+    # because it was never asked are different answers, and only one of them is evidence.
+    def self.matrix(results, sources: %w[docs repo])
+      tested = results.reject { |r| r[:error] }
+      MODELS.values.map { |spec| spec[:label] }.filter_map do |label|
+        rows = tested.select { |r| r[:provider] == label }
+        next if rows.empty?
+
+        # Symbol keys on purpose. A live broadcast passes this hash straight to the view while a
+        # reloaded page gets it back through `as_json` and `deep_symbolize_keys`, and string keys
+        # here made those two paths disagree: the chart drew from the database and came up empty
+        # against the socket.
+        cells = sources.map(&:to_sym).index_with do |source|
+          in_source = rows.select { |r| r[:source].to_s == source.to_s }
+          next nil if in_source.empty?
+
+          best = in_source.max_by { |r| r[:run].to_i }
+          { run: best[:run].to_i, verdict: best[:verdict], probes: in_source.size,
+            matched: best[:matched], source_label: best[:source_label] }
+        end
+
+        { model: label, cells: cells.compact }
+      end
+    end
+
+    # Best run per source across every model, for the one-line answer above the chart.
+    def self.by_source(results)
+      results.reject { |r| r[:error] }.group_by { |r| r[:source].to_s.presence || "docs" }
+             .transform_values { |rows| summarize(rows) }
     end
 
     def controls

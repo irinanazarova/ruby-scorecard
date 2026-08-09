@@ -1,0 +1,13 @@
+<%# One slide's answer, in a sentence, recomputed after every check so it sharpens instead of
+    appearing at the end. Every intermediate state has to be true on its own: a spinner that
+    resolves into a verdict teaches nothing while it spins. %>
+<p class="answer answer--<%= answer.tone %> answer--<%= answer.state %>">
+  <span class="answer__q"><%= answer.question %></span>
+  <strong class="answer__headline"><%= answer.headline %></strong>
+  <% if answer.detail.present? %>
+    <span class="answer__detail"><%= with_learn_links(answer.detail) %></span>
+  <% end %>
+  <% if answer.caveat.present? %>
+    <span class="answer__caveat"><%= answer.caveat %></span>
+  <% end %>
+</p>

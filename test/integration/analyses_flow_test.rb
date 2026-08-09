@@ -14,8 +14,35 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_match "scorecard", response.body.downcase
 
+    # /guide was folded into /learn. The old URL is in the wild, so it has to keep resolving.
     get "/guide"
+    assert_redirected_to "/learn"
+    follow_redirect!
     assert_response :success
+  end
+
+  # Every result on /test deep-links into /learn by fragment, so a renamed id is a broken link that
+  # nothing else would catch: the page still returns 200 and the reader lands at the top of it.
+  #
+  # The expected list is SCANNED from the source rather than restated here. A hardcoded copy would
+  # be one more thing to keep in step, and it would pass while the real link rotted.
+  test "/learn carries every anchor the analyzer links to" do
+    get "/learn"
+    assert_response :success
+
+    # Three services hand out anchors now: the ranked next steps, the per-box fixes on the agent
+    # experience slide, and the licence implications.
+    from_code  = %w[actions.rb discoverability.rb license.rb funnel.rb].flat_map do |file|
+      Rails.root.join("app/services/analyzer", file).read.scan(/(?:anchor|ANCHOR)\s*[:=]\s*"([^"]+)"/).flatten
+    end
+    from_terms = ApplicationHelper::LEARN_TERMS.map(&:last)
+    anchors    = (from_code + from_terms).uniq
+
+    assert_operator anchors.size, :>=, 15, "expected to find the anchors; the scan came up short"
+    anchors.each do |anchor|
+      assert_match(/id="#{Regexp.escape(anchor)}"/, response.body,
+                   "/learn is missing ##{anchor}, which a result on /test links to")
+    end
   end
 
   test "the test page renders with the free allowance shown" do
@@ -60,13 +87,11 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
     end
     assert_equal 0, Analysis.free_remaining(session_token_from_cookie)
 
-    # Warm every check for a new target, so the controller sees a fully cached run.
-    target = "https://example.com/docs/warm"
-    %i[retrieval code_channel web_channel memorization].each do |kind|
-      Analyzer::Cache.fetch(kind, target) { { checks: [] } }
-    end
+    # Warm every check for a new pair, so the controller sees a fully cached run.
+    docs = "https://example.com/docs/warm"
+    warm_every_check(docs, "acme/warm")
 
-    post "/analyses", params: { input: target }
+    post "/analyses", params: { docs_url: docs, repo: "acme/warm" }
     assert_redirected_to analysis_path(Analysis.last), "a fully cached run must be allowed past the allowance"
     assert Analysis.last.from_cache
   end
@@ -135,6 +160,8 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
   test "every published page carries the main navigation" do
     %w[/ /guide /check /contributors /test /learn].each do |path|
       get path
+      # /guide is a 301 to /learn now; the bar has to be on the page a visitor actually lands on.
+      follow_redirect! if response.redirect?
       assert_response :success, "#{path} did not render"
       assert_match "/learn", response.body, "#{path} has no link to /learn"
       assert_match "/test", response.body, "#{path} has no link to /test"
@@ -154,7 +181,7 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
 
   # Results without next steps leave a visitor to invent their own plan, usually the wrong one.
   test "a result carries prioritised action items that link into the learn page" do
-    post "/analyses", params: { input: "https://example.com/docs/actionable" }
+    post "/analyses", params: { docs_url: "https://example.com/docs/actionable", repo: "acme/docs" }
     analysis = Analysis.last
 
     analysis.update!(status: "done", results: {
@@ -164,16 +191,20 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
         { "name" => "Sitemap", "pass" => false, "detail" => "" },
         { "name" => "Markdown twin (.md)", "pass" => false, "detail" => "" }
       ] } },
-      "code_channel" => { "result" => { "present" => false } }
+      "code_channel" => { "result" => { "present" => false, "reason" => "Repo not found or private: acme/docs" } }
     })
 
     get "/analyses/#{analysis.id}"
     assert_response :success
     assert_match "What to do next", response.body
-    assert_match "Put the docs source in a public repo", response.body
+    assert_match "Publish the docs source in a public repo", response.body
     assert_match "/learn#code-channel", response.body
-    assert_operator response.body.index("Put the docs source in a public repo"), :<,
-                    response.body.index("Ship a sitemap.xml"),
+    # Scoped to the ranked list. The same advice also appears inline next to its unticked box on the
+    # agent-experience slide, which sits earlier in the document, so comparing positions across the
+    # whole page measures slide order rather than ranking.
+    ranked = response.body[/<section class="actions".*?<\/ol>/m]
+    assert_operator ranked.index("Publish the docs source in a public repo"), :<,
+                    ranked.index("Ship a sitemap.xml"),
                     "the repo item outranks crawl hygiene"
   end
 
@@ -236,45 +267,49 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
     assert_equal 0, Analysis.free_remaining(session_token_from_cookie), "allowance is spent"
 
     AnalyzerConfig::EXAMPLES.each do |example|
-      post "/analyses", params: { input: example[:url] }
+      post "/analyses", params: { docs_url: example[:docs], repo: example[:repo] }
       assert_redirected_to analysis_path(Analysis.last),
-                           "#{example[:url]} must run even with no allowance left"
+                           "#{example[:label]} must run even with no allowance left"
     end
   end
 
-  test "a target whose probe is already cached does not consume the allowance" do
-    target = "https://example.com/docs/already-probed"
-    Analyzer::Cache.fetch(:memorization, target) { { summary: { verdict: "none" } } }
+  test "a pair whose probe is already cached does not consume the allowance" do
+    docs = "https://example.com/docs/already-probed"
+    pair = Analyzer::Target.new(docs_url: docs, repo: "acme/probed")
+    Analyzer::Cache.fetch(:memorization, pair.cache_key) { { summary: { verdict: "none" } } }
 
     AnalyzerConfig::FREE_ANALYSES_PER_SESSION.times do |i|
       post "/analyses", params: { input: "https://example.com/docs/burn-#{i}" }
     end
     assert_equal 0, Analysis.free_remaining(session_token_from_cookie)
 
-    post "/analyses", params: { input: target }
+    post "/analyses", params: { docs_url: docs, repo: "acme/probed" }
     assert_redirected_to analysis_path(Analysis.last), "a warm probe costs nothing, so it is free"
   end
 
-  test "every listed example is a valid target and carries a note" do
+  # Both halves are filled in for every listed example, which is the point of the pair: the demo
+  # should never show the tool working one out from the other.
+  test "every listed example fills in both fields and carries a note" do
     AnalyzerConfig::EXAMPLES.each do |example|
-      assert Analyzer::Target.new(example[:url]).valid?, "#{example[:url]} does not parse"
-      assert example[:note].present?, "#{example[:url]} has no note"
-      assert AnalyzerConfig.example?(example[:url])
-      assert AnalyzerConfig.example?("#{example[:url]}/"), "trailing slash should still match"
+      target = Analyzer::Target.new(docs_url: example[:docs], repo: example[:repo])
+      assert target.valid?, "#{example[:label]} does not parse: #{target.error}"
+      assert_equal :both, target.kind, "#{example[:label]} is missing one half of the pair"
+      assert example[:note].present?, "#{example[:label]} has no note"
+      assert AnalyzerConfig.example?(example[:docs], example[:repo])
+      assert AnalyzerConfig.example?("#{example[:docs]}/", example[:repo]),
+             "trailing slash should still match"
     end
-    assert_not AnalyzerConfig.example?("https://example.com/docs/not-listed")
+    assert_not AnalyzerConfig.example?("https://example.com/docs/not-listed", "acme/nope")
   end
 
   # The job used to recompute from_cache over EVERY step including `target`, which is the parsed
   # input echoed back and never has a cache entry, so `all?` could never be true and a fully warm
   # re-run still consumed an allowance slot.
   test "a fully cached run is recorded as cached and stays free" do
-    target = "https://example.com/docs/warm-rerun"
-    %i[retrieval code_channel web_channel memorization].each do |kind|
-      Analyzer::Cache.fetch(kind, target) { { checks: [] } }
-    end
+    docs = "https://example.com/docs/warm-rerun"
+    warm_every_check(docs, "acme/rerun")
 
-    post "/analyses", params: { input: target }
+    post "/analyses", params: { docs_url: docs, repo: "acme/rerun" }
     analysis = Analysis.last
     perform_enqueued_jobs
 
@@ -285,6 +320,20 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  # Each check caches under its OWN key: the two HTTP checks under the docs URL, the two GitHub
+  # checks under the repo, and the probe under the pair. Warming them all under one key is what made
+  # an earlier version of this test pass while cached re-runs still burned an allowance slot.
+  def warm_every_check(docs, repo)
+    Analyzer::Cache.fetch(:retrieval, docs) { { checks: [] } }
+    Analyzer::Cache.fetch(:web_channel, docs) { { checks: [] } }
+    Analyzer::Cache.fetch(:repo_signals, repo) { { present: true, checks: [] } }
+    Analyzer::Cache.fetch(:code_channel, repo) { { present: true, checks: [] } }
+    Analyzer::Cache.fetch(:memorization, Analyzer::Target.new(docs_url: docs, repo: repo).cache_key) do
+      { summary: { verdict: "none" } }
+    end
+    Analyzer::Cache.fetch(:references, "-") { { items: [] } }
+  end
 
   def session_token_from_cookie
     Analysis.last&.session_token

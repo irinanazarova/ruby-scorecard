@@ -6,8 +6,12 @@ require "test_helper"
 # The four detail boxes can afford a caveat in small print; a wrong word at the top of the page
 # cannot be walked back.
 class VerdictTest < ActiveSupport::TestCase
-  def verdict(payloads, status: "running")
-    Analyzer::Verdict.new(payloads, status: status)
+  # Every case gets a target unless it says otherwise. The two input fields are what decide whether
+  # a channel is CLOSED or merely unmeasured, so a fixture without one is not a state the app can
+  # reach: the form requires at least one of the pair.
+  def verdict(payloads, status: "running", docs: "https://acme.com/docs/page", repo: "acme/docs")
+    with_target = { "target" => step(docs_url: docs, repo: repo) }.merge(payloads)
+    Analyzer::Verdict.new(with_target, status: status)
   end
 
   def step(result) = { result: result }
@@ -30,8 +34,9 @@ class VerdictTest < ActiveSupport::TestCase
          ])
   end
 
-  def code(present: true, swh: true, kept: true, repo: "acme/docs")
+  def code(present: true, swh: true, kept: true, repo: "acme/docs", in_v3: nil, post_cutoff: false)
     step(present: present, repo: repo, swh_archived: swh, kept_by_stack: kept,
+         in_stack_v3: in_v3, post_cutoff: post_cutoff,
          license_class: kept == false ? :copyleft : :permissive, checks: [])
   end
 
@@ -131,6 +136,27 @@ class VerdictTest < ActiveSupport::TestCase
     assert_equal :fail, a.cues.find { |c| c.label == "code path" }.status
   end
 
+  # The per-file filtering of The Stack v3 is not reproducible from outside (karafka/wiki's
+  # all-rights-reserved text is in the train set; karafka/karafka's LGPL is out), so the observed
+  # index must beat every license- and archival-based inference, in both directions.
+  test "observed v3 membership opens the code path over a disqualifying license" do
+    a = verdict({"code_channel" => code(kept: false, swh: false, in_v3: true)}).training_answer
+    assert_equal :pass, a.cues.find { |c| c.label == "code path" }.status
+    assert_match(/The Stack v3/, a.detail)
+  end
+
+  test "observed v3 absence closes the code path over a permissive license" do
+    a = verdict({"code_channel" => code(kept: true, swh: true, in_v3: false)}).training_answer
+    assert_equal :fail, a.cues.find { |c| c.label == "code path" }.status
+    assert_match(/not in The Stack v3/, a.detail)
+  end
+
+  test "a post-cutoff absence blames the crawl date, not the license" do
+    a = verdict({"code_channel" => code(kept: true, in_v3: false, post_cutoff: true)}).training_answer
+    assert_match(/cutoff/, a.detail)
+    refute_match(/non-permissive/, a.detail)
+  end
+
   # The Stack v2/v3 keep unlicensed repos, and the study's headline case (140 stars, no licence,
   # reproduced by two frontier models) lives or dies on the page saying so.
   test "an unlicensed repo is called unlicensed, never permissive" do
@@ -142,9 +168,31 @@ class VerdictTest < ActiveSupport::TestCase
     refute_match(/permissively licensed/, a.detail)
   end
 
-  test "a repo target does not pretend to answer the retrieval question" do
-    a = verdict({"target" => step(kind: "repo", repo: "acme/docs")}).retrieval_answer
+  test "a run with no docs site does not pretend to answer the retrieval question" do
+    a = verdict({}, docs: nil).retrieval_answer
     assert_equal :unknown, a.tone
     assert_match(/not checked/i, a.headline)
+  end
+
+  # Nothing is inferred any more, so an empty repo box leaves the code channel UNMEASURED. Drawing
+  # that as a closed gate would tell someone their repo is disqualified when we never looked at one.
+  test "an empty repo box leaves the code channel unmeasured rather than closed" do
+    a = verdict({"web_channel" => web(crawled: false), "memorization" => memorized("none")},
+                repo: nil).training_answer
+
+    assert_equal :unknown, a.tone
+    refute_match(/unlikely/i, a.headline)
+    assert_match(/no repo was given/i, a.detail)
+  end
+
+  # Both halves are probed now, and they routinely disagree. A headline that says "30 consecutive
+  # words of it" without naming the source sends people to fix the wrong thing.
+  test "a strong result names which half was reproduced" do
+    payload = step(summary: { verdict: "strong", best_run: 30, models_fired: ["Claude Opus"],
+                              spans_tested: 4, probes: 12 },
+                   by_source: { "docs" => { best_run: 2 }, "repo" => { best_run: 30 } })
+    a = verdict({"code_channel" => code, "memorization" => payload}).training_answer
+
+    assert_match(/your repo/, a.headline)
   end
 end

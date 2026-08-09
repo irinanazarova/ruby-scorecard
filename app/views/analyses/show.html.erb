@@ -3,48 +3,109 @@
 
 <%# data-analysis-sync-* : the safety net for a broadcast that arrives before the socket does.
     A fully cached run finishes in ~1.5s, which is faster than the WebSocket connects, so every
-    step was broadcast into a page that was not yet listening and the visitor sat in front of four
-    "waiting" boxes with the finished results already in the database. The controller re-fetches
-    this page until it reads as done, so the answer converges whatever the cable does. %>
-<section class="result" data-controller="analysis-sync"
+    region was broadcast into a page that was not yet listening and the visitor sat in front of an
+    empty deck with the finished results already in the database. The controller re-fetches this
+    page until it reads as done, so the answer converges whatever the cable does.
+
+    data-controller order matters: reveal owns the stage wrappers, analysis-sync only ever swaps
+    the regions INSIDE them, so a broadcast never resets how far the visitor has walked. %>
+<section class="deck" data-controller="reveal analysis-sync"
+         data-action="click->reveal#advance"
+         data-reveal-revealed-value="1"
          data-analysis-sync-status-value="<%= @analysis.status %>"
          data-analysis-sync-url-value="<%= analysis_path(@analysis) %>">
-  <p class="result__back"><%= link_to "&larr; Check another".html_safe, test_path %></p>
-  <h1 class="result__target"><%= @analysis.input %></h1>
 
   <% stored = @analysis.step_payloads %>
 
-  <%# The answer comes first, then what to do about it, then the working. A visitor who reads only
-      the top of this page should still leave knowing their situation and their next move.
-
-      The progress line sits above the answer rather than between the answer and the advice: while
-      a run is filling it explains why, and once the run is done it is the least interesting line
-      on the page. %>
-  <%= render "analyses/status", analysis: @analysis %>
-
-  <%= render "analyses/verdict", payloads: stored, status: @analysis.status %>
-
-  <%= render "analyses/actions", payloads: stored %>
-
-  <h2 class="evidence__title" id="evidence">The evidence</h2>
-
-  <%# Order is the argument, not just the loading order: can an agent read it, could it ever be
-      trained on, and did that actually happen. Each box fills as its check lands.
-
-      A step that has already answered renders from the stored results, so a reload or a shared
-      permalink shows the finished analysis. Only steps still in flight render the placeholder and
-      wait for their broadcast. Finished steps render the partial bare: it carries the step id
-      itself, which is what the broadcast replaces, so wrapping it would nest the same id twice. %>
-  <div class="steps">
-    <% Analysis::STEPS.each do |step, title, hint| %>
-      <% if (payload = stored[step]) %>
-        <%= render "analyses/step", step: step, payload: payload, analysis: @analysis,
-                   repo_source: payload[:repo_source] %>
-      <% else %>
-        <%= tag.div id: "step_#{step}" do %>
-          <%= render "analyses/pending", title: title, hint: hint %>
-        <% end %>
+  <header class="deck__head">
+    <p class="deck__back"><%= link_to "&larr; Check another".html_safe, test_path %></p>
+    <div class="deck__target">
+      <% if @analysis.docs_url.present? %>
+        <span class="chip chip--docs"><span class="chip__key">docs</span>
+          <a href="<%= @analysis.docs_url %>" rel="noopener"><%= @analysis.docs_url.sub(%r{\Ahttps?://}, "") %></a>
+        </span>
       <% end %>
-    <% end %>
+      <% if @analysis.repo.present? %>
+        <span class="chip chip--repo"><span class="chip__key">repo</span>
+          <a href="https://github.com/<%= @analysis.repo %>" rel="noopener"><%= @analysis.repo %></a>
+        </span>
+      <% end %>
+    </div>
+    <%= render "analyses/status", analysis: @analysis %>
+  </header>
+
+  <div class="deck__stages">
+    <%# --- 1. can an agent use you today ------------------------------------------------------ %>
+    <section class="stage" data-reveal-target="stage" id="stage-agent">
+      <p class="stage__number">1 of 4</p>
+      <h2 class="stage__title">Agent experience</h2>
+      <p class="stage__lead">Can an agent discover your product, evaluate it, and suggest it?</p>
+      <%= render "analyses/discoverability", payloads: stored %>
+    </section>
+
+    <%# --- 2. the two funnels ------------------------------------------------------------------ %>
+    <section class="stage" data-reveal-target="stage" id="stage-funnel">
+      <p class="stage__number">2 of 4</p>
+      <h2 class="stage__title">How text reaches a model</h2>
+      <p class="stage__lead">Two pipelines, each throwing most of its input away. Where does yours
+      stop?</p>
+      <%= render "analyses/funnel", payloads: stored %>
+    </section>
+
+    <%# --- 3. did it actually happen ----------------------------------------------------------- %>
+    <section class="stage" data-reveal-target="stage" id="stage-recall">
+      <p class="stage__number">3 of 4</p>
+      <h2 class="stage__title">Model recall</h2>
+      <p class="stage__lead">The same probe on every column: 55 words in, longest exact
+      continuation out.</p>
+      <%= render "analyses/recall", payloads: stored %>
+    </section>
+
+    <%# --- 4. what to do ----------------------------------------------------------------------- %>
+    <section class="stage" data-reveal-target="stage" id="stage-actions">
+      <p class="stage__number">4 of 4</p>
+      <h2 class="stage__title">What to do next</h2>
+      <p class="stage__lead">Ranked by how much it changes, for this result rather than in
+      general.</p>
+      <%= render "analyses/actions", payloads: stored %>
+
+      <details class="deck__evidence" id="evidence">
+        <summary>All the working, check by check</summary>
+
+        <%# A step that has already answered renders from the stored results, so a reload or a
+            shared permalink shows the finished analysis. Only steps still in flight render the
+            placeholder and wait for their broadcast. Finished steps render the partial bare: it
+            carries the step id itself, which is what the broadcast replaces, so wrapping it would
+            nest the same id twice. %>
+        <div class="steps">
+          <% Analysis::STEPS.each do |step, title, hint| %>
+            <% if (payload = stored[step]) %>
+              <%= render "analyses/step", step: step, payload: payload, analysis: @analysis %>
+            <% else %>
+              <%= tag.div id: "step_#{step}" do %>
+                <%= render "analyses/pending", title: title, hint: hint %>
+              <% end %>
+            <% end %>
+          <% end %>
+        </div>
+      </details>
+    </section>
   </div>
+
+  <%# The deck controls. Fixed to the bottom of the viewport, so the prompt to advance is visible
+      whatever the visitor has scrolled to. %>
+  <nav class="deck__nav" aria-label="Slides" data-no-advance>
+    <button type="button" class="deck__btn" data-reveal-target="back" data-action="reveal#back"
+            aria-label="Previous slide">&larr;</button>
+    <span class="deck__dots" aria-hidden="true">
+      <% 4.times do %><span class="dot" data-reveal-target="dot"></span><% end %>
+    </span>
+    <button type="button" class="deck__btn deck__btn--go" data-reveal-target="forward"
+            data-action="reveal#next">Next &rarr;</button>
+    <span class="deck__hint" data-reveal-target="hint">Press <kbd>&rarr;</kbd> or <kbd>Enter</kbd>,
+    or click anywhere</span>
+    <button type="button" class="deck__all" data-reveal-target="all" data-action="reveal#all">
+      Show everything
+    </button>
+  </nav>
 </section>

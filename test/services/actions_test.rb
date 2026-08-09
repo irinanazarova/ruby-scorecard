@@ -6,7 +6,12 @@ require "test_helper"
 # never invent work from a check that failed to run, never rank a sitemap above a missing repo, and
 # never assume a deliberate robots.txt block was a mistake.
 class ActionsTest < ActiveSupport::TestCase
-  def actions(payloads) = Analyzer::Actions.new(payloads)
+  # Every case gets a target unless it says otherwise. Which of the two boxes was filled in decides
+  # whether a channel reads as closed or as never looked at, so a fixture without one is not a state
+  # the form can produce.
+  def actions(payloads, docs: "https://acme.com/docs/page", repo: "acme/docs")
+    Analyzer::Actions.new({ "target" => step(docs_url: docs, repo: repo) }.merge(payloads))
+  end
 
   def step(result) = { result: result }
 
@@ -32,7 +37,18 @@ class ActionsTest < ActiveSupport::TestCase
     step(present: present, repo: repo, swh_archived: swh, kept_by_stack: kept, license_label: label)
   end
 
-  def keys(payloads) = actions(payloads).items.map(&:key)
+  def signals(readme: 400, description: true, topics: 2, releases: 3, months: 1)
+    step(present: true, repo: "acme/docs", checks: [
+           { name: "Public on GitHub", pass: true, detail: "acme/docs, 12 stars" },
+           { name: "README explains the project", pass: readme >= 80, detail: "#{readme} words of prose" },
+           { name: "Description and topics set", pass: description && topics.positive?,
+             detail: "neither set" },
+           { name: "Tagged releases", pass: releases.positive?, detail: "no published releases" },
+           { name: "Active in the last 12 months", pass: months <= 12, detail: "last push #{months} months ago" }
+         ])
+  end
+
+  def keys(payloads, **) = actions(payloads, **).items.map(&:key)
 
   test "a missing repo is the top item, above any web-channel work" do
     items = actions({ "retrieval" => retrieval(sitemap: false),
@@ -104,9 +120,35 @@ class ActionsTest < ActiveSupport::TestCase
     assert_equal [], actions({}).settled
   end
 
+  # Nothing is inferred any more, so "you left the box empty" is a fact about the FORM. Reporting it
+  # as "you have no repo" would be the tool telling someone something it never checked.
+  test "an empty repo box asks for the repo rather than announcing there is none" do
+    items = actions({}, repo: nil).items
+    assert_equal [:repo], items.map(&:key)
+    assert_match(/repo box empty/, items.first.why)
+    refute_match(/we found no public repository/i, items.first.why)
+  end
+
+  test "repo signals produce their own ranked items below the corpus work" do
+    payloads = { "code_channel" => code(present: false),
+                 "repo_signals" => signals(readme: 12, description: false, topics: 0, releases: 0) }
+    items = actions(payloads).items
+
+    assert_equal :repo, items.first.key, "publishing the source still outranks a README rewrite"
+    assert_includes items.map(&:key), :repo_readme_explains_the_project
+    assert_includes items.map(&:key), :repo_tagged_releases
+    assert_equal :low, items.find { |i| i.key == :repo_tagged_releases }.impact
+  end
+
+  test "a passing repo signal is acknowledged rather than dropped" do
+    settled = actions({ "repo_signals" => signals }).settled
+    assert(settled.any? { |line| line.start_with?("README explains the project") })
+  end
+
   test "every item points at an anchor that exists on /learn" do
     payloads = { "retrieval" => retrieval(allowed: false, reachable: false, md: false, sitemap: false),
                  "code_channel" => code(present: false),
+                 "repo_signals" => signals(readme: 4, description: false, topics: 0, releases: 0, months: 30),
                  "web_channel" => web(crawled: false, quality: false, score: 1.2) }
     page = Rails.root.join("app/views/pages/learn.html.erb").read
 

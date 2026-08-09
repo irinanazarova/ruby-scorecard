@@ -66,9 +66,19 @@
   font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.1; margin: 0 0 .75rem; letter-spacing: -.02em; }
 .probe-hero__lead { max-width: var(--measure, 68ch); font-size: 1.05rem; color: var(--text-soft); }
 
-.probe-form { display: flex; gap: .5rem; margin: 1.5rem 0 .5rem; flex-wrap: wrap; }
+/* Two labelled fields rather than one box that guesses. The grid keeps them side by side on a
+   laptop and stacked on a phone, and the submit row spans both so "either may be empty" reads as a
+   rule about the pair rather than about the second field. */
+.probe-form { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  margin: 1.5rem 0 .5rem; align-items: start; }
+@media (max-width: 46rem) { .probe-form { grid-template-columns: 1fr; } }
+.probe-form__field { display: flex; flex-direction: column; gap: .3rem; }
+.probe-form__field label { font-size: .85rem; font-weight: 650; }
+.probe-form__hint { font-size: .8rem; color: var(--text-soft); line-height: 1.4; }
+.probe-form__submit { grid-column: 1 / -1; display: flex; align-items: center; gap: .8rem;
+  flex-wrap: wrap; }
 .probe-form input[type="text"] {
-  flex: 1 1 22rem; padding: .8rem 1rem; font: inherit; font-family: var(--font-mono, monospace);
+  width: 100%; padding: .8rem 1rem; font: inherit; font-family: var(--font-mono, monospace);
   font-size: .95rem; border: 2px solid var(--line-strong);
   border-radius: var(--radius, 10px); background: var(--surface); color: var(--text);
 }
@@ -89,24 +99,98 @@
 .examples h2 { font-size: 1.1rem; margin-bottom: .25rem; }
 .examples .note { color: var(--text-soft); font-size: .9rem; margin-top: 0; }
 .examples__list { list-style: none; padding: 0; display: grid; gap: .75rem; }
-.examples__list li { display: flex; flex-direction: column; gap: .25rem;
+.examples__list li { display: flex; flex-direction: column; gap: .35rem;
   border: 1px solid var(--line); border-radius: var(--radius, 10px); padding: .8rem 1rem;
   background: var(--surface); }
-.examples__list span { font-size: .88rem; color: var(--text-soft); }
-.examples__btn { background: none; border: 0; padding: 0; font: inherit; font-weight: 600;
-  font-family: var(--font-mono, monospace); font-size: .9rem; color: var(--link); cursor: pointer;
-  text-align: left; }
-.examples__btn:hover { text-decoration: underline; }
 
-/* --- results ---------------------------------------------------------------------------------- */
-.result { padding-top: 2rem; }
-.result__back a { font-size: .9rem; }
-.result__target { font-family: var(--font-mono, monospace); font-size: 1.1rem; word-break: break-all;
-  margin: .25rem 0 1rem; }
+/* Both halves of the pair are shown before anything runs, which is the point of the redesign: the
+   tool no longer works one out from the other, so the demo should never look like it did. */
+.example__pair { display: flex; align-items: baseline; gap: .5rem; flex-wrap: wrap; }
+.example__label { font-weight: 700; }
+.example__docs, .example__repo { font-family: var(--font-mono, monospace); font-size: .8rem;
+  background: var(--code-bg); border-radius: 4px; padding: .1rem .4rem; color: var(--text-soft); }
+.example__docs::before { content: "docs "; opacity: .6; }
+.example__repo::before { content: "repo "; opacity: .6; }
+.example__note { font-size: .88rem; color: var(--text-soft); margin: 0; }
+.example__go { display: flex; gap: .8rem; align-items: center; flex-wrap: wrap; }
+.example__go form { display: inline; }
+.examples__btn { background: var(--accent); color: #fff; border: 0; border-radius: 999px;
+  padding: .3rem .9rem; font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; }
+.examples__fill { background: none; border: 0; padding: 0; font: inherit; font-size: .85rem;
+  color: var(--link); cursor: pointer; text-decoration: underline; }
+
+/* --- the deck ----------------------------------------------------------------------------------
+ *
+ * Results are walked one slide at a time, like a presentation, and slides ACCUMULATE: advancing
+ * reveals the next and keeps everything already shown. The controls are pinned to the bottom of the
+ * viewport so the prompt to advance is visible wherever the visitor has scrolled to.
+ *
+ * padding-bottom on .deck reserves room for that fixed bar, or the last slide's final line sits
+ * underneath it and looks truncated.
+ */
+.deck { padding: 1.5rem 0 7rem; }
+.deck__head { display: grid; gap: .6rem; padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--line); }
+.deck__back a { font-size: .9rem; }
+.deck__target { display: flex; gap: .5rem; flex-wrap: wrap; }
+
+.chip { display: inline-flex; align-items: baseline; gap: .4rem; font-family: var(--font-mono, monospace);
+  font-size: .85rem; border: 1px solid var(--line-strong); border-radius: 999px;
+  padding: .2rem .8rem; background: var(--surface); max-width: 100%; }
+.chip a { color: var(--text); word-break: break-all; }
+.chip__key { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text-soft); font-family: var(--font-grotesk, sans-serif); }
+.chip--docs { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.chip--repo { border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
 
 .status { padding: .6rem .9rem; border-radius: var(--radius, 10px);
   background: var(--code-bg); color: var(--text); font-size: .9rem; }
 .status small { color: var(--text-soft); }
+
+.deck__stages { display: grid; gap: 2.5rem; }
+.stage { padding-top: 1.75rem; scroll-margin-top: 1rem; }
+.stage + .stage { border-top: 1px solid var(--line); }
+.stage__number { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--accent); font-weight: 600; margin: 0 0 .4rem; }
+.stage__title { font-family: var(--font-grotesk); font-weight: 720;
+  font-size: clamp(1.4rem, 3vw, 2rem); line-height: 1.15; letter-spacing: -.02em; margin: 0; }
+.stage__lead { color: var(--text-soft); margin: .35rem 0 1.25rem; max-width: var(--measure, 68ch); }
+
+/* Hidden slides are display:none rather than visibility:hidden, so they take no space and the
+   fixed nav never floats over a gap. The reveal controller also pulls their focusables out of the
+   tab order, which display:none does for free but the class has to survive a broadcast. */
+.stage--hidden { display: none; }
+.stage:not(.stage--hidden) { animation: stage-in .28s ease-out both; }
+@keyframes stage-in { from { opacity: 0; transform: translateY(.6rem) } to { opacity: 1; transform: none } }
+@media (prefers-reduced-motion: reduce) { .stage:not(.stage--hidden) { animation: none } }
+
+.deck__nav { position: fixed; left: 50%; transform: translateX(-50%); bottom: 1rem; z-index: 20;
+  display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; justify-content: center;
+  padding: .5rem .8rem; border: 1px solid var(--line-strong); border-radius: 999px;
+  background: var(--surface); box-shadow: 0 6px 24px rgb(0 0 0 / 18%); max-width: calc(100vw - 2rem); }
+.deck__btn { font: inherit; font-size: .85rem; cursor: pointer; border-radius: 999px;
+  border: 1px solid var(--line-strong); background: var(--bg); color: var(--text);
+  padding: .3rem .8rem; }
+.deck__btn:disabled { opacity: .35; cursor: default; }
+.deck__btn--go { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.deck__dots { display: inline-flex; gap: .3rem; }
+.dot { width: .5rem; height: .5rem; border-radius: 50%; background: var(--line-strong); opacity: .5; }
+.dot--on { background: var(--accent); opacity: 1; }
+.deck__hint { font-size: .78rem; color: var(--text-soft); }
+.deck__hint.is-spent { display: none; }
+.deck__hint kbd { font-family: var(--font-mono, monospace); font-size: .72rem;
+  border: 1px solid var(--line-strong); border-radius: 4px; padding: 0 .25rem; }
+.deck__all { font: inherit; font-size: .78rem; background: none; border: 0; color: var(--link);
+  cursor: pointer; text-decoration: underline; }
+@media (max-width: 34rem) { .deck__hint { display: none; } }
+
+.deck__evidence { margin-top: 1.5rem; border-top: 1px solid var(--line); padding-top: .8rem; }
+.deck__evidence > summary { cursor: pointer; font-size: .85rem; color: var(--text-soft);
+  text-transform: uppercase; letter-spacing: .04em; }
+.deck__evidence > summary:hover { color: var(--accent); }
+
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* --- the answer, above the evidence ------------------------------------------------------------
  *
@@ -116,11 +200,10 @@
  * Tone is carried by a left rule and the headline colour, never by colour alone — `--unknown` and
  * `--mixed` differ in wording too, so a red/green-blind reader loses nothing.
  */
-.answers { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.25rem 0; }
-@media (max-width: 46rem) { .answers { grid-template-columns: 1fr; } }
-
-.answer { border: 1px solid var(--line); border-left: 4px solid var(--line-strong);
-  border-radius: var(--radius, 10px); padding: 1rem 1.2rem; background: var(--surface); }
+.answer { display: block; border: 1px solid var(--line); border-left: 4px solid var(--line-strong);
+  border-radius: var(--radius, 10px); padding: 1rem 1.2rem; background: var(--surface);
+  margin: 0 0 1.25rem; }
+.answer > * { display: block; }
 .answer__q { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em;
   color: var(--text-soft); margin: 0 0 .4rem; }
 .answer__headline { font-family: var(--font-grotesk); font-weight: 700;
@@ -143,21 +226,190 @@
 @keyframes answer-breathe { 0%, 100% { opacity: 1 } 50% { opacity: .45 } }
 @media (prefers-reduced-motion: reduce) { .answer--pending .answer__headline { animation: none } }
 
-/* Which gates have reported, and how each one came back. This is the progress bar: it fills left
-   to right as the checks land, and every dot keeps its meaning once the run is over. */
-.cues { list-style: none; padding: 0; margin: .8rem 0 0; display: flex; flex-wrap: wrap; gap: .35rem .9rem; }
-.cue { display: inline-flex; align-items: center; gap: .35rem; font-size: .78rem;
-  color: var(--text-soft); }
-.cue__dot { width: .55rem; height: .55rem; border-radius: 50%; flex: none;
-  background: var(--line-strong); }
-.cue--pass .cue__dot { background: var(--ok); }
-.cue--fail .cue__dot { background: var(--bad); }
-.cue--unknown .cue__dot { background: var(--warn); }
-.cue--waiting .cue__dot { background: none; border: 1px dashed var(--line-strong); }
-.cue--waiting { opacity: .7; }
+/* --- slide 1: agent experience -----------------------------------------------------------------
+ *
+ * Two columns of boxes, docs on the left and repo on the right, because the two are separately
+ * fixable and a visitor usually owns one of them and not the other.
+ *
+ * A box that is not ticked carries its fix inline. That is the whole design: a checklist that only
+ * reports leaves the reader to work out what any of it is worth.
+ */
+.ax__scope { font-size: .88rem; color: var(--text-soft); border-left: 3px solid var(--line-strong);
+  padding-left: .8rem; margin: 0 0 1.25rem; max-width: var(--measure, 68ch); }
+.ax__cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+@media (max-width: 52rem) { .ax__cols { grid-template-columns: 1fr; } }
 
-.evidence__title { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em;
-  color: var(--text-soft); margin: 1.75rem 0 0; }
+.axcol { border: 1px solid var(--line); border-radius: var(--radius, 10px);
+  background: var(--surface); padding: 1rem 1.1rem; }
+.axcol__head { margin-bottom: .75rem; }
+.axcol__head h3 { font-size: 1rem; margin: 0; }
+.axcol__subject { font-family: var(--font-mono, monospace); font-size: .8rem;
+  color: var(--text-soft); margin: .15rem 0 0; word-break: break-all; }
+.axcol__empty { font-size: .9rem; color: var(--text-soft); margin: 0; }
+.axcol--missing { border-style: dashed; }
+
+.ax__tally { margin: 1rem 0 0; font-size: .92rem; }
+.ax__tally strong { color: var(--bad); font-size: 1.1rem; }
+.ax__tally--clear { color: var(--ok); }
+
+/* The inline fix under an unticked box. Indented under the label so the column still scans as a
+   list of boxes rather than as prose. */
+.check__action { display: block; font-size: .85rem; margin-top: .3rem; padding-left: .1rem;
+  color: var(--text); border-left: 2px solid color-mix(in srgb, var(--accent) 50%, transparent);
+  padding-left: .6rem; }
+.check__action--info { border-left-color: var(--line-strong); }
+.check__why-link { white-space: nowrap; font-weight: 600; }
+.check--warn .check__mark { color: var(--warn); }
+.check--waiting { opacity: .6; }
+.check--waiting .check__mark { color: var(--text-soft); }
+
+/* Placeholder rows while a column's check is still running, so the slide has its final shape
+   before the data lands and nothing jumps when it does. */
+.checks--ghost .check__body { flex: 1; }
+.ghostbar { display: block; height: .7rem; width: 70%; border-radius: 4px;
+  background: var(--line); animation: ghost 1.4s ease-in-out infinite; }
+@keyframes ghost { 0%, 100% { opacity: .35 } 50% { opacity: .8 } }
+@media (prefers-reduced-motion: reduce) { .ghostbar { animation: none } }
+
+/* --- slide 2: the two funnels ------------------------------------------------------------------
+ *
+ * Two wide bases narrowing into one small apex. The widths are the argument: every tier keeps a
+ * fraction of what arrives at it, and verbatim recall is rare even for text that cleared them all.
+ *
+ * Drawn with plain boxes at percentage widths rather than clip-path trapezoids, because the labels
+ * have to stay readable at 320px and a real trapezoid clips its own text.
+ */
+.funnel { display: grid; gap: .5rem; justify-items: center; }
+.funnel__apex { width: 100%; display: flex; justify-content: center; }
+.funnel__apex .tier { width: min(26rem, 60%); }
+
+.funnel__connector { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+  justify-content: center; font-size: .85rem; color: var(--text-soft); margin: 0;
+  text-align: center; }
+.funnel__arrow { color: var(--accent); font-size: 1.2rem; line-height: 1; }
+.funnel__mechanism { font-weight: 650; color: var(--text); }
+
+/* One grid for BOTH channels, with each tile placed explicitly, so the two funnels share their row
+   heights. As two independent grids they did not: "Archived and permissively licensed" wraps to
+   three lines and "Quality filter" to two, and the middle tier of one channel floated half a tile
+   above the other, which reads as a rendering fault rather than as a comparison.
+
+   `display: contents` on .fchan lets its children join the parent grid while the channel keeps its
+   class for placement. */
+.funnel__channels { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem 1.25rem; width: 100%;
+  align-items: end; }
+.fchan { display: contents; }
+.fchan--web .tier:nth-of-type(1) { grid-area: 1 / 1; }
+.fchan--web .tier:nth-of-type(2) { grid-area: 2 / 1; }
+.fchan--web .fchan__foot { grid-area: 3 / 1; }
+.fchan--code .tier:nth-of-type(1) { grid-area: 1 / 2; }
+.fchan--code .tier:nth-of-type(2) { grid-area: 2 / 2; }
+.fchan--code .fchan__foot { grid-area: 3 / 2; }
+.funnel__channels .tier { justify-self: center; }
+
+/* Stacked, the two funnels run one after the other rather than side by side, so the placement has
+   to be re-declared or both channels land in the same three rows on top of each other. */
+@media (max-width: 46rem) {
+  .funnel__channels { grid-template-columns: 1fr; }
+  .fchan--web .tier:nth-of-type(1) { grid-area: 1 / 1; }
+  .fchan--web .tier:nth-of-type(2) { grid-area: 2 / 1; }
+  .fchan--web .fchan__foot { grid-area: 3 / 1; }
+  .fchan--code .tier:nth-of-type(1) { grid-area: 4 / 1; }
+  .fchan--code .tier:nth-of-type(2) { grid-area: 5 / 1; }
+  .fchan--code .fchan__foot { grid-area: 6 / 1; }
+}
+.fchan__foot { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text-soft); margin: .2rem 0 0; text-align: center; }
+.fchan__subject { display: block; text-transform: none; letter-spacing: 0;
+  font-family: var(--font-mono, monospace); font-size: .78rem; word-break: break-all; }
+.fchan__subject--none { font-style: italic; }
+
+.tier { width: var(--tier-w, 100%); display: grid;
+  grid-template-columns: 1.4rem 1fr auto; gap: .1rem .5rem; align-items: baseline;
+  border: 1px solid var(--line-strong); border-radius: var(--radius, 10px);
+  padding: .6rem .8rem; background: var(--surface); text-align: left; }
+.tier__mark { grid-row: 1 / span 2; font-weight: 700; font-size: 1rem; align-self: center; }
+.tier__label { font-weight: 650; font-size: .95rem; }
+.tier__detail { grid-column: 2; font-size: .8rem; color: var(--text-soft); }
+.tier__why { grid-column: 3; grid-row: 1; font-size: .78rem; white-space: nowrap; }
+
+.tier--pass { border-color: color-mix(in srgb, var(--ok) 55%, transparent);
+  background: color-mix(in srgb, var(--ok) 10%, var(--surface)); }
+.tier--pass .tier__mark { color: var(--ok); }
+.tier--fail { border-color: color-mix(in srgb, var(--bad) 55%, transparent);
+  background: color-mix(in srgb, var(--bad) 8%, var(--surface)); }
+.tier--fail .tier__mark { color: var(--bad); }
+.tier--unknown { border-color: color-mix(in srgb, var(--warn) 55%, transparent); }
+.tier--unknown .tier__mark { color: var(--warn); }
+.tier--waiting, .tier--missing { border-style: dashed; opacity: .65; }
+
+.tier--apex { border-width: 2px; }
+.tier--apex .tier__label { font-family: var(--font-grotesk); font-weight: 750; font-size: 1.05rem; }
+
+/* justify-self overrides the centring the funnel grid applies to its children: a paragraph capped
+   at the reading measure and centred under two columns hangs in the middle of the page with no
+   edge to start from. */
+.funnel__note { font-size: .85rem; color: var(--text-soft); margin: 1rem 0 0;
+  max-width: var(--measure, 68ch); justify-self: start; }
+
+/* --- slide 3: the recall grid ------------------------------------------------------------------
+ *
+ * Models down the side, your text and the reference pages across the top. One shared scale across
+ * the whole grid, because per-row scaling would make a 2-word run and a 31-word run look alike.
+ */
+.recall__waiting { font-size: .92rem; color: var(--text-soft); }
+.recall__scroll { overflow-x: auto; margin: 0 0 .8rem; }
+.recall__grid { border-collapse: collapse; width: 100%; min-width: 40rem; }
+.recall__grid th, .recall__grid td { padding: .5rem .6rem; border-bottom: 1px solid var(--line);
+  vertical-align: middle; }
+.recall__corner { text-align: left; font-size: .75rem; text-transform: uppercase;
+  letter-spacing: .04em; color: var(--text-soft); font-weight: 500; }
+.recall__col { text-align: left; vertical-align: bottom; min-width: 6.5rem; }
+.recall__collabel { display: block; font-size: .85rem; font-weight: 650; }
+.recall__colsub { display: block; font-size: .72rem; color: var(--text-soft); font-weight: 400; }
+.recall__col--yours { border-bottom: 2px solid var(--accent); }
+.recall__col--reference { border-bottom: 2px solid var(--ok); }
+.recall__col--control { border-bottom: 2px solid var(--line-strong); }
+.recall__model { text-align: left; font-size: .9rem; font-weight: 650; white-space: nowrap; }
+
+/* Bar and number on ONE line, with the bar in a fixed-width track. Stacked, the number sat under
+   its own bar and every cell read as two separate facts. The track is what lets the bar keep a
+   percentage width while still sitting beside the figure. */
+.recall__cell { white-space: nowrap; }
+.bar-track { display: inline-block; width: 4.5rem; vertical-align: middle; margin-right: .5rem;
+  border-bottom: 1px solid var(--line); }
+.bar { display: block; height: .5rem; border-radius: 3px; width: var(--bar, 0%); min-width: 2px;
+  background: var(--line-strong); }
+.recall__cell--yours .bar { background: var(--accent); }
+.recall__cell--reference .bar { background: var(--ok); }
+.recall__cell--control .bar { background: var(--text-soft); }
+.bar--none { opacity: .35; }
+.bar__value { font-family: var(--font-mono, monospace); font-size: .8rem;
+  font-variant-numeric: tabular-nums; }
+.bar__value--muted { color: var(--text-soft); font-size: .72rem; }
+
+/* The sentence and the swatches are separate paragraphs. Sharing one flex row put "your text" at
+   the end of the sentence line and wrapped the other two underneath, so the key read as part of
+   the prose. */
+.recall__legend { font-size: .85rem; color: var(--text-soft); margin: 0;
+  max-width: var(--measure, 68ch); }
+.recall__legend strong { color: var(--text); }
+.recall__keys { font-size: .82rem; color: var(--text-soft); display: flex; gap: 1.1rem;
+  flex-wrap: wrap; align-items: center; margin: .4rem 0 0; }
+.recall__key { display: inline-flex; align-items: center; gap: .3rem; }
+.swatch { width: .7rem; height: .45rem; border-radius: 2px; display: inline-block; }
+.swatch--yours { background: var(--accent); }
+.swatch--reference { background: var(--ok); }
+.swatch--control { background: var(--text-soft); }
+
+.recall__controls { font-size: .85rem; margin: .6rem 0 0; padding: .5rem .8rem;
+  border-radius: var(--radius, 10px); background: var(--code-bg); }
+.recall__controls--ok { color: var(--text-soft); }
+.recall__controls--bad { border: 1px solid var(--bad); color: var(--bad); }
+.recall__caveat { font-size: .85rem; color: var(--text-soft); margin: .8rem 0 0;
+  max-width: var(--measure, 68ch); }
+
+.tag--source { border-color: var(--accent); color: var(--accent); }
 
 .steps { display: grid; gap: 1rem; margin-top: 1.25rem; }
 .step { border: 1px solid var(--line); border-radius: var(--radius, 10px);
@@ -219,24 +471,6 @@
 .recent li { padding: .25rem 0; }
 .recent small { color: var(--text-soft); }
 
-/* --- side-by-side baseline -------------------------------------------------------------------- */
-.baseline { margin-top: 1.2rem; border-top: 1px solid var(--line); padding-top: 1rem; }
-.baseline h2 { font-size: 1rem; margin: 0 0 .75rem; }
-.baseline__grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
-@media (max-width: 34rem) { .baseline__grid { grid-template-columns: 1fr; } }
-.baseline__col { border: 1px solid var(--line); border-radius: var(--radius, 10px);
-  padding: .75rem .9rem; background: var(--surface); }
-.baseline__col--ref { border-color: var(--ok); }
-.baseline__who { font-size: .8rem; text-transform: uppercase; letter-spacing: .04em;
-  color: var(--text-soft); margin: 0 0 .3rem; }
-.baseline__verdict { font-size: 1.15rem; font-weight: 700; margin: 0 0 .25rem; }
-.baseline__verdict--none { color: var(--text-soft); font-weight: 600; }
-.baseline__verdict--strong { color: var(--ok); }
-.baseline__verdict--partial { color: var(--warn); }
-.baseline__meta { font-size: .82rem; color: var(--text-soft); margin: 0; }
-.baseline__note { font-size: .85rem; color: var(--text-soft); margin-top: .8rem;
-  max-width: var(--measure, 68ch); }
-
 /* --- /learn ------------------------------------------------------------------------------------
  *
  * A reading page inside the app rather than a generated document, because every result on /test
@@ -297,6 +531,122 @@
 
 .learn__cta { display: inline-block; margin: .5rem 1rem .5rem 0; font-weight: 600; }
 .learn__cta--quiet { color: var(--text-soft); font-weight: 500; }
+
+/* --- the checklist -------------------------------------------------------------------------
+ *
+ * The page opens with what to do, because that is what a visitor arriving from a result wants.
+ * Each item is one action, one reason, and a link to the section that shows the working.
+ */
+.learn__do, .learn__skip, .learn__limits { list-style: none; padding: 0; margin: 1rem 0 0;
+  display: grid; gap: .6rem; counter-reset: none; }
+.learn__do { counter-reset: doitem; }
+.learn__do > li, .learn__skip > li, .learn__limits > li {
+  border: 1px solid var(--line); border-radius: var(--radius, 10px);
+  background: var(--surface); padding: .75rem 1rem .8rem 2.6rem; position: relative; }
+.learn__do > li { border-left: 3px solid var(--accent); }
+
+/* Numbered squares on the do-lists, an unchecked box on the skip-list: the shape says which list
+   you are reading even when the heading has scrolled off. */
+.learn__do > li::before { counter-increment: doitem; content: counter(doitem);
+  position: absolute; left: .8rem; top: .8rem; width: 1.2rem; height: 1.2rem;
+  border-radius: 4px; background: var(--accent); color: #fff; font-size: .72rem;
+  font-weight: 700; display: grid; place-items: center; }
+.learn__skip > li::before { content: "✕"; position: absolute; left: .8rem; top: .75rem;
+  width: 1.2rem; height: 1.2rem; border-radius: 4px; font-size: .78rem; font-weight: 700;
+  display: grid; place-items: center;
+  color: var(--bad); border: 1px solid color-mix(in srgb, var(--bad) 45%, transparent); }
+.learn__limits > li { padding-left: 1rem; border-left: 3px solid var(--line-strong); }
+
+/* Fact lists: the page's default body copy. One claim per line, tighter than a paragraph and
+   scannable in a way running prose is not. */
+.learn__facts { margin: .6rem 0 1rem; padding-left: 1.1rem; }
+.learn__facts li { font-size: .95rem; line-height: 1.55; margin-bottom: .3rem; }
+
+.learn__why { display: block; font-size: .92rem; color: var(--text-soft); margin-top: .25rem; }
+.learn__tag { display: inline-block; font-size: .68rem; text-transform: uppercase;
+  letter-spacing: .05em; border: 1px solid var(--line-strong); border-radius: 999px;
+  padding: .05rem .5rem; margin-left: .35rem; color: var(--text-soft); vertical-align: .1em; }
+.learn__tag--high { color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+
+/* --- collapsed evidence ---------------------------------------------------------------------
+ *
+ * Every measured claim keeps its table, one click from the sentence it supports. Closed by
+ * default so the page reads as a checklist; open, it is the same evidence the old /guide printed
+ * inline.
+ */
+.learn__ev { margin: 1rem 0 0; border: 1px solid var(--line); border-radius: var(--radius, 10px);
+  background: var(--surface); }
+.learn__ev > summary { cursor: pointer; padding: .6rem .9rem; font-size: .9rem; font-weight: 600;
+  color: var(--text-soft); list-style-position: inside; }
+.learn__ev > summary:hover { color: var(--accent); }
+.learn__ev[open] > summary { border-bottom: 1px solid var(--line); }
+.learn__ev > *:not(summary) { margin-left: .9rem; margin-right: .9rem; }
+.learn__ev > *:last-child { margin-bottom: .9rem; }
+.learn__evnote { font-size: .88rem; line-height: 1.6; color: var(--text-soft); }
+.learn__sources { padding-left: 1.1rem; }
+.learn__sources li { font-size: .88rem; line-height: 1.7; margin-bottom: .3rem; }
+
+/* --- diagrams --------------------------------------------------------------------------------
+ *
+ * Hand-authored inline SVG: no external asset, and every colour is a design token, so the figures
+ * follow the theme toggle like the rest of the page.
+ *
+ * Figures bleed wider than the reading measure, because 720 units squeezed into 68ch renders the
+ * labels below legibility. Below that width they scroll inside their own box, the same bargain
+ * .learn__tablewrap makes, so the page body never scrolls sideways.
+ */
+.learn__fig { --bleed: clamp(0rem, calc((100vw - var(--measure, 68ch)) / 2 - 2rem), 7rem);
+  margin: 1.75rem calc(-1 * var(--bleed)); overflow-x: auto; }
+.learn__svg { display: block; width: 100%; min-width: 34rem; height: auto; }
+.learn__fig figcaption { font-size: .88rem; line-height: 1.55; color: var(--text-soft);
+  margin: .6rem calc(var(--bleed)) 0; }
+
+.svg-cap { font-family: var(--font-grotesk); font-size: 9.5px; font-weight: 700;
+  letter-spacing: .09em; fill: var(--text-soft); }
+.svg-cap--keep { fill: var(--accent); }
+.svg-t { font-family: var(--font-grotesk); font-size: 13px; font-weight: 650; fill: var(--text); }
+.svg-t--head { font-size: 13.5px; font-weight: 750; }
+.svg-t--inv { fill: var(--bg); font-size: 15px; font-weight: 750; }
+.svg-t--ok { fill: var(--ok); }
+.svg-t--warn { fill: var(--warn); }
+.svg-t--bad { fill: var(--bad); }
+.svg-s { font-family: var(--font-grotesk); font-size: 11.5px; font-weight: 450;
+  fill: var(--text-soft); }
+.svg-s--strong { font-weight: 700; fill: var(--text); }
+.svg-v { font-family: var(--font-mono, monospace); font-size: 11px; fill: var(--text-soft); }
+
+.svg-box { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1; }
+.svg-box--ok   { fill: color-mix(in srgb, var(--ok) 12%, var(--surface));
+  stroke: color-mix(in srgb, var(--ok) 55%, transparent); }
+.svg-box--warn { fill: color-mix(in srgb, var(--warn) 12%, var(--surface));
+  stroke: color-mix(in srgb, var(--warn) 55%, transparent); }
+.svg-box--bad  { fill: color-mix(in srgb, var(--bad) 12%, var(--surface));
+  stroke: color-mix(in srgb, var(--bad) 55%, transparent); }
+.svg-box--ink  { fill: var(--text); stroke: none; }
+.svg-arrow { stroke: var(--line-strong); stroke-width: 1.5; fill: none;
+  marker-end: url(#svg-arrowhead); }
+
+.svg-lane { fill: var(--surface); stroke: var(--line); stroke-width: 1; }
+.svg-lane--ok   { fill: color-mix(in srgb, var(--ok) 8%, var(--surface)); }
+.svg-lane--warn { fill: color-mix(in srgb, var(--warn) 8%, var(--surface)); }
+.svg-lane--bad  { fill: color-mix(in srgb, var(--bad) 8%, var(--surface)); }
+.svg-pip { fill: var(--line-strong); }
+.svg-pip--ok { fill: var(--ok); } .svg-pip--warn { fill: var(--warn); }
+.svg-pip--bad { fill: var(--bad); }
+
+.svg-axis { stroke: var(--line-strong); stroke-width: 1; }
+.svg-keep { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.svg-bar--a { fill: var(--accent); }
+.svg-bar--b { fill: color-mix(in srgb, var(--text-soft) 55%, transparent); }
+
+.svg-quad { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1; }
+.svg-quad--best { fill: color-mix(in srgb, var(--ok) 10%, var(--surface));
+  stroke: color-mix(in srgb, var(--ok) 55%, transparent); }
+.svg-quad--warn { fill: color-mix(in srgb, var(--warn) 10%, var(--surface));
+  stroke: color-mix(in srgb, var(--warn) 55%, transparent); }
+.svg-quad--bad  { fill: color-mix(in srgb, var(--bad) 10%, var(--surface));
+  stroke: color-mix(in srgb, var(--bad) 55%, transparent); }
 
 /* --- action items on a result ------------------------------------------------------------------
  *

@@ -31,7 +31,7 @@ module Analyzer
 
     # Open items, most valuable first.
     def items
-      list = training_items + retrieval_items
+      list = training_items + retrieval_items + repo_items
       list.compact.sort_by { |item| IMPACT_ORDER.fetch(item.impact, 3) }
     end
 
@@ -45,8 +45,14 @@ module Analyzer
       out << "AI crawlers are allowed and the page fetches cleanly." if crawlable?
       out << "Agents can get the source text, not just rendered HTML." if clean_text?
       out << "A sitemap points crawlers at your pages." if pass?("retrieval", "Sitemap")
-      out << "Models already reproduce this page verbatim." if memorized?
-      out
+      out << "Models already reproduce this text verbatim." if memorized?
+      out + settled_repo_signals
+    end
+
+    def settled_repo_signals
+      Array(result("repo_signals")&.dig(:checks)).filter_map do |c|
+        "#{c[:name]}: #{c[:detail]}." if c[:pass]
+      end
     end
 
     private
@@ -59,16 +65,30 @@ module Analyzer
 
     # The highest-value change on the whole page: the code channel has no prose quality filter, so a
     # reference page that can never pass the web filter still reaches a corpus through the repo.
+    #
+    # Two different situations produce this item, and they need different wording. Nothing is
+    # inferred any more, so "you left the repo box empty" is a fact about the FORM and must not be
+    # reported as "you have no repo".
     def repo_item
+      return no_repo_given_item if target[:repo].blank?
+
       code = result("code_channel")
       return nil if code.nil? || code[:error].present?
       return nil if code[:present] || code[:transient]
 
       Item.new(key: :repo, impact: :high,
-               title: "Put the docs source in a public repo",
-               why: "We found no public repository carrying this text. Code corpora take Markdown " \
-                    "with no prose-quality filter, so this is the one route a reference page can " \
-                    "take without being rewritten.",
+               title: "Publish the docs source in a public repo",
+               why: "#{code[:reason]} Code corpora take Markdown with no prose-quality filter, so " \
+                    "this is the one route a reference page can take without being rewritten.",
+               anchor: "code-channel", anchor_label: "how the code channel works")
+    end
+
+    def no_repo_given_item
+      Item.new(key: :repo, impact: :high,
+               title: "Give us a repo, or publish one",
+               why: "You ran this with the repo box empty, so the entire code channel went " \
+                    "unmeasured. That channel takes Markdown with no prose-quality filter, and it " \
+                    "is the route most reference documentation can actually take.",
                anchor: "code-channel", anchor_label: "how the code channel works")
     end
 
@@ -76,12 +96,14 @@ module Analyzer
       code = result("code_channel")
       return nil unless code&.dig(:present)
       return nil if code[:swh_archived]
+      # Observed membership in v3 already proves collection; nagging about SWH would be noise.
+      return nil if code[:in_stack_v3] == true
 
       Item.new(key: :archive, impact: :high,
                title: "Get #{code[:repo]} archived by Software Heritage",
-               why: "The Stack v2 and v3 are built from that archive, and archival is a separate " \
-                    "step from being public on GitHub. Until it happens, the licence on this repo " \
-                    "buys nothing.",
+               why: "The Stack v2 was built from that archive and SWH-based corpora keep coming, " \
+                    "and archival is a separate step from being public on GitHub. It is the one " \
+                    "collection path a maintainer can trigger directly.",
                anchor: "software-heritage", anchor_label: "why archival is its own gate")
     end
 
@@ -191,11 +213,64 @@ module Analyzer
                anchor: "sitemap", anchor_label: "crawl budget")
     end
 
+    # --- the repo as an agent reads it -----------------------------------------------------------
+
+    # These change what an agent can say about you TODAY, which is a faster payoff than anything in
+    # the training list, and they are cheap. They rank below the corpus work because a README rewrite
+    # does not put you in a corpus, and above nothing because a repo an agent cannot summarise will
+    # not be recommended by one.
+    # The detail is always a MEASURED clause and always leads, so every line opens with the finding
+    # rather than with advice the reader has no reason to accept yet.
+    REPO_ADVICE = {
+      "README explains the project" =>
+        [:medium, "Open the README with what this does and who it is for",
+         "An agent quotes the README when it recommends you, and a badge row gives it nothing to " \
+         "quote.",
+         "repo-readme", "why the README carries the most weight"],
+      "Description and topics set" =>
+        [:medium, "Fill in the repo description and topics",
+         "Those are the fields GitHub search matches on, and search is how an agent finds you when " \
+         "it does not already know your name.",
+         "repo-metadata", "the fields GitHub search reads"],
+      "Tagged releases" =>
+        [:low, "Publish tagged releases",
+         "A release gives an agent a version to name instead of pointing someone at whatever is on " \
+         "main today.",
+         "repo-releases", "why a version number matters"],
+      "Active in the last 12 months" =>
+        [:low, "Push something, or say in the README that the project is finished",
+         "Recency is weighed by agents and by the people reading their answers, and a finished " \
+         "project that says so answers the question directly.",
+         "repo-activity", "how recency is read"]
+    }.freeze
+
+    def repo_items
+      signals = result("repo_signals")
+      return [] unless signals&.dig(:present)
+
+      Array(signals[:checks]).filter_map do |c|
+        next unless c[:pass] == false
+
+        advice = REPO_ADVICE[c[:name]]
+        next unless advice
+
+        impact, title, why, anchor, label = advice
+        Item.new(key: :"repo_#{c[:name].parameterize(separator: '_')}", impact: impact, title: title,
+                 why: "#{signals[:repo]}: #{c[:detail]}. #{why}", anchor: anchor, anchor_label: label)
+      end
+    end
+
     # --- shared ---------------------------------------------------------------------------------
+
+    def target = result("target") || {}
 
     def code_open?
       code = result("code_channel")
-      code&.dig(:present) && code[:swh_archived] && code[:kept_by_stack] == true
+      return false unless code&.dig(:present)
+      return true if code[:in_stack_v3] == true
+      return false if code[:in_stack_v3] == false
+
+      code[:swh_archived] && code[:kept_by_stack] == true
     end
 
     def memorized?

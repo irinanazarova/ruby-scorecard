@@ -1,0 +1,33 @@
+{
+  "_note": "Passages verified in the 168-repo study (data/memorization_study.json). Pinned so the reference columns are a FIXED yardstick: same 55 words in, same 60 compared against, every run. Selected by the same deterministic prose-aware picker the live probe uses.",
+  "_source": "scripts/repo_probe.rb, run 2026-06",
+  "passages": {
+    "tailwind-upgrade": {
+      "study_label": "tailwindlabs/tailwindcss.com [1]",
+      "prefix": "imports and vendor prefixing is now handled for you automatically, so you can remove `postcss-import` and `autoprefixer` if they are in your project: If you're using Vite, we recommend migrating from the PostCSS plugin to our new dedicated Vite plugin for improved performance and the best developer experience: In v4, Tailwind CLI lives in a",
+      "truth": "dedicated `@tailwindcss/cli` package. Update any of your build commands to use the new package instead: Here's a comprehensive list of all the breaking changes in Tailwind CSS v4.0. Our [upgrade tool](#using-the-upgrade-tool) will handle most of these changes for you automatically, so we highly recommend using it if you can. Tailwind CSS v4.0 is designed for modern browsers and targets Safari",
+      "measured_in_study": {
+        "claude-opus-4-8": 16,
+        "gpt-5.5-via-codex": 3
+      }
+    },
+    "rails-i18n": {
+      "study_label": "rails/rails [3]",
+      "prefix": "for basic I18n support. NOTE: The I18n API is primarily intended for translating user-facing text within the application. Translating model content itself (for example, blog posts stored in the database) requires a separate approach. The Ruby I18n gem is split into two parts: define how the library works. [_Simple_](https://github.com/ruby-i18n/i18n/blob/master/lib/i18n/backend/simple.rb) backend) that implements these methods. As",
+      "truth": "a user you should only access the public methods on the I18n module, but it is useful to know about the capabilities of the backend. INFO: It is possible to swap the shipped `Simple` backend with a more powerful one, which would store translation data in a relational database, GetText dictionary, or similar. See section [Using alternate backends](#using-alternate-backends) below. The",
+      "measured_in_study": {
+        "claude-opus-4-8": 30,
+        "gpt-5.5-via-codex": 2
+      }
+    },
+    "supabase-redirect-urls": {
+      "study_label": "supabase/supabase [3]",
+      "prefix": "for client-only apps. Your site directly receives the access token after the user confirms their email. scrollable size=\"small\" type=\"underlined\" queryGroup=\"language\" To sign up the user, call [signUp()](/docs/reference/javascript/auth-signup) with their email address and password. You can optionally specify a URL to redirect to after the user clicks the confirmation link. This URL must be configured as",
+      "truth": "a [Redirect URL](/docs/guides/auth/redirect-urls), which you can do in the [dashboard](/dashboard/project/_/auth/url-configuration) for hosted projects, or in the [configuration file](/docs/guides/cli/config#auth.additional_redirect_urls) for self-hosted projects. If you don't specify a redirect URL, the user is automatically redirected to your site URL. This defaults to `localhost:3000`, but you can also configure this. To sign up the user, call [signUp()](/docs/reference/dart/auth-signup) with their email address and password:",
+      "measured_in_study": {
+        "claude-opus-4-8": 33,
+        "gpt-5.5-via-codex": 1
+      }
+    }
+  }
+}

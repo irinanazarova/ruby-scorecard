@@ -40,18 +40,25 @@
           <small>A short run is weak evidence on its own: common phrasing recurs across many
           documents. Treat it as a hint, not a finding.</small>
         <% else %>
-          <%= summary[:models_fired].to_a.to_sentence %> reproduced it,
-          <strong><%= summary[:best_run] %> consecutive words</strong> verbatim.
+          <%# models_strong, not models_fired: the latter counts anything past the weak 6-word bar,
+              which credited a model that managed 7 words with another model's 54. %>
+          <%= (summary[:models_strong].presence || summary[:models_fired]).to_a.to_sentence %>
+          reproduced it, <strong><%= summary[:best_run] %> consecutive words</strong> verbatim.
           <small>You cannot reproduce text you have never seen. This is strong evidence it was trained on.</small>
         <% end %>
       </p>
 
       <details class="step__detail" <%= "open" if summary[:verdict] != "none" %>>
         <summary>Show exactly what we tested</summary>
-        <% Array(result[:probes]).group_by { |p| p[:offset] }.each do |offset, probes| %>
+        <%# Grouped by SOURCE as well as offset. Both halves of the input are probed now, and their
+            word offsets collide constantly: two unrelated passages were being merged into one box
+            and shown under a single prefix. %>
+        <% Array(result[:probes]).group_by { |p| [p[:source].to_s, p[:offset]] }.each do |(source, offset), probes| %>
           <div class="probe">
-            <p class="probe__label">Passage at word <%= offset %> of
-              <%= result.dig(:passages, 0, :total_words) %></p>
+            <p class="probe__label">
+              <span class="tag tag--source"><%= source == "repo" ? "your repo" : "your docs" %></span>
+              <%= probes.first[:source_label] %>, from word <%= offset %>
+            </p>
             <p class="probe__prefix"><em>We showed the model:</em> &ldquo;&hellip;<%= probes.first[:prefix] %>&rdquo;</p>
             <p class="probe__truth"><em>What actually follows:</em> &ldquo;<%= probes.first[:truth] %>&hellip;&rdquo;</p>
             <table class="probe__models">
@@ -80,8 +87,6 @@
           nothing above is interpretable.</small>
         </p>
       </details>
-
-      <%= render "analyses/baseline", mine: summary %>
     <% end %>
 
   <% elsif step.to_sym == :code_channel && result[:present] == false %>
@@ -110,9 +115,6 @@
     <% if step.to_sym == :code_channel && result[:repo].present? %>
       <p class="step__note">
         Repo: <a href="https://github.com/<%= result[:repo] %>"><%= result[:repo] %></a>
-        <% if defined?(repo_source) && repo_source.present? %>
-          <small>(found via <%= repo_source %>)</small>
-        <% end %>
         <% if result[:github_mislabels] %>
           <br><strong>Note:</strong> GitHub reports this license as
           &ldquo;<%= result[:github_spdx] %>&rdquo;. Reading the license text shows it is actually

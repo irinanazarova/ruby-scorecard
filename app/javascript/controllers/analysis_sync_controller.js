@@ -22,7 +22,18 @@ export default class extends Controller {
   static CEILING_MS = 5 * 60 * 1000
 
   // These are the regions the job broadcasts. Anything else on the page is static for the run.
-  static TARGETS = ["#analysis_verdict", "#analysis_actions", "#analysis_status", ".steps"]
+  //
+  // Every one of them sits INSIDE a slide wrapper rather than being one, which is what keeps this
+  // from fighting the deck: swapping a region never touches the wrappers the reveal controller
+  // owns, so a broadcast landing mid-walkthrough cannot reset which slides are showing.
+  static TARGETS = [
+    "#analysis_discoverability",
+    "#analysis_funnel",
+    "#analysis_recall",
+    "#analysis_actions",
+    "#analysis_status",
+    ".steps"
+  ]
 
   connect() {
     if (this.statusValue === "done" || this.statusValue === "failed") return

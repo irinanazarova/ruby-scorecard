@@ -25,7 +25,10 @@ module Analyzer
     # near 0.9; SVG path data and minified JS sit near 0.
     PROSE_RATIO = 0.65
 
-    Result = Struct.new(:ok, :error, :prefix, :truth, :source_label, :total_words, :offset,
+    # `source` is :docs or :repo. The probe now runs against both halves of the input, and a chart
+    # that shows one bar per model without saying WHICH text each bar came from is unreadable: a
+    # page can be absent from every corpus while its repo is reproduced word for word.
+    Result = Struct.new(:ok, :error, :prefix, :truth, :source_label, :total_words, :offset, :source,
                         keyword_init: true)
 
     def self.from_url(url)

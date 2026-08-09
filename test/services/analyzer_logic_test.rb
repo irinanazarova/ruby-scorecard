@@ -51,24 +51,6 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
     assert_equal false, keep[:source_available]
   end
 
-  # --- repo inference from a hostname -----------------------------------------------------------
-  # Taking the first label sent docs.anycable.io to a GitHub user called "docs".
-
-  def org_label(host)
-    Analyzer::Run.new("https://example.com").send(:org_label, host)
-  end
-
-  test "strips known doc subdomains" do
-    assert_equal "anycable", org_label("docs.anycable.io")
-    assert_equal "stripe",   org_label("api.stripe.com")
-    assert_equal "workos",   org_label("workos.com")
-    assert_equal "hoppscotch", org_label("www.hoppscotch.io")
-  end
-
-  test "handles two-part TLDs" do
-    assert_equal "example", org_label("docs.example.co.uk")
-  end
-
   # --- passage selection ------------------------------------------------------------------------
   # Single-span probing produced a false negative on Tailwind for GPT-5.5, which fired on only one
   # of three spans. Sparsity is the whole reason multiple spans exist.
@@ -134,12 +116,36 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
 
   # --- target parsing ---------------------------------------------------------------------------
 
-  test "accepts urls, github urls and owner/repo slugs" do
-    assert_equal :repo, Analyzer::Target.new("https://github.com/rails/rails").kind
-    assert_equal "rails/rails", Analyzer::Target.new("rails/rails").repo
-    assert_equal :url, Analyzer::Target.new("https://example.com/docs").kind
-    assert_equal "https://example.com/docs", Analyzer::Target.new("example.com/docs").url
-    refute Analyzer::Target.new("not a url").valid?
+  test "takes the two fields separately and never fills one in from the other" do
+    t = Analyzer::Target.new(docs_url: "example.com/docs", repo: "rails/rails")
+    assert_equal "https://example.com/docs", t.url
+    assert_equal "rails/rails", t.repo
+    assert_equal :both, t.kind
+
+    assert_equal :url, Analyzer::Target.new(docs_url: "https://example.com/docs").kind
+    assert_nil Analyzer::Target.new(docs_url: "https://example.com/docs").repo,
+               "a docs URL must never produce a repo"
+    assert_equal :repo, Analyzer::Target.new(repo: "https://github.com/rails/rails").kind
+  end
+
+  test "names which field is wrong instead of rejecting the pair" do
+    refute Analyzer::Target.new(docs_url: "not a url").valid?
+    assert_match(/not a url/, Analyzer::Target.new(docs_url: "not a url").error)
+    assert_match(/owner\/repo/, Analyzer::Target.new(repo: "not a slug").error)
+    assert_match(/at least|Enter/i, Analyzer::Target.new.error)
+  end
+
+  # A github.com link pasted into the docs box is a misfiled repo, and running it as a web target
+  # would report "not in Common Crawl" about a page that was never a page.
+  test "a github link in the docs box is treated as the repo" do
+    t = Analyzer::Target.new(docs_url: "https://github.com/rails/rails")
+    assert_equal "rails/rails", t.repo
+    assert_nil t.url
+  end
+
+  test "one box, split, still works for an old permalink" do
+    assert_equal "rails/rails", Analyzer::Target.from_input("rails/rails").repo
+    assert_equal "https://example.com/docs", Analyzer::Target.from_input("example.com/docs").url
   end
 
   # --- cache ------------------------------------------------------------------------------------

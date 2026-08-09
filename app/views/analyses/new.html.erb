@@ -1,20 +1,40 @@
-<% content_for :title, "Is your documentation in the training data?" %>
+<% content_for :title, "Can agents find, read and recall your product?" %>
 
-<section class="probe-hero">
-  <h1>Is your documentation in the training data?</h1>
+<section class="probe-hero" data-controller="prefill">
+  <h1>Can agents find, read and recall your product?</h1>
   <p class="probe-hero__lead">
-    Paste a documentation URL or a GitHub repo. We check whether agents can retrieve it today,
-    whether it could reach a training corpus at all, and whether frontier models already reproduce
-    it word for word. Every result comes with the working and with what to do about it.
+    Two questions, measured separately. Can an agent discover your product, read it and suggest it
+    today? And is your text already inside the models, word for word?
     <a href="/learn">How the whole system works &rarr;</a>
   </p>
 
+  <%# Two named fields, because the answer depends on both and guessing the missing half was the
+      worst thing the old single box did: it walked from "a repo named after this site" down to
+      "the org's most-starred repo", and that last step renders exactly like a measurement. %>
   <%= form_with url: analyses_path, method: :post, class: "probe-form" do |f| %>
-    <%= f.text_field :input,
-          placeholder: "https://yourcompany.com/docs/getting-started  or  owner/repo",
-          autofocus: true, autocomplete: "off", spellcheck: "false",
-          "aria-label": "Documentation URL or GitHub repo" %>
-    <%= f.submit "Analyze" %>
+    <div class="probe-form__field">
+      <%= f.label :docs_url, "Your documentation website" %>
+      <%= f.text_field :docs_url, value: params[:docs_url],
+            placeholder: "https://yourcompany.com/docs/getting-started",
+            autofocus: true, autocomplete: "off", spellcheck: "false",
+            data: { prefill_target: "docs" } %>
+      <span class="probe-form__hint">One content page, not the docs landing page. Landing pages are
+      mostly links and there is nothing in them to test.</span>
+    </div>
+
+    <div class="probe-form__field">
+      <%= f.label :repo, "Your open source repo" %>
+      <%= f.text_field :repo, value: params[:repo],
+            placeholder: "owner/repo", autocomplete: "off", spellcheck: "false",
+            data: { prefill_target: "repo" } %>
+      <span class="probe-form__hint">Docs, SDK or the product itself, whichever is public.</span>
+    </div>
+
+    <div class="probe-form__submit">
+      <%= f.submit "Analyze" %>
+      <span class="probe-form__hint">Either box may be left empty. We need at least one, and we
+      never guess the other.</span>
+    </div>
   <% end %>
 
   <p class="probe-form__quota">
@@ -24,30 +44,41 @@
     <% else %>
       <strong><%= free_remaining %></strong> of
       <%= AnalyzerConfig::FREE_ANALYSES_PER_SESSION %> free checks left.
-      Re-running a link you already checked is free and never uses one up.
+      Re-running a pair you already checked is free and never uses one up.
       <%= button_to "Sign in with GitHub", "/auth/github", method: :post, class: "analyzer__linkbtn",
                     data: { turbo: false } %>
     <% end %>
   </p>
-</section>
 
-<section class="examples">
-  <h2>Or start with one of these</h2>
-  <p class="note">
-    <%= AnalyzerConfig::EXAMPLES.size %> real cases with measured results, including one page that
-    two frontier models reproduce word for word. Every result is shown against docs that
-    <em>are</em> in the training data, so a null answer means something. These four are free to run
-    and never use up a check.
-  </p>
-  <ul class="examples__list">
-    <% AnalyzerConfig::EXAMPLES.each do |example| %>
-      <li>
-        <%= button_to example[:label], analyses_path,
-              params: { input: example[:url] }, class: "examples__btn" %>
-        <span><%= example[:note] %></span>
-      </li>
-    <% end %>
-  </ul>
+  <section class="examples">
+    <h2>Or start with one of these</h2>
+    <p class="note">
+      <%= @examples.size %> real products with measured results, each one a docs site next to the
+      repo its team would name. Every note below states what these actually produced. They are free
+      to run and never use up a check.
+    </p>
+    <ul class="examples__list">
+      <% @examples.each do |example| %>
+        <li class="example">
+          <div class="example__pair">
+            <span class="example__label"><%= example[:label] %></span>
+            <code class="example__docs"><%= example[:docs].sub(%r{\Ahttps?://}, "") %></code>
+            <code class="example__repo"><%= example[:repo] %></code>
+          </div>
+          <p class="example__note"><%= example[:note] %></p>
+          <div class="example__go">
+            <%= button_to "Run it", analyses_path,
+                  params: { docs_url: example[:docs], repo: example[:repo] }, class: "examples__btn" %>
+            <button type="button" class="examples__fill"
+                    data-action="prefill#fill"
+                    data-docs="<%= example[:docs] %>" data-repo="<%= example[:repo] %>">
+              Put it in the form
+            </button>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </section>
 </section>
 
 <% if @recent.any? %>

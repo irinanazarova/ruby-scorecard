@@ -1,0 +1,74 @@
+<%# Agent experience as two columns of boxes. Rendered bare: this element carries the id the
+    broadcast replaces. %>
+<% d = Analyzer::Discoverability.new(payloads) %>
+<% marks = { pass: "✓", fail: "✗", warn: "!", info: "i", unknown: "?", waiting: "…" } %>
+
+<div class="ax" id="analysis_discoverability">
+  <%= render "analyses/answer", answer: Analyzer::Verdict.new(payloads).retrieval_answer %>
+
+  <p class="ax__scope"><strong>Scope:</strong> <%= Analyzer::Discoverability::SCOPE %></p>
+
+  <div class="ax__cols">
+    <% d.columns.each do |col| %>
+      <section class="axcol axcol--<%= col.state %>">
+        <header class="axcol__head">
+          <h3><%= col.title %></h3>
+          <% if col.subject.present? %>
+            <p class="axcol__subject"><%= col.subject.sub(%r{\Ahttps?://}, "") %></p>
+          <% end %>
+        </header>
+
+        <% case col.state
+           when :missing %>
+          <p class="axcol__empty">You left this box empty, so none of it was measured.
+            <%= link_to "Run it again with both →", test_path %></p>
+
+        <% when :waiting %>
+          <ul class="checks checks--ghost">
+            <% 5.times do %><li class="check check--waiting"><span class="check__mark">…</span>
+              <span class="check__body"><span class="ghostbar"></span></span></li><% end %>
+          </ul>
+
+        <% when :error %>
+          <p class="axcol__empty"><%= col.note %></p>
+
+        <% else %>
+          <ul class="checks">
+            <% col.items.each do |item| %>
+              <li class="check check--<%= item.status %>">
+                <span class="check__mark" aria-hidden="true"><%= marks[item.status] %></span>
+                <span class="check__body">
+                  <strong><%= item.label %></strong>
+                  <span class="check__detail"><%= item.detail %></span>
+
+                  <%# A box that is not ticked never stops at the negative. The fix goes here, next
+                      to the finding, and the "Why" goes to the paragraph that explains the
+                      mechanism rather than to the top of /learn. %>
+                  <% if item.action.present? %>
+                    <span class="check__action">
+                      <%= item.action %>
+                      <a class="check__why-link" href="/learn#<%= item.anchor %>">Why &rarr;</a>
+                    </span>
+                  <% elsif item.anchor.present? && item.status == :info %>
+                    <span class="check__action check__action--info">
+                      <a class="check__why-link" href="/learn#<%= item.anchor %>"><%= item.anchor_label %> &rarr;</a>
+                    </span>
+                  <% end %>
+                </span>
+              </li>
+            <% end %>
+          </ul>
+        <% end %>
+      </section>
+    <% end %>
+  </div>
+
+  <% open = d.open_items %>
+  <% if open.any? %>
+    <p class="ax__tally"><strong><%= open.size %></strong>
+      <%= "fix".pluralize(open.size) %> above, each one deployable today.</p>
+  <% elsif d.ready? %>
+    <p class="ax__tally ax__tally--clear">Every box we check is ticked. An agent can find this,
+    read it, and has grounds to suggest it.</p>
+  <% end %>
+</div>

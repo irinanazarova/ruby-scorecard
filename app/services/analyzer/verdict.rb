@@ -40,7 +40,7 @@ module Analyzer
     # --- question 1: retrieval -------------------------------------------------------------------
 
     def retrieval_answer
-      return repo_retrieval_answer if repo_only?
+      return no_docs_answer if target[:docs_url].blank?
 
       r = result("retrieval")
       return waiting_answer(:retrieval) if r.nil?
@@ -118,13 +118,14 @@ module Analyzer
       case mem[:verdict]
       when "strong"
         { tone: :yes,
-          headline: "Yes. #{models_fired(mem)} reproduce #{mem[:best_run]} consecutive words of it.",
-          detail: "You cannot reproduce text you have never seen, so this page reached a training " \
+          headline: "Yes. #{models_strong(mem)} #{reproduce_verb(mem)} #{mem[:best_run]} " \
+                    "consecutive words of #{best_source_noun}.",
+          detail: "You cannot reproduce text you have never seen, so this text reached a training " \
                   "corpus. #{route_sentence(code, web)}",
           caveat: nil }
       when "partial"
         { tone: :mixed,
-          headline: "Maybe. #{models_fired(mem)} continued it for #{mem[:best_run]} words.",
+          headline: "Maybe. #{models_fired(mem)} continued #{best_source_noun} for #{mem[:best_run]} words.",
           detail: "A run that short is phrasing thousands of documents share, so it is a hint " \
                   "rather than a finding. #{route_sentence(code, web)}",
           caveat: probe_caveat(mem) }
@@ -132,6 +133,10 @@ module Analyzer
         null_recall_wording(mem, code, web)
       end
     end
+
+    # States that leave the question open rather than answering it. `unmeasured` belongs here
+    # because a channel nobody looked at is not a channel that is closed.
+    UNRESOLVED = %i[unknown waiting unmeasured].freeze
 
     # No model recalled it. What that MEANS depends entirely on whether a path into a corpus is
     # even open, which is why the two channel checks exist.
@@ -142,9 +147,9 @@ module Analyzer
         { tone: :mixed, headline: "No model reproduced it. #{open_label(code, web)} open.",
           detail: "Open route: #{clauses(open_paths)}.",
           caveat: probe_caveat(mem) }
-      elsif [code, web].any? { |state, _| %i[unknown waiting].include?(state) }
+      elsif [code, web].any? { |state, _| UNRESOLVED.include?(state) }
         { tone: :unknown, headline: "No model reproduced it, and one channel could not be checked.",
-          detail: "Unresolved: #{clauses([code, web].select { |s, _| %i[unknown waiting].include?(s) })}. " \
+          detail: "Unresolved: #{clauses([code, web].select { |s, _| UNRESOLVED.include?(s) })}. " \
                   "That leaves the question open in one direction.",
           caveat: probe_caveat(mem) }
       else
@@ -212,12 +217,45 @@ module Analyzer
 
     def models_fired(mem) = Array(mem[:models_fired]).to_sentence.presence || "Models"
 
+    # Only the models that actually cleared the strong bar. models_fired counts anything past the
+    # weak one, so a run where GPT reproduced 54 words and Claude managed 7 was announced as
+    # "Claude Opus and GPT-5.5 reproduce 54 consecutive words".
+    def models_strong(mem) = strong_list(mem).to_sentence.presence || "Models"
+
+    # One model reproduces, two models reproduce. Written out rather than run through `pluralize`,
+    # which counts nouns and would need inverting for a verb.
+    def reproduce_verb(mem)
+      strong_list(mem).size == 1 ? "reproduces" : "reproduce"
+    end
+
+    def strong_list(mem)
+      Array(mem[:models_strong]).presence || Array(mem[:models_fired])
+    end
+
+    # Both halves of the input are probed, and they routinely disagree: a docs page can be absent
+    # from every corpus while the repo behind it is reproduced word for word. A headline that says
+    # "reproduce 30 consecutive words of it" without saying which "it" sends people to fix the wrong
+    # thing.
+    def best_source_noun
+      by = result("memorization")&.dig(:by_source)
+      return "it" if by.blank?
+
+      key = by.max_by { |_source, summary| summary[:best_run].to_i }&.first
+      key.to_s == "repo" ? "your repo" : "your docs page"
+    end
+
     # --- the two channels ------------------------------------------------------------------------
 
     # [state, reason] where state is :open, :blocked, :absent, :unknown or :waiting. The reason is a
     # clause, lowercase and without a full stop, so the wording methods can compose sentences.
     def code_path
       r = result("code_channel")
+
+      # Nothing is inferred, so an empty repo box leaves this channel UNMEASURED. That is not the
+      # same as closed, and rendering it as closed would tell someone their repo is disqualified
+      # when we never looked at one. Checked after the result rather than before it, so a payload
+      # that did land is always believed over what the form said.
+      return [:unmeasured, "the code channel was not checked, because no repo was given"] if r.nil? && target[:repo].blank?
       return [:waiting, nil] if r.nil?
       return [:unknown, "the GitHub check did not complete"] if r[:error].present?
 
@@ -228,8 +266,21 @@ module Analyzer
         return [:absent, "no public repo carries this text"]
       end
 
-      return [:blocked, "#{r[:repo]} is not archived by Software Heritage, and The Stack is built " \
-                        "from that archive"] unless r[:swh_archived]
+      # The observed answer beats every inference below it: the per-file license filtering of The
+      # Stack v3 is not reproducible from outside, and it surprises in both directions.
+      case r[:in_stack_v3]
+      when true
+        return [:open, "code from #{r[:repo]} is in The Stack v3 train set, per the official index"]
+      when false
+        return [:blocked, "#{r[:repo]} went public after The Stack v3's crawl cutoff " \
+                          "(#{r[:stack_cutoff] || '2025-08-07'}); the license reading below " \
+                          "forecasts the next snapshot"] if r[:post_cutoff]
+
+        return [:blocked, "#{r[:repo]} is not in The Stack v3 train set, per the official index"]
+      end
+
+      return [:blocked, "#{r[:repo]} is not archived by Software Heritage, the archive The Stack " \
+                        "v2 was built from (v3 membership could not be checked)"] unless r[:swh_archived]
 
       # `kept_by_stack` arrives as a symbol from a live run and as a string from the stored JSON, so
       # everything but true/false is compared as text.
@@ -262,6 +313,7 @@ module Analyzer
 
     def web_path
       r = result("web_channel")
+      return [:unmeasured, "the web channel was not checked, because no docs site was given"] if r.nil? && target[:docs_url].blank?
       return [:waiting, nil] if r.nil?
       return [:unknown, "the web checks did not complete"] if r[:error].present?
 
@@ -305,14 +357,14 @@ module Analyzer
              detail: error.to_s, cues: [])
     end
 
-    def repo_retrieval_answer
+    def no_docs_answer
       answer(:retrieval, state: :final, tone: :unknown,
-             headline: "Not checked. This target is a repo.",
-             detail: "Retrieval is a property of a URL an agent can fetch. Paste a documentation " \
-                     "link to have it checked.", cues: [])
+             headline: "Not checked. You ran this without a documentation site.",
+             detail: "Everything on this slide is a property of a URL an agent can fetch. Add your " \
+                     "docs site and run it again to have it measured.", cues: [])
     end
 
-    def repo_only? = result("target") && result("target")[:kind].to_s == "repo"
+    def target = result("target") || {}
 
     def result(step)
       payload = @payloads[step.to_s]

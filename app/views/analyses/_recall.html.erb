@@ -1,0 +1,93 @@
+<%# The recall grid: models down the side, your text and the reference pages across the top, every
+    number from the identical probe. Rendered bare: this element carries the id the broadcast
+    replaces. %>
+<% grid = Analyzer::RecallGrid.new(payloads) %>
+
+<div class="recall" id="analysis_recall">
+  <%= render "analyses/answer", answer: Analyzer::Verdict.new(payloads).training_answer %>
+
+  <% if !grid.ready? %>
+    <p class="recall__waiting">Probing each passage against every model. This is the slow part:
+    9 to 12 calls, about a minute and a half.</p>
+  <% else %>
+    <% scale = grid.scale %>
+    <div class="recall__scroll">
+      <table class="recall__grid">
+        <caption class="visually-hidden">Longest run of consecutive words each model reproduced
+        verbatim</caption>
+        <thead>
+          <tr>
+            <th scope="col" class="recall__corner">Longest verbatim run</th>
+            <% grid.columns.each do |col| %>
+              <th scope="col" class="recall__col recall__col--<%= col.kind %>">
+                <span class="recall__collabel">
+                  <% if col.href.present? %>
+                    <a href="<%= col.href %>" rel="noopener"><%= col.label %></a>
+                  <% else %>
+                    <%= col.label %>
+                  <% end %>
+                </span>
+                <span class="recall__colsub"><%= col.sublabel %></span>
+              </th>
+            <% end %>
+          </tr>
+        </thead>
+        <tbody>
+          <% grid.rows.each do |row| %>
+            <tr>
+              <th scope="row" class="recall__model"><%= row.model %></th>
+              <% grid.columns.each do |col| %>
+                <% cell = row.cells[col.key] %>
+                <td class="recall__cell recall__cell--<%= col.kind %> recall__cell--<%= cell.state %>">
+                  <% if cell.state == :measured %>
+                    <%# The bar is drawn against ONE scale across the whole grid. Scaling each row
+                        to its own maximum would make a 2-word run and a 31-word run look alike. %>
+                    <span class="bar-track" title="<%= cell.matched.presence || 'no matching run' %>">
+                      <span class="bar bar--<%= cell.verdict %>"
+                            style="--bar: <%= ((cell.run.to_f / scale) * 100).clamp(0, 100).round %>%"></span>
+                    </span><span class="bar__value"><%= cell.run %></span>
+                  <% elsif cell.state == :waiting %>
+                    <span class="bar__value bar__value--muted">…</span>
+                  <% else %>
+                    <span class="bar__value bar__value--muted" title="never probed">not asked</span>
+                  <% end %>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="recall__legend">
+      Words, not a score. <strong><%= grid.threshold %> or more</strong> consecutive words is the
+      bar we call recall: you cannot reproduce text you have never seen.
+    </p>
+    <p class="recall__keys">
+      <span class="recall__key"><span class="swatch swatch--yours"></span> your text</span>
+      <span class="recall__key"><span class="swatch swatch--reference"></span> verified as being in
+      the corpus, on a pinned passage</span>
+      <span class="recall__key"><span class="swatch swatch--control"></span> controls</span>
+    </p>
+
+    <% case grid.controls_ok?
+       when true %>
+      <p class="recall__controls recall__controls--ok">
+        Controls behaved: the MIT licence text fired on every model and the invented passage fired
+        on none. That is what makes the middle columns readable.
+      </p>
+    <% when false %>
+      <p class="recall__controls recall__controls--bad">
+        The controls misbehaved on this run, so nothing in this grid is interpretable. The MIT
+        licence text must fire on every model and the invented passage must fire on none.
+      </p>
+    <% end %>
+
+    <p class="recall__caveat">
+      A null result is weak evidence. Models memorize a fraction of what they read, so an empty row
+      does not prove your text is absent from any corpus. The reference columns are there so an
+      empty row can be read against what a positive looks like under the identical probe.
+      <a href="/learn#memorization">What this can and cannot prove &rarr;</a>
+    </p>
+  <% end %>
+</div>

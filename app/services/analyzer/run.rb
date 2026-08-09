@@ -1,23 +1,32 @@
 # frozen_string_literal: true
 
 module Analyzer
-  # Orchestrates one analysis.
+  # Orchestrates one analysis over the two things the visitor gave us: a documentation URL and a
+  # GitHub repo. Either may be absent, and every step below skips cleanly when its half is missing.
   #
-  # Ordering is chosen for the demo, not for tidiness: the checks that answer in ~1s run first and
-  # the ones that can stall run last, so the screen fills immediately and Common Crawl's 40s worst
-  # case never blocks anything else. Each step yields the moment it lands.
+  # Ordering is chosen for the deck, not for tidiness. The reveal walks agent experience first, then
+  # the two training funnels, then recall, so the checks are run in that order and each one yields
+  # the moment it lands. The two that can stall (Common Crawl, the model probes) are last, which is
+  # why the first slide is filled within a couple of seconds of a cold start.
   #
-  # Everything goes through Analyzer::Cache, so a run you did before the demo replays instantly and
-  # is labelled as cached rather than passed off as live.
+  # Nothing is inferred. An earlier version worked the repo out from the docs URL and, failing
+  # everything else, fell back to the org's most-starred repo, which is a guess that renders exactly
+  # like a measurement.
+  #
+  # Everything goes through Analyzer::Cache, so a run done before the demo replays instantly and is
+  # labelled as cached rather than passed off as live.
   class Run
-    STEPS = %i[target retrieval code_channel web_channel memorization].freeze
+    STEPS = %i[target retrieval repo_signals code_channel web_channel memorization references].freeze
 
-    # repo_source explains HOW the repo was identified, so the UI can distinguish a near-certain
-    # match from a guess instead of presenting both as fact.
-    attr_reader :target, :results, :repo_source
+    # Spans per source. Two rather than three, because the probe now covers docs AND repo and the
+    # call budget has to stretch across both. Memorization is sparse, so spans are where the signal
+    # is: dropping to one span per source would turn a real hit into a coin flip.
+    SPANS_PER_SOURCE = 2
 
-    def initialize(input, refresh: false, models: Memorization::MODELS.keys)
-      @target = Target.new(input)
+    attr_reader :target, :results
+
+    def initialize(target, refresh: false, models: Memorization::MODELS.keys)
+      @target = target.is_a?(Target) ? target : Target.from_input(target)
       @refresh = refresh
       @models = models
       @results = {}
@@ -26,42 +35,52 @@ module Analyzer
     def valid? = @target.valid?
 
     def cache_status
-      Cache.status(%i[retrieval code_channel web_channel memorization], cache_target)
+      Cache.status(%i[retrieval repo_signals code_channel web_channel memorization], @target.cache_key)
     end
 
     # Yields [step, payload] as each completes. payload carries :result, :cached_at, :cache_hit.
-    def call
-      yield_step(:target, { result: @target.to_h, cache_hit: false, cached_at: nil }) { |s, p| yield(s, p) if block_given? }
+    def call(&block)
+      emit(:target, { result: @target.to_h, cache_hit: false, cached_at: nil }, &block)
 
-      # 1. Retrieval: ~1-2s, pure HTTP. Fills the screen straight away.
+      # 1. Agent experience, both halves. Pure HTTP, ~1-3s, so the first slide is filled almost
+      #    immediately even on a cold run.
       if @target.url
-        step(:retrieval) { Retrieval.new(@target.url).call }.then { |p| yield(:retrieval, p) if block_given? }
+        step(:retrieval, key: @target.url) { Retrieval.new(@target.url).call }.then { |p| block&.call(:retrieval, p) }
+      end
+      if @target.repo
+        step(:repo_signals, key: @target.repo) { RepoSignals.new(@target.repo).call }
+          .then { |p| block&.call(:repo_signals, p) }
       end
 
-      # 2. Code channel: GitHub + Software Heritage + licence text, ~2-5s.
-      repo = @target.repo || infer_repo
-      step(:code_channel, key: repo.to_s) { CodeChannel.new(repo).call }
-        .then { |p| yield(:code_channel, p) if block_given? }
-
-      # 3. Web channel: Common Crawl (the slow one) + the quality classifier.
-      if @target.url
-        step(:web_channel) { WebChannel.new(@target.url).call }.then { |p| yield(:web_channel, p) if block_given? }
+      # 2. The code funnel: GitHub, Software Heritage and the licence text, ~2-5s.
+      if @target.repo
+        step(:code_channel, key: @target.repo) { CodeChannel.new(@target.repo).call }
+          .then { |p| block&.call(:code_channel, p) }
       end
 
-      # 4. Memorization: costs money, so it is last and strictly capped.
-      step(:memorization) { memorization_payload(repo) }.then { |p| yield(:memorization, p) if block_given? }
+      # 3. The web funnel: Common Crawl (the slow one) and the quality classifier.
+      if @target.url
+        step(:web_channel, key: @target.url) { WebChannel.new(@target.url).call }
+          .then { |p| block&.call(:web_channel, p) }
+      end
+
+      # 4. Recall. Costs money, so it is last and strictly capped.
+      step(:memorization) { memorization_payload }.then { |p| block&.call(:memorization, p) }
+
+      # 5. The pages that are known to be in the corpus, so the recall chart has a scale. Cached for
+      #    30 days apiece, so this is free on all but one run a month.
+      step(:references, key: "-") { { items: References.all(models: @models) } }
+        .then { |p| block&.call(:references, p) }
 
       @results
     end
 
     private
 
-    def cache_target = @target.url || @target.repo
-
     # One failing check must never take down the run. On stage, a Common Crawl timeout or a GitHub
-    # rate limit should show as a single failed row while everything else still renders.
+    # rate limit should show as a single failed tile while everything else still renders.
     def step(name, key: nil, &block)
-      payload = Cache.fetch(name, key || cache_target, refresh: @refresh, &block)
+      payload = Cache.fetch(name, key || @target.cache_key, refresh: @refresh, &block)
       @results[name] = payload
       payload
     rescue StandardError => e
@@ -71,169 +90,88 @@ module Analyzer
       failed
     end
 
-    def yield_step(name, payload)
+    def emit(name, payload)
       @results[name] = payload
       yield(name, payload) if block_given?
       payload
     end
 
-    # A docs URL usually has a repo behind it, and finding the RIGHT one is what makes the licence
-    # and collection verdicts meaningful for someone who only pasted a documentation link.
-    #
-    # Owner first, then the repo inside it. Two failures drove this order:
-    #   - Deriving the owner from the domain breaks when they differ. tailwindcss.com belongs to the
-    #     `tailwindlabs` org, so "tailwindcss/tailwindcss.com" 404s.
-    #   - Counting links returns the PRODUCT repo, because tailwindcss.com links
-    #     tailwindlabs/tailwindcss far more than tailwindlabs/tailwindcss.com. A repo named after
-    #     the site is unambiguous: someone deliberately named it that.
-    #
-    # Records HOW the repo was found. "Named after this site" is near-certain, "most-linked" is a
-    # guess, and the UI must not present them as equally solid.
-    def infer_repo
-      return nil unless @target.url
-
-      host = URI.parse(@target.url).host.to_s.downcase.sub(/\Awww\./, "")
-      owner = link_owner || org_label(host)
-      return nil if owner.blank?
-
-      if (r = by_name(owner, host) || by_name(owner, host.sub(/\A[^.]+\./, "")))
-        @repo_source = "repo named after this site"
-        return r
-      end
-      if (r = %w[docs website site].lazy.filter_map { |n| by_name(owner, n) }.first)
-        @repo_source = "the org's docs repo"
-        return r
-      end
-      if (r = link_repo)
-        @repo_source = "linked from the page"
-        return r
-      end
-
-      @repo_source = "the org's most-starred repo (inferred, may not hold these docs)"
-      most_starred(owner)
-    end
-
-
-    # The owner that appears most often in GitHub links on the page.
-    def link_owner
-      body = Http.probe(@target.url, timeout: 10)[:body].to_s
-      owners = body.scan(%r{github\.com/([\w-]+)/[\w.-]+}i).flatten
-                   .reject { |o| %w[sponsors orgs features about pricing login topics apps marketplace].include?(o.downcase) }
-      owners.tally.max_by { |_, n| n }&.first
-    end
-
-    # Most docs sites link their own repo somewhere on the page. An "Edit this page" link is the
-    # single most reliable signal there is, because it points at the file being rendered: it names
-    # the DOCS repo rather than the product repo, which are frequently different
-    # (docs.anycable.io lives in anycable/docs.anycable.io, not anycable/anycable).
-    def link_repo
-      body = Http.probe(@target.url, timeout: 10)[:body].to_s
-
-      edit = body.scan(%r{github\.com/([\w-]+)/([\w.-]+?)/(?:edit|blob|tree)/}i)
-                 .map { |o, r| "#{o}/#{r}" }
-      return edit.tally.max_by { |_, n| n }&.first if edit.any?
-
-      links = body.scan(%r{github\.com/([\w-]+)/([\w.-]+)}i)
-                  .map { |o, r| "#{o}/#{r.sub(/\.git\z/, '').sub(/[)\]"'].*\z/, '')}" }
-                  .reject { |s| s.match?(%r{/(sponsors|orgs|features|about|pricing|login|topics)\z}i) }
-      links.empty? ? nil : links.tally.max_by { |_, n| n }&.first
-    end
-
-    # Client-rendered docs sites ship no links in their HTML, so scraping finds nothing. Fall back
-    # to the domain name: workos.com -> the `workos` org, then its most-starred repo. Inferred, and
-    # flagged as such, but it is what makes the licence and collection verdicts available at all for
-    # a site that never mentions its own repo.
-    # Multi-part TLDs mean you cannot just take the last-but-one label either (foo.co.uk).
-    KNOWN_SUBDOMAINS = %w[docs doc www api developer developers help support learn guide guides
-                          reference blog get try app dashboard].freeze
-    TWO_PART_TLDS = %w[co.uk com.au co.nz com.br co.jp co.il org.uk ac.uk].freeze
-
-    # Order matters, and "most starred repo in the org" must be LAST.
-    #
-    # Docs commonly live in a repo named after the site itself: anycable/docs.anycable.io,
-    # tailwindlabs/tailwindcss.com. Jumping straight to the org's flagship reported AnyCable's
-    # licence and collection status from anycable/anycable, a different repo with a different
-    # history, while claiming to describe the docs.
-    def by_name(owner, name)
-      return nil if name.blank?
-
-      info = Http.json("https://api.github.com/repos/#{owner}/#{name}", headers: gh_headers)
-      info && info["full_name"] ? info["full_name"] : nil
-    end
-
-    def most_starred(label)
-      found = Http.json("https://api.github.com/search/repositories?q=user:#{label}&sort=stars&order=desc&per_page=1",
-                        headers: gh_headers)
-      found&.dig("items", 0, "full_name")
-    end
-
-    # docs.anycable.io -> "anycable", not "docs". Taking the first label searched GitHub for a user
-    # called "docs" (and "api" for api.stripe.com), which quietly returned a stranger's repo.
-    def org_label(host)
-      parts = host.to_s.downcase.split(".")
-      parts.shift while parts.length > 2 && KNOWN_SUBDOMAINS.include?(parts.first)
-
-      tld_len = TWO_PART_TLDS.include?(parts.last(2).join(".")) ? 2 : 1
-      registrable = parts[-(tld_len + 1)]
-      registrable if registrable.present? && !KNOWN_SUBDOMAINS.include?(registrable)
-    end
-
-    def gh_headers = Http.github_headers
-
-    def memorization_payload(repo)
-      passages = build_passages(repo)
+    def memorization_payload
+      passages = build_passages
       ok = passages.select(&:ok)
       return { error: passages.first&.error || "No testable prose found" } if ok.empty?
 
-      unless AnalyzerConfig.anthropic_key? || AnalyzerConfig.openai_key?
+      unless AnalyzerConfig.any_model_key?
         return { error: "No model API keys configured", passages: ok.map(&:to_h) }
       end
 
-      probe = Memorization.new(ok, models: @models)
-      probes = probe.call
-      { passages: ok.map(&:to_h), probes: probes,
-        summary: Memorization.summarize(probes), controls: controls(probe) }
+      probes = Memorization.new(ok, models: @models).call
+      { passages: ok.map(&:to_h),
+        probes: probes,
+        summary: Memorization.summarize(probes),
+        by_source: Memorization.by_source(probes),
+        matrix: Memorization.matrix(probes),
+        skipped: passages.reject(&:ok).map { |p| { source: p.source, error: p.error } },
+        controls: controls }
     end
 
     # Controls are byte-identical on every run, so paying for them per analysis is pure waste: they
     # were 2.01c of a 5.77c analysis, 35% of the bill, to re-learn that MIT still fires. Cached
     # globally per model set and refreshed daily, which is often enough to catch a provider change.
-    def controls(probe)
-      Cache.fetch(:controls, @models.sort.join("+"), ttl: 1.day) { probe.controls }[:result]
+    def controls
+      Cache.fetch(:controls, @models.sort.join("+"), ttl: 1.day) do
+        Memorization.new([], models: @models).controls
+      end[:result]
     end
 
-    # Test the text the user actually asked about.
+    # Test both halves of what the visitor gave us, INTERLEAVED by span index.
     #
-    # If they pasted a URL, probe THAT page (falling back to its markdown twin when the HTML is
-    # client-rendered). Preferring the repo here was wrong: for workos.com/docs/authkit it wandered
-    # off to a README inside the login-box demo repo and reported on text nobody asked about.
-    # Only when the input is a repo do we go looking for its docs prose.
-    def build_passages(repo)
-      return Passage.candidates_from_url(@target.url) if @target.url
+    # The order matters as much as the contents. Probing all of the docs spans and then all of the
+    # repo spans means a call cap or the wall-clock deadline lands entirely on the repo, and the
+    # chart then shows an empty repo column that looks like a negative result rather than an
+    # unfinished one. Round-robin means whatever budget exists is spent evenly across both.
+    def build_passages
+      docs = @target.url ? tag(Passage.candidates_from_url(@target.url, count: SPANS_PER_SOURCE), :docs) : []
+      repo = @target.repo ? tag(repo_passages, :repo) : []
 
-      return [] unless repo && (info = Http.json("https://api.github.com/repos/#{repo}", headers: gh_headers))
+      interleave(docs, repo)
+    end
+
+    def tag(passages, source)
+      Array(passages).each { |p| p.source = source }
+    end
+
+    def interleave(a, b)
+      [a.length, b.length].max.times.flat_map { |i| [a[i], b[i]] }.compact
+    end
+
+    # Prose first, because a docs repo should be judged on its docs. But plenty of repos are all
+    # code: basecamp/fizzy has no prose file big enough to probe, and answering "no prose found" to
+    # someone asking whether their CODE reached a corpus is refusing the actual question. Code is
+    # what The Stack is mostly made of, so fall through and test it directly.
+    #
+    # Falling through on an UNUSABLE docs file matters as much as on a missing one. fizzy has docs/,
+    # but the largest file there is API reference: endpoint tables and status codes, which the prose
+    # filter rejects and nobody could continue from memory.
+    def repo_passages
+      info = Http.json("https://api.github.com/repos/#{@target.repo}", headers: gh_headers)
+      return [] unless info
 
       branch = info["default_branch"]
 
-      # Prose first, because a docs repo should be judged on its docs. But plenty of repos are all
-      # code: basecamp/fizzy has no prose file big enough to probe, and answering "no prose found"
-      # to someone asking whether their CODE reached a corpus is refusing the actual question. Code
-      # is what The Stack is mostly made of, so fall through and test it directly.
-      # Falling through on an UNUSABLE docs file matters as much as on a missing one. fizzy has
-      # docs/, but the largest file there is API reference: endpoint tables and status codes, which
-      # the prose filter rejects and nobody could continue from memory. Testing "is there a docs
-      # file" rather than "did it yield a testable span" left that repo untestable.
-      if (path = docs_file(repo, branch))
-        prose = Passage.candidates_from_repo_file(repo, branch, path)
+      if (path = docs_file(branch))
+        prose = Passage.candidates_from_repo_file(@target.repo, branch, path, count: SPANS_PER_SOURCE)
         return prose if prose.any?(&:ok)
       end
 
-      if (path = code_file(repo, branch))
-        Passage.candidates_from_repo_file(repo, branch, path, prose: false)
+      if (path = code_file(branch))
+        Passage.candidates_from_repo_file(@target.repo, branch, path, count: SPANS_PER_SOURCE, prose: false)
       else
         []
       end
     end
+
+    def gh_headers = Http.github_headers
 
     CODE_EXT = /\.(rb|js|jsx|ts|tsx|py|go|rs|java|kt|swift|c|cc|cpp|h|hpp|cs|php|ex|exs|scala|sh|sql)\z/i
 
@@ -244,33 +182,37 @@ module Analyzer
 
     # The largest hand-written source file, which is the closest thing to "the file this project is
     # actually known for" that a tree listing can tell us.
-    def code_file(repo, branch)
-      tree = Http.json("https://api.github.com/repos/#{repo}/git/trees/#{branch}?recursive=1",
-                       headers: gh_headers)
-      return nil unless tree && tree["tree"]
+    def code_file(branch)
+      nodes = tree(branch) or return nil
 
-      tree["tree"]
-        .select do |n|
-          n["type"] == "blob" && n["path"].match?(CODE_EXT) && !n["path"].match?(SKIP_PATH) &&
-            n["size"].to_i.between?(2_000, 60_000)
-        end
-        .max_by { |n| n["size"].to_i }&.fetch("path", nil)
+      nodes.select do |n|
+        n["type"] == "blob" && n["path"].match?(CODE_EXT) && !n["path"].match?(SKIP_PATH) &&
+          n["size"].to_i.between?(2_000, 60_000)
+      end.max_by { |n| n["size"].to_i }&.fetch("path", nil)
     end
 
     # Pick the most prose-heavy markdown under docs/, matching how the research probe chose passages:
     # size alone selects tables of config flags, which nobody could continue from memory.
-    def docs_file(repo, branch)
-      tree = Http.json("https://api.github.com/repos/#{repo}/git/trees/#{branch}?recursive=1",
-                       headers: gh_headers)
-      return nil unless tree && tree["tree"]
+    def docs_file(branch)
+      nodes = tree(branch) or return nil
 
-      md = tree["tree"].select do |n|
+      md = nodes.select do |n|
         n["type"] == "blob" && n["path"] =~ /\.mdx?$/i &&
           n["path"] !~ /CHANGELOG|LICENSE|CONTRIBUTING|CODE_OF_CONDUCT/i &&
           n["size"].to_i.between?(2_000, 60_000)
       end
       docs = md.select { |n| n["path"].include?("docs/") || n["path"].include?("content/") }
       (docs.presence || md).max_by { |n| n["size"].to_i }&.fetch("path", nil)
+    end
+
+    # One tree listing serves both file pickers. Fetching it twice doubled the cost of the most
+    # expensive GitHub call in the run, on repos where the recursive tree is megabytes.
+    def tree(branch)
+      return @tree if defined?(@tree)
+
+      data = Http.json("https://api.github.com/repos/#{@target.repo}/git/trees/#{branch}?recursive=1",
+                       headers: gh_headers)
+      @tree = data && data["tree"]
     end
   end
 end
