@@ -1,12 +1,11 @@
 <%# One completed check. `payload` carries :result, :cache_hit, :cached_at, :took_ms. %>
 <% result = payload[:result] || {} %>
-<%# Kept in step with Analysis::STEPS: the same box has to carry the same title whether it renders
-    from stored results or from a broadcast. %>
-<% titles = Analysis::STEPS.to_h { |step, title, _hint| [step.to_sym, title] }.merge(target: "Target") %>
+<%# One source for the wording, so the same box carries the same title whether it renders from
+    stored results or from a broadcast that replaced it. %>
 
 <article class="step step--done" id="step_<%= step %>">
   <header class="step__head">
-    <h2><%= titles[step.to_sym] || step %></h2>
+    <h2><%= Analyzer::Steps.title_for(step) %></h2>
     <span class="step__meta">
       <% if payload[:cache_hit] %>
         <span class="tag tag--cached" title="Served from a previous run, not measured again just now">

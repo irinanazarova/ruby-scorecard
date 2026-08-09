@@ -19,15 +19,11 @@ module Analyzer
   #      the credibility of every other line.
   #   2. Never tell someone to open a gate they closed on purpose. A robots.txt that blocks AI
   #      crawlers is a decision; the item says so and states what it costs, rather than assuming.
-  class Actions
+  class Actions < Presenter
     # impact: :high | :medium | :low, which is what the ordering and the tag render from.
     Item = Struct.new(:key, :title, :why, :impact, :anchor, :anchor_label, keyword_init: true)
 
     IMPACT_ORDER = { high: 0, medium: 1, low: 2 }.freeze
-
-    def initialize(payloads)
-      @payloads = payloads || {}
-    end
 
     # Open items, most valuable first.
     #
@@ -270,8 +266,6 @@ module Analyzer
 
     # --- shared ---------------------------------------------------------------------------------
 
-    def target = result("target") || {}
-
     def passage_only?
       target[:passage].present? && target[:docs_url].blank? && target[:repo].blank?
     end
@@ -297,20 +291,5 @@ module Analyzer
     def clean_text?
       pass?("retrieval", "Markdown twin (.md)") || pass?("retrieval", "Markdown content negotiation")
     end
-
-    def result(step)
-      payload = @payloads[step.to_s]
-      return nil unless payload.is_a?(Hash)
-
-      payload[:result].is_a?(Hash) ? payload[:result] : nil
-    end
-
-    def check(step, name)
-      Array(result(step)&.dig(:checks)).find { |c| c[:name] == name }
-    end
-
-    def pass?(step, name) = check(step, name)&.dig(:pass)
-
-    def detail(step, name) = check(step, name)&.dig(:detail)
   end
 end

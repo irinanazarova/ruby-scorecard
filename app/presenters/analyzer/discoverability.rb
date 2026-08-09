@@ -11,7 +11,7 @@ module Analyzer
   # A box that is not ticked is never left as a bare negative. Every one carries the change to make
   # and a link to the part of /learn that explains why it matters, because "Sitemap: no" is a fact
   # and a fact is not advice.
-  class Discoverability
+  class Discoverability < Presenter
     # status: :pass | :fail | :info | :unknown | :waiting
     Item = Struct.new(:label, :status, :detail, :action, :anchor, :anchor_label, keyword_init: true)
     # state: :ready | :waiting | :missing | :error
@@ -20,10 +20,6 @@ module Analyzer
     # The one sentence that stops the ticks from being read as a bigger claim than they are.
     SCOPE = "Discover, evaluate and suggest. Whether an agent can then install, configure, deploy " \
             "or buy your product is a separate question, and nothing here measures it."
-
-    def initialize(payloads)
-      @payloads = payloads || {}
-    end
 
     def columns = [ docs_column, repo_column ]
 
@@ -186,22 +182,5 @@ module Analyzer
       Item.new(label: label, status: status, detail: detail,
                action: (status == :pass ? nil : action), anchor: anchor, anchor_label: anchor_label)
     end
-
-    def target = result("target") || {}
-
-    def result(step)
-      payload = @payloads[step.to_s]
-      return nil unless payload.is_a?(Hash)
-
-      payload[:result].is_a?(Hash) ? payload[:result] : nil
-    end
-
-    def check(step, name)
-      Array(result(step)&.dig(:checks)).find { |c| c[:name] == name }
-    end
-
-    def pass?(step, name) = check(step, name)&.dig(:pass)
-
-    def detail(step, name) = check(step, name)&.dig(:detail)
   end
 end

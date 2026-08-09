@@ -17,7 +17,7 @@ module Analyzer
   # A reference is dropped when it is the target's own repo. Showing tailwindlabs/tailwindcss.com as
   # both "your repo" and "the reference" produces two nearly identical bars and invites the audience
   # to ask why they disagree, which is not the question you want from the room.
-  class RecallGrid
+  class RecallGrid < Presenter
     # kind drives the styling and the reading order: yours, then what a positive looks like, then
     # the calibration pair.
     Column = Struct.new(:key, :label, :sublabel, :kind, :href, keyword_init: true)
@@ -28,10 +28,6 @@ module Analyzer
     # Never scale to less than this. A grid whose widest bar is 3 words would draw that 3 as a full
     # bar and read as a hit.
     MIN_SCALE = Memorization::STRONG_RUN * 2
-
-    def initialize(payloads)
-      @payloads = payloads || {}
-    end
 
     def ready? = memorization.present? || references.any?
 
@@ -157,15 +153,6 @@ module Analyzer
       URI.parse(url.to_s).host.to_s.sub(/\Awww\./, "").presence || url
     rescue StandardError
       url
-    end
-
-    def target = result("target") || {}
-
-    def result(step)
-      payload = @payloads[step.to_s]
-      return nil unless payload.is_a?(Hash)
-
-      payload[:result].is_a?(Hash) ? payload[:result] : nil
     end
   end
 end

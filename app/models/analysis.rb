@@ -27,24 +27,14 @@ class Analysis < ApplicationRecord
   # repo to read, so two of the four slides would be nothing but "nothing given to check".
   def passage_only? = passage.present? && docs_url.blank? && repo.blank?
 
-  # The measurements, in the order the deck argues them: what an agent sees today, then whether
-  # either funnel is open, then whether recall actually happened.
-  #
-  # Titled as measurements rather than as questions, because the slides above them ask the
-  # questions. Two boxes headed "Can agents retrieve it today?" and "Can an agent read this page
-  # today?" on one screen read as the same thing asked twice.
-  #
-  # `references` is deliberately absent: it is the scale on the recall chart, not evidence about
-  # this target, and listing it here would invite reading it as one.
-  STEPS = [
-    [ "retrieval",     "What a crawler sees on your docs", "robots, crawlability, sitemap, markdown twins" ],
-    [ "repo_signals",  "What an agent finds in your repo", "README, description, licence, releases, activity" ],
-    [ "code_channel",  "The code funnel",                  "public repo, Software Heritage, licence" ],
-    [ "web_channel",   "The web funnel",                   "Common Crawl, then the quality filter" ],
-    [ "memorization",  "The memorization probe",           "the slow one: both sources against every model" ]
-  ].freeze
+  # The evidence boxes and their wording moved to Analyzer::Steps in app/presenters. They were
+  # sentences for a screen, and a model should not have to be edited to reword a heading.
+  # Analyzer::Run::STEPS remains the authority on what actually executes.
 
-  # Finished step payloads, keyed by step name, ready for the `analyses/step` partial.
+  # Finished step payloads, keyed by step name.
+  #
+  # This is rehydration, not presentation: it reads back what was written, in the shape it was
+  # written. Which is why it stays on the model while the wording did not.
   #
   # `results` is written through `as_json`, so it comes back with string keys and timestamps as
   # strings while the partial reads symbols. Without rehydrating it here, reloading a finished

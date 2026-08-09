@@ -89,13 +89,13 @@
           <details class="deck__evidence" id="evidence">
             <summary>All the working, check by check</summary>
             <div class="steps">
-              <% Analysis::STEPS.each do |step, step_title, hint| %>
-                <% next if @analysis.passage_only? && step != "memorization" %>
-                <% if (payload = stored[step]) %>
-                  <%= render "analyses/step", step: step, payload: payload, analysis: @analysis %>
+              <% Analyzer::Steps::ALL.each do |step| %>
+                <% next if @analysis.passage_only? && step.key != "memorization" %>
+                <% if (payload = stored[step.key]) %>
+                  <%= render "analyses/step", step: step.key, payload: payload, analysis: @analysis %>
                 <% else %>
-                  <%= tag.div id: "step_#{step}" do %>
-                    <%= render "analyses/pending", title: step_title, hint: hint %>
+                  <%= tag.div id: "step_#{step.key}" do %>
+                    <%= render "analyses/pending", title: step.title, hint: step.hint %>
                   <% end %>
                 <% end %>
               <% end %>

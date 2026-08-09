@@ -19,7 +19,7 @@ module Analyzer
   # the finding from our own 168-repo study: how many COPIES of a text exist predicts recall
   # (Spearman rho +0.70), while stars do not. Nothing here measures copies live, so it is labelled
   # as the mechanism rather than dressed up as a result.
-  class Funnel
+  class Funnel < Presenter
     # status: :pass | :fail | :unknown | :waiting | :missing
     # width is the drawn width as a percentage of the channel's base, which is what makes it read as
     # a funnel rather than a stack of equal boxes.
@@ -28,10 +28,6 @@ module Analyzer
 
     CONNECTOR = "and it is repeated across many sources"
     CONNECTOR_ANCHOR = "copies"
-
-    def initialize(payloads)
-      @payloads = payloads || {}
-    end
 
     def channels = [ web_channel, code_channel ]
 
@@ -184,22 +180,5 @@ module Analyzer
 
       r[:summary].presence
     end
-
-    def target = result("target") || {}
-
-    def result(step)
-      payload = @payloads[step.to_s]
-      return nil unless payload.is_a?(Hash)
-
-      payload[:result].is_a?(Hash) ? payload[:result] : nil
-    end
-
-    def check(step, name)
-      Array(result(step)&.dig(:checks)).find { |c| c[:name] == name }
-    end
-
-    def pass?(step, name) = check(step, name)&.dig(:pass)
-
-    def detail(step, name) = check(step, name)&.dig(:detail)
   end
 end

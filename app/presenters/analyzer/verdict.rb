@@ -22,7 +22,7 @@ module Analyzer
   #     a fraction of what they read, so absence of recall is absence of evidence.
   #   - A check that did not complete (GitHub rate limit, Common Crawl down) never hardens into a
   #     negative. An unknown gate makes the whole answer unknown, never a "no".
-  class Verdict
+  class Verdict < Presenter
     # state: :pending (nothing yet) | :partial (still filling) | :final
     # tone:  :yes | :no | :mixed | :unknown, which is what the card colours from
     Answer = Struct.new(:key, :question, :state, :tone, :headline, :detail, :caveat, :cues,
@@ -31,7 +31,7 @@ module Analyzer
     Cue = Struct.new(:label, :status, keyword_init: true)
 
     def initialize(payloads, status: nil)
-      @payloads = payloads || {}
+      super(payloads)
       @status = status.to_s
     end
 
@@ -85,7 +85,7 @@ module Analyzer
     def retrieval_wording(allowed, reachable, clean)
       if allowed == false
         { tone: :no, headline: "No. robots.txt blocks AI crawlers.",
-          detail: "#{detail_of('retrieval', 'Crawlers allowed')}. A disallowed crawler skips the " \
+          detail: "#{detail('retrieval', 'Crawlers allowed')}. A disallowed crawler skips the " \
                   "page entirely, so nothing downstream can happen." }
       elsif reachable == false
         { tone: :no, headline: "No. The page does not fetch as a crawler.",
@@ -390,23 +390,6 @@ module Analyzer
              detail: "Everything on this slide is a property of a URL an agent can fetch. Add your " \
                      "docs site and run it again to have it measured.", cues: [])
     end
-
-    def target = result("target") || {}
-
-    def result(step)
-      payload = @payloads[step.to_s]
-      return nil unless payload.is_a?(Hash)
-
-      payload[:result].is_a?(Hash) ? payload[:result] : nil
-    end
-
-    def check(step, name)
-      Array(result(step)&.dig(:checks)).find { |c| c[:name] == name }
-    end
-
-    def pass?(step, name) = check(step, name)&.dig(:pass)
-
-    def detail_of(step, name) = check(step, name)&.dig(:detail)
 
     def status_of(flag)
       case flag

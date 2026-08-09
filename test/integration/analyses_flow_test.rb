@@ -30,10 +30,13 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
     get "/learn"
     assert_response :success
 
-    # Three services hand out anchors now: the ranked next steps, the per-box fixes on the agent
-    # experience slide, and the licence implications.
-    from_code  = %w[actions.rb discoverability.rb license.rb funnel.rb].flat_map do |file|
-      Rails.root.join("app/services/analyzer", file).read.scan(/(?:anchor|ANCHOR)\s*[:=]\s*"([^"]+)"/).flatten
+    # Globbed rather than listed by filename. A named list breaks the moment a file moves between
+    # layers, which is exactly what happened when the presenters left app/services, and it fails as
+    # a missing FILE rather than as a missing anchor -- an error that says nothing about the thing
+    # under test. Anchors are handed out by presenters (the ranked next steps, the per-box fixes)
+    # and by services (the licence implications), so both layers are scanned.
+    from_code = Rails.root.glob("app/{services,presenters}/analyzer/*.rb").flat_map do |file|
+      file.read.scan(/(?:anchor|ANCHOR)\s*[:=]\s*"([^"]+)"/).flatten
     end
     from_terms = ApplicationHelper::LEARN_TERMS.map(&:last)
     anchors    = (from_code + from_terms).uniq
