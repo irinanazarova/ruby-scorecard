@@ -2,8 +2,11 @@
 # Build the static half of ruby.evilmartians.com into dist/, then publish it into the Rails app's
 # public/ so one server hosts both the generated pages and the live /test analyzer.
 #
-# The generators are unchanged: the scorecard, guide and contributors report are still fully
+# The generators are unchanged: the scorecard and contributors report are still fully
 # server-rendered HTML that works with JavaScript off. Rails only hands the files back.
+#
+# /learn is NOT generated here. It is a Rails view, because every result on /test deep-links into
+# its anchors and needs the app layout to come with them.
 set -euo pipefail
 cd "$(dirname "$0")"
 

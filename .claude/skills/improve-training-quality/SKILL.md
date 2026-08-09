@@ -72,7 +72,7 @@ once. The gems (`onnxruntime`, `tokenizers`, `nokogiri`) must be installed (`bun
    - For reference docs: rely on the **code/GitHub channel** (a public, permissively-licensed repo with a
      strong README and runnable examples; the Markdown source is trained on regardless of the prose score).
    - For non-tutorial posts: the genre caps low; a genuinely instructional companion piece is more trainable.
-   Point to `docs/how-devtooling-gets-into-training-data.md` for the full strategy.
+   Point to `app/views/pages/learn.html.erb` (published at /learn) for the full strategy.
 
 ## Output
 

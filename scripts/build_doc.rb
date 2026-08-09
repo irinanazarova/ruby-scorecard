@@ -4,7 +4,7 @@
 # Render a Markdown doc into a styled, self-contained HTML (and, via headless Chrome, a PDF) optimized
 # for reading: generous measure, real typography, clickable links, a table of contents, print styles.
 #
-#   ruby scripts/build_doc.rb docs/how-devtooling-gets-into-training-data.md
+#   ruby scripts/build_doc.rb path/to/doc.md
 #
 # Produces <same-path>.html. Run build_doc_pdf.sh afterwards (or build.sh) for the PDF.
 
@@ -12,7 +12,7 @@ require "redcarpet"
 require_relative "site_nav"
 
 ROOT = File.expand_path("..", __dir__)
-src = ARGV[0] || File.join(ROOT, "docs", "how-devtooling-gets-into-training-data.md")
+src = ARGV[0] or abort "usage: build_doc.rb <doc.md>"
 abort "no #{src}" unless File.exist?(src)
 
 raw = File.read(src)

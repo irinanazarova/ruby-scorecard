@@ -3,9 +3,9 @@
 # One navigation bar for every generated page.
 #
 # The site grew a page at a time, so each generator built its own top of page: the scorecard put a
-# kicker and a theme toggle inside a dark hero, /check opened straight into a <main>, and the guide
-# is a standalone document with its own stylesheet. Nothing linked to anything else, so a reader who
-# landed on /check had no way to reach /test or /learn except by editing the URL.
+# kicker and a theme toggle inside a dark hero, and /check opened straight into a <main>. Nothing
+# linked to anything else, so a reader who landed on /check had no way to reach /test or /learn
+# except by editing the URL.
 #
 # This is deliberately the SAME markup the Rails layout renders for /test and /learn, so the bar
 # does not shift or restyle as a visitor crosses between the generated pages and the app. Keep the
@@ -14,7 +14,6 @@
 # The brand is the home link, which is why "/" is not repeated in LINKS.
 SITE_NAV_LINKS = [
   ["/learn", "Learn"],
-  ["/guide", "Guide"],
   ["/test",  "Test a page"]
 ].freeze
 

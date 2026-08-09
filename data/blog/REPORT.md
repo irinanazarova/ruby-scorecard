@@ -43,7 +43,7 @@ the scored window), faithful to the post's real facts.
 
 Reference/config docs cap ~1.7-2.0 regardless of prose quality. Route these through the **code/repo
 channel** (public, permissively-licensed repo, strong README, runnable examples, the `.md` source is
-trained on directly). See `docs/how-devtooling-gets-into-training-data.md`.
+trained on directly). See `app/views/pages/learn.html.erb` (published at /learn).
 
 ## Caveats to weigh before a PR
 

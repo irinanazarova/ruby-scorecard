@@ -38,7 +38,7 @@ sentences, definitions up front, prose around code), then scored with the local 
    first fence entered the window under a weaker title). Pad the educational lead so the whole scored
    window is prose.
 
-## Recommendation (per docs/how-devtooling-gets-into-training-data.md)
+## Recommendation (per /learn)
 
 - **Streaming tutorial:** clears the open web-filter proxy. It is the one worth investing crawl reach in
   (backlinks, cross-posts, sitemap) so Common Crawl actually fetches it.

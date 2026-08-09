@@ -12,7 +12,6 @@
 class PagesController < ApplicationController
   PAGES = {
     "scorecard" => "scorecard.html",
-    "guide" => "guide.html",
     "check" => "check.html",
     "contributors" => "contributors.html",
     "quality-rewrites" => "quality-rewrites.html",
@@ -22,6 +21,9 @@ class PagesController < ApplicationController
   # /learn is the one content page rendered by Rails rather than generated into dist/. It is deep
   # linked from every result on /test, so it needs the app layout: the same theme toggle, the same
   # header, and a way back to the analyzer. A standalone generated page would drop all three.
+  #
+  # It absorbed the former /guide, which is why "guide" left PAGES above: routes.rb 301s that URL
+  # here instead.
   def learn; end
 
   def show

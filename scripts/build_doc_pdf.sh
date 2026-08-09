@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Render a styled HTML doc to PDF via headless Chrome (clickable links preserved).
-#   ./scripts/build_doc_pdf.sh docs/how-devtooling-gets-into-training-data.html
+#   ./scripts/build_doc_pdf.sh path/to/doc.html
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-html="${1:-docs/how-devtooling-gets-into-training-data.html}"
+html="${1:?usage: build_doc_pdf.sh <doc.html>}"
 [ -f "$html" ] || { echo "no $html (run: ruby scripts/build_doc.rb ...)" >&2; exit 1; }
 pdf="${html%.html}.pdf"
 abs="$(cd "$(dirname "$html")" && pwd)/$(basename "$html")"

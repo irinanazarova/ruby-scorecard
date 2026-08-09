@@ -40,7 +40,6 @@
         <%# aria-current follows the request rather than being hardcoded on one link, which used to
             mark "Test a page" as current on every page in this layout. %>
         <a href="/learn" <%= 'aria-current=page'.html_safe if current_page?("/learn") %>>Learn</a>
-        <a href="/guide">Guide</a>
         <a href="<%= test_path %>" <%= 'aria-current=page'.html_safe if current_page?(test_path) %>>Test a page</a>
         <%# The scorecard's own toggle, driven by the nanotags bundle loaded at the end of <body>.
             Without it /test was the one page on the site with no way to change theme. %>
@@ -71,8 +70,7 @@
     <footer class="analyzer__footer">
       <p>These are proxies, not ground truth. The quality gate is the open FineWeb-Edu classifier,
       not any lab's actual filter, and a memorization probe can show a page <em>was</em> seen but
-      never prove it was not. <a href="/learn">How this works &rarr;</a>
-      <a href="/guide">The measurements behind it &rarr;</a></p>
+      never prove it was not. <a href="/learn">How this works, and the measurements behind it &rarr;</a></p>
     </footer>
   </body>
 </html>
