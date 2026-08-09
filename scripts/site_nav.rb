@@ -32,16 +32,28 @@ SITE_NAV_CSS = <<~CSS
 CSS
 
 # `current` is the path of the page being generated, so it can mark itself.
-def site_nav(current: nil)
+# `toggle` adds the theme switcher; pass it only from pages that load the nanotags bundle
+# (scorecard, contributors), because on any other page the button would render and do nothing.
+# The Rails layout carries the same toggle in its own bar, so the control sits in the nav on
+# every themed page instead of inside one page's hero.
+def site_nav(current: nil, toggle: false)
   links = SITE_NAV_LINKS.map do |href, label|
     %(<a href="#{href}"#{' aria-current="page"' if href == current}>#{label}</a>)
   end.join("\n    ")
+  switch = toggle ? <<~T.strip : ""
+    <theme-toggle>
+          <button type="button" data-ref="button" class="theme-toggle" aria-pressed="false" aria-label="Toggle colour theme">
+            <span class="theme-toggle__dot"></span><span class="theme-toggle__label">Light</span>
+          </button>
+        </theme-toggle>
+  T
 
   <<~HTML
     <nav class="site-nav" aria-label="Main">
       <a class="site-nav__brand" href="/">Ruby &amp; Rails LLM scorecard</a>
       <div class="site-nav__links">
         #{links}
+        #{switch}
       </div>
     </nav>
   HTML

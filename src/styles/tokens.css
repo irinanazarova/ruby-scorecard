@@ -40,9 +40,11 @@
   --bad: var(--red);
   --warn: #b8631f;
   --code-bg: var(--cream-warm);
-  --hero-bg: var(--plum-ink);
-  --hero-text: var(--cream);
-  --hero-soft: #c9b9c4;
+  /* The hero follows the theme: a warm band in light, near-black in dark. Everything inside it
+     (stats frame, tile borders) is mixed from --hero-text, so the pair must stay high-contrast. */
+  --hero-bg: var(--cream-warm);
+  --hero-text: var(--plum-ink);
+  --hero-soft: #6a5560;
 }
 
 [data-theme="dark"] {

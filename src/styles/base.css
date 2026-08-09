@@ -44,9 +44,8 @@ strong { font-weight: 650; }
 
 /* ---------- Site navigation ----------
    The same bar the Rails layout renders for /test and /learn, so crossing between the generated
-   pages and the app does not move it. It sits on --bg above the dark hero rather than inside it:
-   .hero hardcodes cream text for a near-black band, and links inherited from it were invisible
-   against the page background on every other page. */
+   pages and the app does not move it. It sits on --bg above the hero and carries the theme
+   toggle, so the switch lives in the same place on every page instead of inside one hero. */
 .site-nav {
   display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
   max-width: var(--maxw); margin: 0 auto; padding: 1.1rem var(--pad);
@@ -65,8 +64,7 @@ strong { font-weight: 650; }
   border-bottom: 3px solid var(--red);
   position: relative;
 }
-.hero__top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: clamp(2.25rem, 5vw, 3.5rem); }
-.hero .kicker { color: var(--red); margin: 0; }
+.hero .kicker { color: var(--red); margin: 0 0 clamp(2.25rem, 5vw, 3.5rem); }
 .hero .kicker::before { content: "▸ "; }
 .hero h1 {
   font-family: var(--font-grotesk);
@@ -111,9 +109,10 @@ theme-toggle { display: inline-flex; }
   font-size: .66rem;
   text-transform: uppercase;
   letter-spacing: .1em;
-  color: var(--hero-text);
+  /* Lives in the nav (on --bg) on every page, so it reads from the page palette. */
+  color: var(--text);
   background: transparent;
-  border: 1px solid color-mix(in srgb, var(--hero-text) 32%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text) 32%, transparent);
   border-radius: 100px;
   padding: .5em 1em;
   cursor: pointer;
@@ -504,6 +503,5 @@ footer .fn {
 footer .fn strong { color: var(--text); }
 
 @media (max-width: 560px) {
-  .hero__top { flex-direction: row; }
   .stat b { font-size: 1.6rem; }
 }

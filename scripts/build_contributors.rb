@@ -270,17 +270,10 @@ PAGE = <<HTML
 </style>
 </head>
 <body>
-#{site_nav}
+#{site_nav(toggle: true)}
 <header class="hero">
   <div class="wrap">
-    <div class="hero__top">
-      <p class="kicker label">Evil Martians &middot; Ruby</p>
-      <theme-toggle>
-        <button type="button" data-ref="button" class="theme-toggle" aria-pressed="false" aria-label="Toggle colour theme">
-          <span class="theme-toggle__dot"></span><span class="theme-toggle__label">Light</span>
-        </button>
-      </theme-toggle>
-    </div>
+    <p class="kicker label">Evil Martians &middot; Ruby</p>
     <h1>Ruby open source: who builds it</h1>
     <p class="lede"><strong>A snapshot of Ruby's open-source engine in 2026.</strong> We scanned
     #{commate(REPO_COUNT)} repositories where Ruby is the dominant language and ranked every 2026

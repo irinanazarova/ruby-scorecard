@@ -9,7 +9,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=d01463cc">
 <link rel="icon" sizes="32x32" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="assets/styles.css?v=47580bf7">
+<link rel="stylesheet" href="assets/styles.css?v=c3eaf278">
 <script type="module" src="assets/app.js?v=ea570623"></script>
 <style>
   td.lft, th.lft { text-align: left; }
@@ -48,19 +48,17 @@
   <div class="site-nav__links">
     <a href="/learn">Learn</a>
     <a href="/test">Test a page</a>
+    <theme-toggle>
+      <button type="button" data-ref="button" class="theme-toggle" aria-pressed="false" aria-label="Toggle colour theme">
+        <span class="theme-toggle__dot"></span><span class="theme-toggle__label">Light</span>
+      </button>
+    </theme-toggle>
   </div>
 </nav>
 
 <header class="hero">
   <div class="wrap">
-    <div class="hero__top">
-      <p class="kicker label">Evil Martians &middot; Ruby</p>
-      <theme-toggle>
-        <button type="button" data-ref="button" class="theme-toggle" aria-pressed="false" aria-label="Toggle colour theme">
-          <span class="theme-toggle__dot"></span><span class="theme-toggle__label">Light</span>
-        </button>
-      </theme-toggle>
-    </div>
+    <p class="kicker label">Evil Martians &middot; Ruby</p>
     <h1>Ruby open source: who builds it</h1>
     <p class="lede"><strong>A snapshot of Ruby's open-source engine in 2026.</strong> We scanned
     3,914 repositories where Ruby is the dominant language and ranked every 2026

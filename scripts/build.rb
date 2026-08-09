@@ -368,13 +368,13 @@ end
 # holding every license GitHub could not identify.
 LICENSES = begin
   seen = rows.filter_map { |r| repos[r["name"]] }.select { |rp| rp["docs_repo"] }
-# The licence name is the final tiebreaker, and it has to be: five licences tie at one repo each,
-# and Ruby's sort_by is NOT stable, so without a total ordering their relative positions are
-# unspecified. The output was reproducible on one machine and different on a CI runner, which is
-# the worst version of this bug -- the committed page and a fresh build of the same data disagreed
-# for no reason anyone could see in the diff.
-tally = seen.group_by { |rp| rp["docs_license"] }.transform_values(&:size)
-            .sort_by { |lic, cnt| [ lic.nil? ? 1 : 0, -cnt, lic.to_s ] }
+  # The licence name is the final tiebreaker, and it has to be: five licences tie at one repo each,
+  # and Ruby's sort_by is NOT stable, so without a total ordering their relative positions are
+  # unspecified. The output was reproducible on one machine and different on a CI runner, which is
+  # the worst version of this bug -- the committed page and a fresh build of the same data disagreed
+  # for no reason anyone could see in the diff.
+  tally = seen.group_by { |rp| rp["docs_license"] }.transform_values(&:size)
+              .sort_by { |lic, cnt| [ lic.nil? ? 1 : 0, -cnt, lic.to_s ] }
   items = tally.map do |lic, cnt|
     label = GH_META.fetch(lic, lic)
     extra = lic == "NOASSERTION" ? %( <span class="lic-note">any custom or source-available terms</span>) : ""
@@ -417,17 +417,10 @@ PAGE = <<HTML
 <script type="module" src="assets/app.js#{asset_q("assets/app.js")}"></script>
 </head>
 <body>
-#{site_nav}
+#{site_nav(toggle: true)}
 <header class="hero">
   <div class="wrap">
-    <div class="hero__top">
-      <p class="kicker label">Evil Martians &middot; Ruby</p>
-      <theme-toggle>
-        <button type="button" data-ref="button" class="theme-toggle" aria-pressed="false" aria-label="Toggle colour theme">
-          <span class="theme-toggle__dot"></span><span class="theme-toggle__label">Light</span>
-        </button>
-      </theme-toggle>
-    </div>
+    <p class="kicker label">Evil Martians &middot; Ruby</p>
     <h1>Ruby &amp; Rails LLM discoverability scorecard</h1>
     <p class="lede"><strong>Ruby and Rails are a great default, for humans and AI agents alike.</strong>
     Yet given a free choice, 13 models picked Ruby <strong>0 times in 1,267 solutions</strong> (the open

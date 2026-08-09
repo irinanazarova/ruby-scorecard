@@ -9,7 +9,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=d01463cc">
 <link rel="icon" sizes="32x32" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="assets/styles.css?v=47580bf7">
+<link rel="stylesheet" href="assets/styles.css?v=c3eaf278">
 <script type="module" src="assets/app.js?v=ea570623"></script>
 </head>
 <body>
@@ -18,19 +18,17 @@
   <div class="site-nav__links">
     <a href="/learn">Learn</a>
     <a href="/test">Test a page</a>
+    <theme-toggle>
+      <button type="button" data-ref="button" class="theme-toggle" aria-pressed="false" aria-label="Toggle colour theme">
+        <span class="theme-toggle__dot"></span><span class="theme-toggle__label">Light</span>
+      </button>
+    </theme-toggle>
   </div>
 </nav>
 
 <header class="hero">
   <div class="wrap">
-    <div class="hero__top">
-      <p class="kicker label">Evil Martians &middot; Ruby</p>
-      <theme-toggle>
-        <button type="button" data-ref="button" class="theme-toggle" aria-pressed="false" aria-label="Toggle colour theme">
-          <span class="theme-toggle__dot"></span><span class="theme-toggle__label">Light</span>
-        </button>
-      </theme-toggle>
-    </div>
+    <p class="kicker label">Evil Martians &middot; Ruby</p>
     <h1>Ruby &amp; Rails LLM discoverability scorecard</h1>
     <p class="lede"><strong>Ruby and Rails are a great default, for humans and AI agents alike.</strong>
     Yet given a free choice, 13 models picked Ruby <strong>0 times in 1,267 solutions</strong> (the open
