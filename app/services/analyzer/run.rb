@@ -162,6 +162,15 @@ module Analyzer
 
       branch = info["default_branch"]
 
+      # A pinned file beats both pickers. The pickers answer "what is the largest hand-written file
+      # here", which is a guess at the project's signature code; for the repos we demo we have
+      # measured the answer instead, and a demo should not re-roll a question already settled.
+      if (pinned = Example.pinned_file(@target.repo))
+        spans = Passage.candidates_from_repo_file(@target.repo, branch, pinned,
+                                                  count: SPANS_PER_SOURCE, prose: false)
+        return spans if spans.any?(&:ok)
+      end
+
       if (path = docs_file(branch))
         prose = Passage.candidates_from_repo_file(@target.repo, branch, path, count: SPANS_PER_SOURCE)
         return prose if prose.any?(&:ok)
@@ -180,8 +189,15 @@ module Analyzer
 
     # Vendored, generated and minified files are duplicated across thousands of repos, so a model
     # continuing one says nothing about THIS project. Fixtures and lockfiles are the same problem.
-    SKIP_PATH = %r{(^|/)(vendor|node_modules|dist|build|tmp|coverage|\.github)/|
-                   fixtures?/|\.min\.|-lock\.|_pb\.|\.generated\.}xi
+    #
+    # TEST files belong on this list too, and their absence had a visible cost: asked for the file
+    # stripe/stripe-node is known for, the picker returned test/stripe.spec.ts, and vitest-dev/vitest
+    # returned test/browser/specs/trace.test.ts. A test suite is the largest thing in plenty of
+    # well-tested repos and the last thing anyone would call the project's signature code.
+    SKIP_PATH = %r{(^|/)(vendor|node_modules|dist|build|tmp|coverage|\.github|
+                   tests?|spec|__tests__|e2e|benchmarks?|examples?)/|
+                   fixtures?/|\.min\.|-lock\.|_pb\.|\.generated\.|
+                   [._-](test|spec)\.[a-z]+\z}xi
 
     # The largest hand-written source file, which is the closest thing to "the file this project is
     # actually known for" that a tree listing can tell us.

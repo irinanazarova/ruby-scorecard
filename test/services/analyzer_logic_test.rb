@@ -82,6 +82,64 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
     assert_match(/needs \d+/, s.error)
   end
 
+  # --- what counts as prose ---------------------------------------------------------------------
+  #
+  # These four are the spans that actually got through the old wordlike-ratio check and produced
+  # numbers we nearly put on a slide. Every token in a navigation bar is a word, so the ratio was
+  # 1.0 and the probe happily scored a model for reproducing an alphabetical list of SQL keywords.
+
+  NOT_PROSE = {
+    "a navigation sidebar" =>
+      "DB SQL Backup DB SQL Create Table SQL Drop Table SQL Alter Table SQL Constraints SQL Not " \
+      "Null SQL Unique SQL Primary Key SQL Foreign Key SQL Check SQL Default SQL Create Index",
+    "a keyword table" =>
+      "SQL Data Types SQL Keywords ADD ADD CONSTRAINT ALL ALTER ALTER COLUMN ALTER TABLE ALTER " \
+      "VIEW AND ANY AS ASC BACKUP DATABASE BETWEEN CASE CHECK COLUMN CONSTRAINT CREATE",
+    "a list of function names" =>
+      "LOG10 MAX MIN PI POWER RADIANS RAND ROUND SIGN SIN SQRT SQUARE SUM TAN Date Functions " \
+      "CURRENT_TIMESTAMP DATEADD DATEDIFF DATEFROMPARTS DATENAME DATEPART DAY GETDATE ISDATE",
+    "site-wide advertising" =>
+      "Join Pro and download the eBook eBook Jackson NPI EA cat=Jackson Do JSON right with " \
+      "Jackson Download the E-book eBook HTTP Client NPI EA cat=Http Client-Side Get the most"
+  }.freeze
+
+  test "furniture that is made of words is still not prose" do
+    NOT_PROSE.each do |what, text|
+      refute Analyzer::Passage.prose?(text.split), "#{what} was accepted as prose"
+    end
+  end
+
+  test "real prose survives the stricter test, including every pinned reference" do
+    prose = "In this tutorial we will first take a look at how to enable autowiring and the " \
+            "various ways to autowire beans, as well as the exceptions you can expect."
+    assert Analyzer::Passage.prose?(prose.split)
+
+    Analyzer::References.passages.each do |key, passage|
+      assert Analyzer::Passage.prose?(passage["prefix"].split),
+             "pinned reference #{key} would no longer be selectable"
+    end
+  end
+
+  # A test suite is the largest thing in plenty of well-tested repos and the last thing anyone would
+  # call the project's signature code. Asked for the file stripe/stripe-node is known for, the picker
+  # returned test/stripe.spec.ts.
+  test "the source-file picker skips tests, fixtures and vendored code" do
+    %w[test/stripe.spec.ts spec/models/user_spec.rb src/foo.test.ts __tests__/a.js
+       e2e/checkout.ts vendor/jquery.js node_modules/lodash/index.js examples/demo.rb].each do |path|
+      assert_match Analyzer::Run::SKIP_PATH, path, "#{path} should not be probed"
+    end
+
+    %w[lib/response.js activesupport/lib/active_support/core_ext/object/blank.rb
+       src/index.ts app/services/thing.rb].each do |path|
+      refute_match Analyzer::Run::SKIP_PATH, path, "#{path} is ordinary source and should be probed"
+    end
+  end
+
+  test "a pinned example file wins over the picker" do
+    assert_equal "lib/response.js", Analyzer::Example.pinned_file("expressjs/express")
+    assert_nil Analyzer::Example.pinned_file("some/unmeasured-repo")
+  end
+
   test "strips code fences so shared snippets cannot fake a match" do
     md = "Some prose here.\n```ruby\nputs 'npm install foo'\n```\nMore prose."
     refute_includes Analyzer::Passage.strip_markdown(md), "npm install"

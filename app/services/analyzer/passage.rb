@@ -224,20 +224,60 @@ module Analyzer
         .gsub(/\s+/, " ").strip
     end
 
-    # Is this span actually prose, or markup that survived stripping?
+    # The words English prose cannot do without. A sentence needs articles, prepositions, pronouns
+    # and auxiliaries to hold it together; a navigation menu, a keyword table and a list of function
+    # names need none of them, which is what makes this the sharpest available signal.
+    FUNCTION_WORDS = %w[
+      the a an and or but of to in for on with at by from as is are was were be been being am
+      it its this that these those which who whom whose you your we our us they their them he she
+      not no nor if then than when where how why what while because so such all any each both few
+      can could should would will shall may might must do does did done have has had having
+      there here about into over under after before between through during without within
+      i me my mine yours ours theirs his her him
+    ].to_set.freeze
+
+    # Calibrated against the spans that actually got through, not guessed. Measured on four false
+    # positives (a W3Schools sidebar, a SQL keyword table, a list of function names, and the ad block
+    # Baeldung repeats on every page) and five known-good passages including all three pinned
+    # references:
     #
-    # Resend's docs are Mintlify and its markdown twin embeds inline SVG. Stripping missed it, and
-    # the probe happily tested `d="M15.145 19.8191..."` against a model: 55 words of path
-    # coordinates, which measures nothing about whether anyone read the page. A model continuing
-    # SVG numerals is doing arithmetic-shaped autocomplete, not recall.
+    #                      function words   max repeat   capitalised
+    #   false positives      0.00 - 0.24    0.06 - 0.39   0.57 - 1.00
+    #   real prose           0.35 - 0.45    0.04 - 0.10   0.09 - 0.14
     #
-    # Checking the span rather than only the source is what makes this hold: it catches SVG, base64,
-    # minified JS, config tables and hashes without needing a rule for each.
+    # Every threshold sits in the gap, and every false positive is caught by at least two of them,
+    # so no single borderline measurement decides the outcome.
+    MIN_FUNCTION_RATIO = 0.22   # below this there are no sentences, only labels
+    MAX_REPEAT_RATIO   = 0.25   # one token owning a quarter of the span is a menu
+    MAX_CAPITAL_RATIO  = 0.40   # Title Case On Every Word is a navigation bar
+
+    # Is this span actually prose, or markup and furniture that survived stripping?
+    #
+    # Three failure modes, all found in production:
+    #
+    #   1. Markup. Resend's docs are Mintlify and its markdown twin embeds inline SVG, so the probe
+    #      happily tested `d="M15.145 19.8191..."`: 55 words of path coordinates, which measures
+    #      nothing. A model continuing SVG numerals is doing arithmetic-shaped autocomplete.
+    #   2. Navigation. w3schools.com/sql/sql_select.asp scored a 43-word "verbatim run" that was
+    #      entirely its sidebar and an alphabetical list of SQL keywords. Every token is a word, so
+    #      the wordlike ratio was 1.0 and the old check waved it through. Reproducing an alphabetical
+    #      list is not evidence of anything.
+    #   3. Site furniture. Baeldung repeats an eBook advert on every page; a model reproducing it has
+    #      memorized the template, not the article.
+    #
+    # Checking the SPAN rather than only the source is what makes this hold: it catches SVG, base64,
+    # minified JS, config tables, hashes, menus and adverts without needing a rule for each.
     def self.prose?(words)
       return false if words.blank?
 
       wordlike = words.count { |w| w.match?(/\A[A-Za-z][A-Za-z'’-]*[.,;:!?)]?\z/) }
-      wordlike.fdiv(words.length) >= PROSE_RATIO
+      return false if wordlike.fdiv(words.length) < PROSE_RATIO
+
+      normalized = words.map { |w| w.downcase.gsub(/[^a-z0-9'’-]/, "") }
+      return false if normalized.count { |w| FUNCTION_WORDS.include?(w) }.fdiv(words.length) < MIN_FUNCTION_RATIO
+      return false if normalized.tally.values.max.fdiv(words.length) > MAX_REPEAT_RATIO
+
+      words.count { |w| w.match?(/\A[A-Z]/) }.fdiv(words.length) <= MAX_CAPITAL_RATIO
     end
   end
 end

@@ -61,7 +61,44 @@ module Analyzer
               "page and the code channel does not." }
     ].freeze
 
-    def self.all = ALL
+    # The two that demonstrate the CODE path carrying text into a model, which is the claim the
+    # whole project rests on and the one the four pairs above never actually show.
+    #
+    # `file` pins which source file gets probed. Without it the run asks "what is the largest
+    # hand-written file in this repo", which is a guess at the project's signature code and moves as
+    # the repo does. These two were measured, so the demo should not re-roll them.
+    #
+    # Why these are clean in a way no web-path example was. The probed text is source code: it is
+    # rendered on no documentation page, so Common Crawl has no copy to have carried, and the code
+    # route is not inferred from the licence but OBSERVED in the Am-I-in-The-Stack index. Every
+    # docs page we found that fires (PostgreSQL MVCC, Python argparse, MDN) turned out to have 60-70%
+    # of the same prose sitting in a public repo, so nothing about them can be attributed to the web;
+    # and the developer content that is crawled with no public source (DigitalOcean, Heroku, Vercel,
+    # Twilio) does not fire at all.
+    CODE_PATH = [
+      { docs: "https://expressjs.com/en/guide/routing.html",
+        repo: "expressjs/express",
+        file: "lib/response.js",
+        label: "Express",
+        note: "69k stars, MIT, archived, and observed in The Stack v3. The probe reads its source " \
+              "rather than its docs: Claude and GPT-5.5 each continued it for 50+ words on two " \
+              "separate measurements." },
+
+      { docs: "https://guides.rubyonrails.org/active_support_core_extensions.html",
+        repo: "rails/rails",
+        file: "activesupport/lib/active_support/core_ext/object/blank.rb",
+        label: "Rails",
+        note: "The same shape in Ruby, and the steadier one: every model continued blank.rb on both " \
+              "measurements, which the guides page beside it manages on none." }
+    ].freeze
+
+    def self.all = ALL + CODE_PATH
+
+    # The source file to probe for a repo we have already measured, or nil to let the run pick.
+    def self.pinned_file(repo)
+      key = repo.to_s.chomp("/")
+      CODE_PATH.find { |e| e[:repo] == key }&.dig(:file)
+    end
 
     # Clicking a listed example must never cost a visitor an allowance slot or trip the per-IP
     # limit, however cold the cache happens to be. Compared ignoring a trailing slash, since that is
@@ -69,7 +106,7 @@ module Analyzer
     def self.match?(docs_url, repo)
       d = docs_url.to_s.strip.chomp("/")
       r = repo.to_s.strip.chomp("/")
-      ALL.any? { |e| e[:docs].to_s.chomp("/") == d && e[:repo].to_s.chomp("/") == r }
+      all.any? { |e| e[:docs].to_s.chomp("/") == d && e[:repo].to_s.chomp("/") == r }
     end
   end
 end
