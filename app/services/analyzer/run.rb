@@ -145,7 +145,7 @@ module Analyzer
     end
 
     def interleave(a, b)
-      [a.length, b.length].max.times.flat_map { |i| [a[i], b[i]] }.compact
+      [ a.length, b.length ].max.times.flat_map { |i| [ a[i], b[i] ] }.compact
     end
 
     # Prose first, because a docs repo should be judged on its docs. But plenty of repos are all

@@ -65,8 +65,8 @@ out = {}
 rows.each_with_index do |r, i|
   name = r["name"]
   cands = Hash.new(0)
-  [repo_from_host(r["docs"]), repo_from_host(r["root"])].compact.each { |s| cands[s] += 5 }
-  [r["docs"], r["root"]].compact.uniq.each do |u|
+  [ repo_from_host(r["docs"]), repo_from_host(r["root"]) ].compact.each { |s| cands[s] += 5 }
+  [ r["docs"], r["root"] ].compact.uniq.each do |u|
     repos_from_html(fetch(u)).each { |s, n| cands[s] += n }
   end
   picked = cands.max_by { |_, n| n }&.first
@@ -82,11 +82,11 @@ rows.each_with_index do |r, i|
   lic = info && info["license"]
   perm = lic && PERMISSIVE.include?(lic)
   cls = if info.nil? then "no_repo_found"
-        elsif lic.nil? || lic == "NOASSERTION" then "unknown_license"
-        elsif perm then "permissive"
-        elsif COPYLEFT.include?(lic) then "copyleft"
-        else "other_license"
-        end
+  elsif lic.nil? || lic == "NOASSERTION" then "unknown_license"
+  elsif perm then "permissive"
+  elsif COPYLEFT.include?(lic) then "copyleft"
+  else "other_license"
+  end
   out[name] = { "repo" => info && info["full"], "license" => lic, "class" => cls,
                 "stars" => info && info["stars"], "archived" => info && info["archived"] }
   warn format("  [%2d/%d] %-22s %-26s %-14s %s", i + 1, rows.size, name[0, 22],

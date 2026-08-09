@@ -145,15 +145,15 @@ def cell_code(rp, note = nil, st = nil, snote = nil)
     verdict = code_in_stack?(rp, note)
     tip = if note
             "Not yet checked against the v3 index; inferred from the license text.#{reading}"
-          elsif raw.nil?
+    elsif raw.nil?
             "Not yet checked against the v3 index. GitHub reports no license file for #{repo}; " \
             "The Stack keeps unlicensed files, so the docs would qualify once crawled"
-          elsif raw == "NOASSERTION"
+    elsif raw == "NOASSERTION"
             "Not yet checked against the v3 index. #{NOASSERT_TIP}. We have not read #{repo}'s " \
             "license text, so its terms are unverified"
-          else
+    else
             "Not yet checked against the v3 index; inferred from GitHub's reported license, #{esc(label)}"
-          end
+    end
     (verdict ? OK : BAD) + %(<span class="#{cls}" title="#{tip}">#{lic_html}</span>)
   end
 end
@@ -163,16 +163,16 @@ end
 # so instead of blaming the license. Returns [tooltip sentence, optional cell label override].
 def absence_reason(st, snote)
   if snote && snote["reason"] == "opt-out"
-    [%(#{esc(snote["note"])} (#{esc(snote["url"])})), "opted out"]
+    [ %(#{esc(snote["note"])} (#{esc(snote["url"])})), "opted out" ]
   elsif snote && snote["reason"] == "post-cutoff"
-    [esc(snote["note"]), "after cutoff"]
+    [ esc(snote["note"]), "after cutoff" ]
   elsif snote
-    [esc(snote["note"]), nil]
+    [ esc(snote["note"]), nil ]
   elsif st["post_cutoff"]
-    ["The repo was created #{esc(st["created"])}, after the crawl cutoff, so no license could have " \
-     "put it in this snapshot.", %(after cutoff)]
+    [ "The repo was created #{esc(st["created"])}, after the crawl cutoff, so no license could have " \
+     "put it in this snapshot.", %(after cutoff) ]
   else
-    ["The reason is not established; the license reading below is the best predictor.", nil]
+    [ "The reason is not established; the license reading below is the best predictor.", nil ]
   end
 end
 
@@ -234,10 +234,10 @@ def cg_cell(cell, src_num)
   %(<td class="cg-#{state}"><span title="#{tip}">#{state}</span>#{sup}</td>)
 end
 
-CAT_ORDER = ["core", "frontend & view", "web frameworks", "data", "ai",
+CAT_ORDER = [ "core", "frontend & view", "web frameworks", "data", "ai",
              "background, realtime & deploy", "tooling & types", "libraries",
-             "community & resources"].freeze
-CAT_LABEL = CAT_ORDER.to_h { |c| [c, c.split.map(&:capitalize).join(" ")] }
+             "community & resources" ].freeze
+CAT_LABEL = CAT_ORDER.to_h { |c| [ c, c.split.map(&:capitalize).join(" ") ] }
 CAT_LABEL["core"] = "Core (Ruby Central / Rails Foundation / community-run)"
 CAT_LABEL["data"] = "Data & ORM"
 CAT_LABEL["ai"]   = "AI"
@@ -275,9 +275,9 @@ present_cats.each do |cat|
     # absence keep the web gates live (an uncollected repo never reached the v2 corpus).
     in_code = if st && !st["in_stack"].nil?
                 st["in_stack"]
-              else
+    else
                 code_in_stack?(rp, note) && !(sw && sw["archived"] == false)
-              end
+    end
     mute = in_code ? " muted" : ""
     muted_tip = in_code ? %( title="code from this repo is in The Stack v3, so the web gates are secondary here") : ""
     trows << %(<tr data-cat="#{slug(cat)}" data-name="#{esc(r["name"].downcase)}" data-cc="#{cov_sortkey(c)}">) \
@@ -294,7 +294,7 @@ end
 TABLE = trows.join("\n")
 
 # ---- category filter chips ----
-chips = [%(<button class="chip" data-cat="all" aria-pressed="true">All</button>)]
+chips = [ %(<button class="chip" data-cat="all" aria-pressed="true">All</button>) ]
 present_cats.each do |c|
   chips << %(<button class="chip" data-cat="#{slug(c)}" aria-pressed="false">#{esc(CHIP_LABEL[c] || c)}</button>)
 end
@@ -311,12 +311,12 @@ BOSS_METERS = meter("Ruby picks", 0, 1267)
 
 # ---- content-gap matrix (the "Rails vs the field" comparison content that does/doesn't exist) ----
 CONTENT_GAP = if content_gap
-  cells = content_gap["tasks"].flat_map { |t| [t["js"], t["py"]] }
+  cells = content_gap["tasks"].flat_map { |t| [ t["js"], t["py"] ] }
   solid = cells.count { |c| c["state"] == "solid" }
   # number the found sources in order of appearance
   src_urls = []
   cells.each { |c| u = c["url"]; src_urls << u if u && !src_urls.include?(u) }
-  src_num = src_urls.each_with_index.to_h { |u, i| [u, i + 1] }
+  src_num = src_urls.each_with_index.to_h { |u, i| [ u, i + 1 ] }
   sources = src_urls.empty? ? "" : %(<p class="note cg-srclist">Sources: ) +
     src_urls.map { |u| host = (URI.parse(u).host&.sub(/\Awww\./, "") || u); %(<sup>#{src_num[u]}</sup>&nbsp;<a href="#{esc(u)}">#{esc(host)}</a>) }.join(" &middot; ") + "</p>"
   heads = content_gap["stacks"].map { |s| %(<th>#{esc(s["label"])} <span class="cg-sub">#{esc(s["sub"])}</span></th>) }.join
@@ -387,15 +387,15 @@ end
 # holding every license GitHub could not identify.
 LICENSES = begin
   seen = rows.filter_map { |r| repos[r["name"]] }.select { |rp| rp["docs_repo"] }
-  tally = seen.group_by { |rp| rp["docs_license"] }.transform_values(&:size).sort_by { |lic, cnt| [lic.nil? ? 1 : 0, -cnt] }
+  tally = seen.group_by { |rp| rp["docs_license"] }.transform_values(&:size).sort_by { |lic, cnt| [ lic.nil? ? 1 : 0, -cnt ] }
   vague = tally.to_h["NOASSERTION"].to_i
-  observed = stack.values.to_h { |v| [v["repo"].to_s.downcase, v["in_stack"]] }
+  observed = stack.values.to_h { |v| [ v["repo"].to_s.downcase, v["in_stack"] ] }
   read = license_notes.map do |slug, nt|
     outcome = case observed[slug.downcase]
-              when true  then "and the repo <strong>is</strong> observed in the v3 train set"
-              when false then "and the repo is observed <strong>absent</strong> from the v3 train set"
-              else "and the repo has no observed answer yet"
-              end
+    when true  then "and the repo <strong>is</strong> observed in the v3 train set"
+    when false then "and the repo is observed <strong>absent</strong> from the v3 train set"
+    else "and the repo has no observed answer yet"
+    end
     %(<li><code>#{esc(slug)}</code> reports <strong>NOASSERTION</strong>, and its #{esc(nt["file"])} is the
       <strong>#{esc(nt["actual"])}</strong>: #{esc(nt["note"])} That makes it
       <em>#{esc(nt["class"])}</em> by the text, #{outcome}.</li>)

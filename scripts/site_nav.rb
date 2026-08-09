@@ -13,8 +13,8 @@
 #
 # The brand is the home link, which is why "/" is not repeated in LINKS.
 SITE_NAV_LINKS = [
-  ["/learn", "Learn"],
-  ["/test",  "Test a page"]
+  [ "/learn", "Learn" ],
+  [ "/test",  "Test a page" ]
 ].freeze
 
 # The guide and the two rewrite showcases ship their own stylesheet rather than the design system,

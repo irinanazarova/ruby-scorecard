@@ -61,7 +61,7 @@ module Analyzer
                                       prefix: pinned["prefix"], truth: pinned["truth"],
                                       offset: 0, total_words: pinned["prefix"].split.size)
 
-        probes = Memorization.new([passage], models: models, max_calls: models.size).call
+        probes = Memorization.new([ passage ], models: models, max_calls: models.size).call
         summary = Memorization.summarize(probes)
 
         { label: config[:label], url: config[:url], repo: config[:repo],

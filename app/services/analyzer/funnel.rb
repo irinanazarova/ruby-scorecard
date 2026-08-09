@@ -33,7 +33,7 @@ module Analyzer
       @payloads = payloads || {}
     end
 
-    def channels = [web_channel, code_channel]
+    def channels = [ web_channel, code_channel ]
 
     # The single block both funnels narrow into.
     def apex
@@ -43,9 +43,9 @@ module Analyzer
 
       status, detail =
         case mem[:verdict]
-        when "strong" then [:pass, "#{mem[:best_run]} consecutive words reproduced"]
-        when "partial" then [:unknown, "#{mem[:best_run]} words continued, below the #{Memorization::STRONG_RUN}-word bar"]
-        else [:fail, "no model reproduced it"]
+        when "strong" then [ :pass, "#{mem[:best_run]} consecutive words reproduced" ]
+        when "partial" then [ :unknown, "#{mem[:best_run]} words continued, below the #{Memorization::STRONG_RUN}-word bar" ]
+        else [ :fail, "no model reproduced it" ]
         end
 
       Tier.new(key: :recall, label: "Model recall", status: status, detail: detail, width: 26,
@@ -94,12 +94,12 @@ module Analyzer
     end
 
     def web_tier_labels
-      [[:crawled, "Crawled content", 100, "web-channel"], [:quality, "Quality filter", 62, "quality-filter"]]
+      [ [ :crawled, "Crawled content", 100, "web-channel" ], [ :quality, "Quality filter", 62, "quality-filter" ] ]
     end
 
     def code_tier_labels
-      [[:public, "Public repos", 100, "code-channel"],
-       [:kept, "Archived and permissively licensed", 62, "the-stack"]]
+      [ [ :public, "Public repos", 100, "code-channel" ],
+       [ :kept, "Archived and permissively licensed", 62, "the-stack" ] ]
     end
 
     def missing_tiers(labels)

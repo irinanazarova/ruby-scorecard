@@ -36,7 +36,7 @@ class SlidesTest < ActiveSupport::TestCase
   def code(license_class: :permissive, kept: true, swh: true, present: true)
     step(present: present, repo: "acme/docs", swh_archived: swh, kept_by_stack: kept,
          license_class: license_class, stars: 12,
-         checks: [{ name: "License permits inclusion", pass: kept == true, detail: "MIT (LICENSE) - kept" }])
+         checks: [ { name: "License permits inclusion", pass: kept == true, detail: "MIT (LICENSE) - kept" } ])
   end
 
   # --- agent experience -------------------------------------------------------------------------
@@ -138,8 +138,8 @@ class SlidesTest < ActiveSupport::TestCase
   # --- the recall grid --------------------------------------------------------------------------
 
   def probes(docs_run:, repo_run:)
-    [{ provider: "Claude Opus", source: "docs", run: docs_run, verdict: "none", offset: 200, matched: "" },
-     { provider: "Claude Opus", source: "repo", run: repo_run, verdict: "strong", offset: 200, matched: "a b c" }]
+    [ { provider: "Claude Opus", source: "docs", run: docs_run, verdict: "none", offset: 200, matched: "" },
+     { provider: "Claude Opus", source: "repo", run: repo_run, verdict: "strong", offset: 200, matched: "a b c" } ]
   end
 
   def memorization(docs_run: 2, repo_run: 30, controls: true)
@@ -149,8 +149,8 @@ class SlidesTest < ActiveSupport::TestCase
   end
 
   def control_probes
-    [{ provider: "Claude Opus", kind: "control+", run: 31, verdict: "strong" },
-     { provider: "Claude Opus", kind: "control-", run: 3, verdict: "none" }]
+    [ { provider: "Claude Opus", kind: "control+", run: 31, verdict: "strong" },
+     { provider: "Claude Opus", kind: "control-", run: 3, verdict: "none" } ]
   end
 
   test "the grid puts both halves of your input under each model" do
@@ -165,7 +165,7 @@ class SlidesTest < ActiveSupport::TestCase
   # A source that was never probed is not a zero. Drawing it as one turns "not asked" into "not
   # memorized", which is the overclaim this whole tool exists to avoid.
   test "a source that was never probed reads as not asked, not as zero" do
-    docs_only = [{ provider: "Claude Opus", source: "docs", run: 4, verdict: "none", offset: 1 }]
+    docs_only = [ { provider: "Claude Opus", source: "docs", run: 4, verdict: "none", offset: 1 } ]
     payload = step(summary: Analyzer::Memorization.summarize(docs_only),
                    matrix: Analyzer::Memorization.matrix(docs_only), controls: control_probes)
 
@@ -184,7 +184,7 @@ class SlidesTest < ActiveSupport::TestCase
 
   # A grid whose widest bar is 3 words would draw that 3 as a full bar and read as a hit.
   test "a grid of small numbers is drawn against a floor, not against its own maximum" do
-    quiet = [{ provider: "Claude Opus", source: "docs", run: 3, verdict: "none", offset: 1 }]
+    quiet = [ { provider: "Claude Opus", source: "docs", run: 3, verdict: "none", offset: 1 } ]
     payload = step(summary: Analyzer::Memorization.summarize(quiet),
                    matrix: Analyzer::Memorization.matrix(quiet), controls: [])
 
@@ -195,12 +195,12 @@ class SlidesTest < ActiveSupport::TestCase
   # GPT reproducing 54 words and Claude managing 7 was announced as "Claude Opus and GPT-5.5
   # reproduce 54 consecutive words", which hands one model another model's result.
   test "the headline credits only the models that cleared the strong bar" do
-    mixed = [{ provider: "Claude Opus", source: "docs", run: 7, verdict: "partial", offset: 1 },
-             { provider: "GPT-5.5", source: "docs", run: 54, verdict: "strong", offset: 1 }]
+    mixed = [ { provider: "Claude Opus", source: "docs", run: 7, verdict: "partial", offset: 1 },
+             { provider: "GPT-5.5", source: "docs", run: 54, verdict: "strong", offset: 1 } ]
     summary = Analyzer::Memorization.summarize(mixed)
 
-    assert_equal ["Claude Opus", "GPT-5.5"], summary[:models_fired]
-    assert_equal ["GPT-5.5"], summary[:models_strong]
+    assert_equal [ "Claude Opus", "GPT-5.5" ], summary[:models_fired]
+    assert_equal [ "GPT-5.5" ], summary[:models_strong]
 
     headline = Analyzer::Verdict.new(target.merge("memorization" => step(summary: summary)))
                                 .training_answer.headline
@@ -212,7 +212,7 @@ class SlidesTest < ActiveSupport::TestCase
     assert_equal true, Analyzer::RecallGrid.new(target.merge("memorization" => memorization)).controls_ok?
 
     broken = step(summary: {}, matrix: [],
-                  controls: [{ provider: "Claude Opus", kind: "control+", run: 1, verdict: "none" }])
+                  controls: [ { provider: "Claude Opus", kind: "control+", run: 1, verdict: "none" } ])
     assert_equal false, Analyzer::RecallGrid.new(target.merge("memorization" => broken)).controls_ok?
   end
 
@@ -223,7 +223,7 @@ class SlidesTest < ActiveSupport::TestCase
   end
 
   test "the paragraph leads the grid and carries its own length" do
-    probes = [{ provider: "Claude Opus", source: "passage", run: 31, verdict: "strong", offset: 0 }]
+    probes = [ { provider: "Claude Opus", source: "passage", run: 31, verdict: "strong", offset: 0 } ]
     payload = step(summary: Analyzer::Memorization.summarize(probes),
                    matrix: Analyzer::Memorization.matrix(probes), controls: [])
 
@@ -268,6 +268,6 @@ class SlidesTest < ActiveSupport::TestCase
     grid = Analyzer::RecallGrid.new(target.merge("memorization" => memorization, "references" => references))
 
     labels = grid.columns.select { |c| c.kind == :reference }.map(&:label)
-    assert_equal ["Rails guides"], labels
+    assert_equal [ "Rails guides" ], labels
   end
 end

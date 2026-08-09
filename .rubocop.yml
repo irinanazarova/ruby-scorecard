@@ -1,0 +1,29 @@
+# Omakase Ruby styling for Rails, the default this project already carried as a gem without ever
+# wiring it up. Nothing here re-litigates omakase; the entries below only exclude paths where the
+# tool would be reporting on generated or vendored output rather than on code anyone writes.
+inherit_gem:
+  rubocop-rails-omakase: rubocop.yml
+
+AllCops:
+  TargetRubyVersion: 3.4
+  Exclude:
+    - "bin/**/*"
+    - "db/schema.rb"
+    - "db/migrate/**/*"
+    - "node_modules/**/*"
+    - "vendor/**/*"
+    - "dist/**/*"
+    - "public/**/*"
+    - "tmp/**/*"
+    - "storage/**/*"
+
+# scripts/ are standalone stdlib programs run by hand (`ruby scripts/probe.rb`), not app code. They
+# print progress as they go and read their own constants at the top of the file, which is the point:
+# each one is meant to be read top to bottom in a single sitting.
+Metrics:
+  Enabled: false
+
+# The generators build HTML by string interpolation on purpose, so heredocs and long lines are the
+# readable form here rather than the exception.
+Layout/LineLength:
+  Enabled: false

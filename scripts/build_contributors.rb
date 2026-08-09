@@ -88,15 +88,15 @@ SHORT_DESC = {
   "TheOdinProject/theodinproject" => "Coding curriculum", "octobox/octobox" => "GitHub notifications manager",
   "seyhunak/twitter-bootstrap-rails" => "Bootstrap for Rails", "ankane/ahoy" => "First-party analytics",
   "sparklemotion/mechanize" => "Web scraping", "ankane/strong_migrations" => "Safe DB migrations",
-  "rails/jbuilder" => "JSON API builder", "basecamp/once-campfire" => "Group chat",
+  "rails/jbuilder" => "JSON API builder", "basecamp/once-campfire" => "Group chat"
 }.freeze
 
 def repo_short(full) = SHORT_DESC[full] || ""
 
 # ---- searchable key for a contributor / project row (drives the client-side filter) ----
 def csearch(c)
-  [c["name"], c["login"], c["location"], c["company"],
-   c["repos"].map { |r| r["repo"] }.join(" ")].compact.join(" ").downcase
+  [ c["name"], c["login"], c["location"], c["company"],
+   c["repos"].map { |r| r["repo"] }.join(" ") ].compact.join(" ").downcase
 end
 
 def clinks(c)
@@ -150,7 +150,7 @@ def maintainers_cell(p)
 end
 
 def project_row(p)
-  key = [p["full"], p["desc"], p["maintainers"].map { |m| "#{m["name"]} #{m["login"]} #{m["company"]}" }.join(" ")].join(" ").downcase
+  key = [ p["full"], p["desc"], p["maintainers"].map { |m| "#{m["name"]} #{m["login"]} #{m["company"]}" }.join(" ") ].join(" ").downcase
   <<~ROW
     <tr data-name="#{esc(key)}">
       <td class="rank">#{p["rank"]}</td>
@@ -303,7 +303,7 @@ dominant language by bytes). The <strong>US</strong> tab is filtered to self-rep
 profiles leave location blank, so it under-counts Americans who don't fill it in; <strong>Worldwide</strong>
 is everyone. Where someone also has non-Ruby-first commits, the &ldquo;N&nbsp;total&rdquo; subline shows the
 larger figure.</p>
-#{tab_group("people", [["t-us", "US-based"], ["t-world", "Worldwide"]], US.size,
+#{tab_group("people", [ [ "t-us", "US-based" ], [ "t-world", "Worldwide" ] ], US.size,
             { "t-us" => people_table("t-us", US_ROWS), "t-world" => people_table("t-world", WORLD_ROWS) })}
 </section>
 
@@ -311,7 +311,7 @@ larger figure.</p>
 <h2><span class="num">02</span>Top Ruby projects</h2>
 <p class="note"><strong>By commits</strong> &mdash; top Ruby-first repos by number of commits in 2026.<br>
 <strong>By stars</strong> &mdash; top Ruby-first repos by stars, with commits in the last 90 days.</p>
-#{tab_group("projects", [["t-proj-act", "By commits"], ["t-proj-star", "By stars"]], PROJECTS_ACT.size,
+#{tab_group("projects", [ [ "t-proj-act", "By commits" ], [ "t-proj-star", "By stars" ] ], PROJECTS_ACT.size,
             { "t-proj-act" => project_table("t-proj-act", ACT_ROWS), "t-proj-star" => project_table("t-proj-star", STAR_ROWS) })}
 </section>
 

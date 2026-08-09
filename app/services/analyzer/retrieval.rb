@@ -67,7 +67,7 @@ module Analyzer
         next if line.empty?
 
         if (m = line.match(/\Auser-agent:\s*(.+)\z/i))
-          agents = [m[1].strip]
+          agents = [ m[1].strip ]
         elsif (m = line.match(/\Adisallow:\s*(.*)\z/i))
           agents.each { |a| rules[a] << m[1].strip }
         end

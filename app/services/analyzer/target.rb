@@ -65,7 +65,7 @@ module Analyzer
     # What the run is called on screen and in the database. Every part, because a result page titled
     # with only one of them hides which repo the licence verdict came from.
     def label
-      parts = [url, repo].compact_blank
+      parts = [ url, repo ].compact_blank
       parts << "a #{passage.split.size}-word paragraph" if passage?
       parts.join("  +  ")
     end

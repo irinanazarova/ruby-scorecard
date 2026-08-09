@@ -32,45 +32,45 @@ CDX_HOST = "https://index.commoncrawl.org"
 # Trusted spot-checks (cc_pages, total_pages_override) carried from the published benchmark;
 # total overrides matter where the figure is a crawl estimate rather than a sitemap count.
 KNOWN_CC = {
-  "Rails Guides" => [165, nil],
-  "Inertia Rails" => [19, 71],
-  "Turbo" => [6, 18],
-  "RubyEvents" => [1, 15_775]
+  "Rails Guides" => [ 165, nil ],
+  "Inertia Rails" => [ 19, 71 ],
+  "Turbo" => [ 6, 18 ],
+  "RubyEvents" => [ 1, 15_775 ]
 }.freeze
 
 def curl(args, timeout: 30)
   out, _err, st = Open3.capture3("curl", "-sS", "-A", UA, "--max-time", timeout.to_s, *args)
-  [out, st.success?]
+  [ out, st.success? ]
 rescue StandardError
-  ["", false]
+  [ "", false ]
 end
 
 # ---- sitemap total (reachable now) ----
 def sitemap_total(root)
   candidates = []
-  body, = curl(["-L", "#{root}/robots.txt"], timeout: 10)
+  body, = curl([ "-L", "#{root}/robots.txt" ], timeout: 10)
   body.each_line do |l|
     candidates << l.split(":", 2)[1].to_s.strip if l.strip.downcase.start_with?("sitemap:")
   end
-  candidates += ["#{root}/sitemap.xml", "#{root}/sitemap_index.xml", "#{root}/sitemap-index.xml"]
+  candidates += [ "#{root}/sitemap.xml", "#{root}/sitemap_index.xml", "#{root}/sitemap-index.xml" ]
 
   candidates.uniq.each do |sm|
-    xml, ok = curl(["-L", sm], timeout: 25)
+    xml, ok = curl([ "-L", sm ], timeout: 25)
     next unless ok && xml.include?("<loc>")
 
     if xml.include?("<sitemapindex")
       children = xml.scan(%r{<loc>\s*([^<]+?)\s*</loc>}).flatten
-      total = children.first(40).sum { |c| curl(["-L", c.strip], timeout: 25).first.scan("<loc>").size }
-      return [total, "sitemap-index"]
+      total = children.first(40).sum { |c| curl([ "-L", c.strip ], timeout: 25).first.scan("<loc>").size }
+      return [ total, "sitemap-index" ]
     end
-    return [xml.scan("<loc>").size, "sitemap"]
+    return [ xml.scan("<loc>").size, "sitemap" ]
   end
-  [nil, nil]
+  [ nil, nil ]
 end
 
 # ---- Common Crawl CDX count (polite; only when the index is up) ----
 def latest_index
-  body, ok = curl(["#{CDX_HOST}/collinfo.json"], timeout: 20)
+  body, ok = curl([ "#{CDX_HOST}/collinfo.json" ], timeout: 20)
   return nil unless ok && !body.empty?
 
   JSON.parse(body).first&.fetch("id", nil)
@@ -99,18 +99,18 @@ def cc_count(scope, index_id)
   query = "url=#{scope}/*&output=json&fl=url&limit=#{HOST_CAP}"
   # Capture the HTTP status: a soft rate-limit (503) returns a non-empty HTML error page,
   # which must NOT be read as "zero records" or we publish a false exact 0.
-  body, ok = curl(["-w", "\n__HTTP__%{http_code}", "#{CDX_HOST}/#{index_id}-index?#{query}"], timeout: 60)
-  return [nil, false] unless ok
+  body, ok = curl([ "-w", "\n__HTTP__%{http_code}", "#{CDX_HOST}/#{index_id}-index?#{query}" ], timeout: 60)
+  return [ nil, false ] unless ok
 
   code = body[/\n__HTTP__(\d+)\z/, 1]
   body = body.sub(/\n__HTTP__\d+\z/, "")
 
   # 404 with "No Captures found" is the CDX way of saying "reachable, genuinely zero records".
-  return [0, true] if code == "404" && body.include?("No Captures")
+  return [ 0, true ] if code == "404" && body.include?("No Captures")
   # Any other non-200 (503 rate-limit, 5xx outage) is "not sampled", never 0.
-  return [nil, false] unless code == "200"
+  return [ nil, false ] unless code == "200"
   # A truly empty 200 body is a real zero.
-  return [0, true] if body.strip.empty?
+  return [ 0, true ] if body.strip.empty?
 
   urls = Set.new
   parsed = false
@@ -126,10 +126,10 @@ def cc_count(scope, index_id)
     end
   end
   # A non-empty 200 body that yielded no parseable JSON records is an error page, not a zero.
-  return [nil, false] unless parsed
+  return [ nil, false ] unless parsed
 
   capped = urls.size >= HOST_CAP
-  [urls.size, !capped] # second value = "exact" (false when we hit the cap)
+  [ urls.size, !capped ] # second value = "exact" (false when we hit the cap)
 end
 
 rows = JSON.parse(File.read(File.join(ROOT, "data", "scorecard.json")))["rows"]

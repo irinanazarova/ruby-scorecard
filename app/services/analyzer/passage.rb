@@ -68,14 +68,14 @@ module Analyzer
     # give. Spreading the attempts is the difference between a coin flip and a fair test.
     def self.candidates(text, label, count: 3, prose: true)
       words = text.split
-      return [build(text, label, prose:)] if words.length < MIN_WORDS + 200
+      return [ build(text, label, prose:) ] if words.length < MIN_WORDS + 200
 
       span = SEED_WORDS + TRUTH_WORDS
       usable = words.length - span - 10
       taken = []
 
       results = count.times.filter_map do |i|
-        wanted = (200 + (i * (usable - 200) / [count, 1].max.to_f)).to_i
+        wanted = (200 + (i * (usable - 200) / [ count, 1 ].max.to_f)).to_i
         offset = prose ? nearest_prose_offset(words, wanted, span, taken) : wanted
         next if offset.nil? || offset.negative? || offset + span > words.length
 
@@ -86,11 +86,11 @@ module Analyzer
       end
 
       return results if results.any?
-      return [build(text, label, prose:)] unless prose
+      return [ build(text, label, prose:) ] unless prose
 
-      [Result.new(ok: false, source_label: label, total_words: words.length,
+      [ Result.new(ok: false, source_label: label, total_words: words.length,
                   error: "No prose found to test. This source is mostly markup, code or data, and " \
-                         "a span of that measures nothing about whether a model read it.")]
+                         "a span of that measures nothing about whether a model read it.") ]
     end
 
     # Walk outward from the span we wanted until we find one that reads like prose, so a page with
@@ -98,7 +98,7 @@ module Analyzer
     # instead of being scored on punctuation.
     def self.nearest_prose_offset(words, wanted, span, taken, step: 25, reach: 60)
       reach.times do |i|
-        [wanted + (i * step), wanted - (i * step)].each do |offset|
+        [ wanted + (i * step), wanted - (i * step) ].each do |offset|
           next if offset.negative? || offset + span > words.length
           next if taken.any? { |t| (t - offset).abs < span }
           return offset if prose?(words[offset, span])
@@ -117,22 +117,22 @@ module Analyzer
     # sized to whatever is there.
     def self.candidates_from_text(text, count: 2)
       words = text.to_s.split
-      return [Result.new(ok: false, source_label: "your paragraph", total_words: words.size,
-                         error: "Only #{words.size} words; the probe needs #{MIN_PASTED_WORDS}.")] if words.size < MIN_PASTED_WORDS
+      return [ Result.new(ok: false, source_label: "your paragraph", total_words: words.size,
+                         error: "Only #{words.size} words; the probe needs #{MIN_PASTED_WORDS}.") ] if words.size < MIN_PASTED_WORDS
 
       return candidates(words.join(" "), "your paragraph", count: count) if words.size >= MIN_WORDS + 200
 
-      seed  = [SEED_WORDS, words.size - MIN_TRUTH].min
-      truth = [words.size - seed, TRUTH_WORDS].min
+      seed  = [ SEED_WORDS, words.size - MIN_TRUTH ].min
+      truth = [ words.size - seed, TRUTH_WORDS ].min
 
-      [Result.new(ok: true, source_label: "your paragraph", total_words: words.size, offset: 0,
+      [ Result.new(ok: true, source_label: "your paragraph", total_words: words.size, offset: 0,
                   prefix: words.first(seed).join(" "),
-                  truth: words[seed, truth].join(" "))]
+                  truth: words[seed, truth].join(" ")) ]
     end
 
     def self.candidates_from_url(url, count: 3)
       res = Http.probe(url, timeout: 15)
-      return [Result.new(ok: false, error: "Could not fetch the page (HTTP #{res[:status] || 'error'})")] unless res[:ok]
+      return [ Result.new(ok: false, error: "Could not fetch the page (HTTP #{res[:status] || 'error'})") ] unless res[:ok]
 
       text = res[:type].to_s.include?("markdown") ? strip_markdown(res[:body]) : extract_html(res[:body])
 
@@ -151,13 +151,13 @@ module Analyzer
       # and text a crawler never sees cannot reach a web corpus.
       words = text.split.length
       if words < MIN_WORDS && res[:body].to_s.bytesize >= CLIENT_RENDERED_BYTES
-        return [Result.new(ok: false, source_label: url, total_words: words,
+        return [ Result.new(ok: false, source_label: url, total_words: words,
                            error: "This page returned #{(res[:body].to_s.bytesize / 1024.0).round} KB " \
                                   "of HTML but only #{words} words of prose: the text is rendered in " \
                                   "the browser and is not in the page source. A crawler fetching this " \
                                   "URL gets the same thing, so the page cannot reach a web corpus " \
                                   "either. Publish a markdown twin, or point us at the docs source " \
-                                  "in your repo.")]
+                                  "in your repo.") ]
       end
 
       candidates(text, url, count:)
@@ -178,7 +178,7 @@ module Analyzer
     # code) and skip the prose filter, because the whole point there is to test the code itself.
     def self.candidates_from_repo_file(repo, branch, path, count: 3, prose: true)
       res = Http.probe("https://raw.githubusercontent.com/#{repo}/#{branch}/#{path}", timeout: 15)
-      return [Result.new(ok: false, error: "Could not fetch #{path}")] unless res[:ok]
+      return [ Result.new(ok: false, error: "Could not fetch #{path}") ] unless res[:ok]
 
       text = prose ? strip_markdown(res[:body]) : res[:body].to_s.gsub(/\s+/, " ").strip
       candidates(text, "#{repo}/#{path}", count:, prose:)
@@ -199,7 +199,7 @@ module Analyzer
                                  "Short or code-heavy pages cannot be tested this way.")
       end
 
-      offset = [200, words.length - SEED_WORDS - TRUTH_WORDS - 10].min
+      offset = [ 200, words.length - SEED_WORDS - TRUTH_WORDS - 10 ].min
       Result.new(ok: true, source_label: label, total_words: words.length, offset: offset,
                  prefix: words[offset, SEED_WORDS].join(" "),
                  truth: words[offset + SEED_WORDS, TRUTH_WORDS].join(" "))

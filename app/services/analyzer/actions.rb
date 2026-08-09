@@ -68,7 +68,7 @@ module Analyzer
     # --- training -------------------------------------------------------------------------------
 
     def training_items
-      [repo_item, archive_item, license_item, crawl_item, quality_item, canonical_item]
+      [ repo_item, archive_item, license_item, crawl_item, quality_item, canonical_item ]
     end
 
     # The highest-value change on the whole page: the code channel has no prose quality filter, so a
@@ -174,7 +174,7 @@ module Analyzer
     # --- retrieval ------------------------------------------------------------------------------
 
     def retrieval_items
-      [robots_item, waf_item, clean_text_item, sitemap_item]
+      [ robots_item, waf_item, clean_text_item, sitemap_item ]
     end
 
     def robots_item
@@ -231,25 +231,25 @@ module Analyzer
     # rather than with advice the reader has no reason to accept yet.
     REPO_ADVICE = {
       "README explains the project" =>
-        [:medium, "Open the README with what this does and who it is for",
+        [ :medium, "Open the README with what this does and who it is for",
          "An agent quotes the README when it recommends you, and a badge row gives it nothing to " \
          "quote.",
-         "repo-readme", "why the README carries the most weight"],
+         "repo-readme", "why the README carries the most weight" ],
       "Description and topics set" =>
-        [:medium, "Fill in the repo description and topics",
+        [ :medium, "Fill in the repo description and topics",
          "Those are the fields GitHub search matches on, and search is how an agent finds you when " \
          "it does not already know your name.",
-         "repo-metadata", "the fields GitHub search reads"],
+         "repo-metadata", "the fields GitHub search reads" ],
       "Tagged releases" =>
-        [:low, "Publish tagged releases",
+        [ :low, "Publish tagged releases",
          "A release gives an agent a version to name instead of pointing someone at whatever is on " \
          "main today.",
-         "repo-releases", "why a version number matters"],
+         "repo-releases", "why a version number matters" ],
       "Active in the last 12 months" =>
-        [:low, "Push something, or say in the README that the project is finished",
+        [ :low, "Push something, or say in the README that the project is finished",
          "Recency is weighed by agents and by the people reading their answers, and a finished " \
          "project that says so answers the question directly.",
-         "repo-activity", "how recency is read"]
+         "repo-activity", "how recency is read" ]
     }.freeze
 
     def repo_items

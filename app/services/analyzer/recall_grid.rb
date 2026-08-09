@@ -38,17 +38,17 @@ module Analyzer
     def threshold = Memorization::STRONG_RUN
 
     def columns
-      @columns ||= [own_columns, reference_columns, control_columns].flatten
+      @columns ||= [ own_columns, reference_columns, control_columns ].flatten
     end
 
     def rows
-      models.map { |model| Row.new(model: model, cells: columns.to_h { |c| [c.key, cell(model, c)] }) }
+      models.map { |model| Row.new(model: model, cells: columns.to_h { |c| [ c.key, cell(model, c) ] }) }
     end
 
     # The widest bar on the grid, so every row is drawn against one scale. Comparing a row against
     # its own maximum would make every model look equally memorized.
     def scale
-      @scale ||= [rows.flat_map { |r| r.cells.values.map { |c| c.run.to_i } }.max.to_i, MIN_SCALE].max
+      @scale ||= [ rows.flat_map { |r| r.cells.values.map { |c| c.run.to_i } }.max.to_i, MIN_SCALE ].max
     end
 
     # Did the controls do what they must? Reported rather than assumed, because a provider change
@@ -88,8 +88,8 @@ module Analyzer
     def control_columns
       return [] if controls.empty?
 
-      [Column.new(key: "control+", label: "MIT licence", sublabel: "must fire", kind: :control),
-       Column.new(key: "control-", label: "Invented text", sublabel: "must not fire", kind: :control)]
+      [ Column.new(key: "control+", label: "MIT licence", sublabel: "must fire", kind: :control),
+       Column.new(key: "control-", label: "Invented text", sublabel: "must not fire", kind: :control) ]
     end
 
     # Every model that produced a number anywhere on the grid. Taken from the union rather than from

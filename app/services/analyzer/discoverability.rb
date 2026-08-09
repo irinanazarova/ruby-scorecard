@@ -25,7 +25,7 @@ module Analyzer
       @payloads = payloads || {}
     end
 
-    def columns = [docs_column, repo_column]
+    def columns = [ docs_column, repo_column ]
 
     # Every unticked box across both columns, so the deck can show a count before the detail.
     def open_items = columns.flat_map(&:items).select { |i| i.status == :fail }
@@ -114,22 +114,22 @@ module Analyzer
 
     ADVICE = {
       "Public on GitHub" =>
-        ["Make the repo public. A private repo is invisible to every agent and every corpus.",
-         "code-channel", "what a public repo unlocks"],
+        [ "Make the repo public. A private repo is invisible to every agent and every corpus.",
+         "code-channel", "what a public repo unlocks" ],
       "README explains the project" =>
-        ["Open the README with what the project does and who it is for, in prose. An agent quotes " \
+        [ "Open the README with what the project does and who it is for, in prose. An agent quotes " \
          "the README when it recommends you, and a badge row gives it nothing to quote.",
-         "repo-readme", "why the README carries the most weight"],
+         "repo-readme", "why the README carries the most weight" ],
       "Description and topics set" =>
-        ["Fill in the repo description and add topics. Those are the fields GitHub search matches " \
+        [ "Fill in the repo description and add topics. Those are the fields GitHub search matches " \
          "on, and search is how an agent finds you when it does not already know your name.",
-         "repo-metadata", "the fields GitHub search reads"],
+         "repo-metadata", "the fields GitHub search reads" ],
       "Tagged releases" =>
-        ["Publish tagged releases. They give an agent a version to name instead of pointing someone " \
+        [ "Publish tagged releases. They give an agent a version to name instead of pointing someone " \
          "at whatever is on main today.",
-         "repo-releases", "why a version number matters"],
-      nil => ["Push something. Recency is weighed by agents and by the people reading their answers.",
-              "repo-activity", "how recency is read"]
+         "repo-releases", "why a version number matters" ],
+      nil => [ "Push something. Recency is weighed by agents and by the people reading their answers.",
+              "repo-activity", "how recency is read" ]
     }.freeze
 
     def repo_items
@@ -179,10 +179,10 @@ module Analyzer
 
     def item(label, pass, detail:, action:, anchor:, anchor_label:)
       status = case pass
-               when true then :pass
-               when false then :fail
-               else :unknown
-               end
+      when true then :pass
+      when false then :fail
+      else :unknown
+      end
       Item.new(label: label, status: status, detail: detail,
                action: (status == :pass ? nil : action), anchor: anchor, anchor_label: anchor_label)
     end

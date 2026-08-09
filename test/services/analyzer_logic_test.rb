@@ -105,13 +105,13 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
   end
 
   test "summarize treats any firing span as a hit and counts what was tried" do
-    probes = [{ run: 2, verdict: "none", offset: 0, provider: "A", cost_cents: 1.0 },
-              { run: 30, verdict: "strong", offset: 500, provider: "B", cost_cents: 1.0 }]
+    probes = [ { run: 2, verdict: "none", offset: 0, provider: "A", cost_cents: 1.0 },
+              { run: 30, verdict: "strong", offset: 500, provider: "B", cost_cents: 1.0 } ]
     s = Analyzer::Memorization.summarize(probes)
     assert_equal "strong", s[:verdict]
     assert_equal 30, s[:best_run]
     assert_equal 2, s[:spans_tested]
-    assert_equal ["B"], s[:models_fired]
+    assert_equal [ "B" ], s[:models_fired]
   end
 
   # --- target parsing ---------------------------------------------------------------------------
@@ -323,6 +323,6 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
     sentence = "The crawler fetches a page and stores the response body for later analysis, " \
                "and the classifier then scores that text for educational value before any of it " \
                "reaches a training corpus at all."
-    ([sentence] * 60).join(" ")
+    ([ sentence ] * 60).join(" ")
   end
 end

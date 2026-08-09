@@ -8,7 +8,7 @@ class User < ApplicationRecord
   # the bill to zero and the cap would never fire.
   def budget_millicents = AnalyzerConfig::BUDGET_CENTS_PER_USER * 10
 
-  def remaining_millicents = [budget_millicents - spent_millicents, 0].max
+  def remaining_millicents = [ budget_millicents - spent_millicents, 0 ].max
 
   def budget_exhausted? = remaining_millicents <= 0
 

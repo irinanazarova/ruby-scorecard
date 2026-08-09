@@ -8,13 +8,13 @@ module ApplicationHelper
   # Longest first: "The Stack v2/v3" has to match before "The Stack", or the tail of the phrase is
   # left dangling outside the link.
   LEARN_TERMS = [
-    ["The Stack v2/v3", "the-stack"],
-    ["The Stack v2 and v3", "the-stack"],
-    ["The Stack", "the-stack"],
-    ["Software Heritage", "swh"],
-    ["Common Crawl", "common-crawl"],
-    ["FineWeb-Edu", "fineweb-edu"],
-    ["CCBot", "ccbot"]
+    [ "The Stack v2/v3", "the-stack" ],
+    [ "The Stack v2 and v3", "the-stack" ],
+    [ "The Stack", "the-stack" ],
+    [ "Software Heritage", "swh" ],
+    [ "Common Crawl", "common-crawl" ],
+    [ "FineWeb-Edu", "fineweb-edu" ],
+    [ "CCBot", "ccbot" ]
   ].freeze
 
   # Links the first mention of each known term. The text is escaped BEFORE any markup is inserted,

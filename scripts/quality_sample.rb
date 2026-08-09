@@ -87,7 +87,7 @@ rows.each_with_index do |r, i|
     warn format("  [%2d/%d] %-22s landing fetch failed", i + 1, rows.size, name[0, 22])
     next
   end
-  urls = [landing] + sample_links(landing, html, N)
+  urls = [ landing ] + sample_links(landing, html, N)
   pages = []
   urls.first(N).each do |u|
     body = u == landing ? html : fetch(u)

@@ -227,7 +227,7 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
         { "name" => "Passes the quality filter", "pass" => true, "score" => 3.2, "detail" => "" }
       ] } },
       "memorization" => { "result" => { "summary" => {
-        "verdict" => "strong", "best_run" => 42, "models_fired" => ["Claude Opus"],
+        "verdict" => "strong", "best_run" => 42, "models_fired" => [ "Claude Opus" ],
         "spans_tested" => 3, "probes" => 9
       } } }
     })

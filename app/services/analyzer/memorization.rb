@@ -166,8 +166,8 @@ module Analyzer
 
     def split(text)
       w = text.split
-      [w.first(Passage::SEED_WORDS).join(" "),
-       w.drop(Passage::SEED_WORDS).first(Passage::TRUTH_WORDS).join(" ")]
+      [ w.first(Passage::SEED_WORDS).join(" "),
+       w.drop(Passage::SEED_WORDS).first(Passage::TRUTH_WORDS).join(" ") ]
     end
 
     def probe(spec, prefix, truth, kind:, label: nil)

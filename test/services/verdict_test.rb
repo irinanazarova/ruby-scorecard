@@ -40,7 +40,7 @@ class VerdictTest < ActiveSupport::TestCase
          license_class: kept == false ? :copyleft : :permissive, checks: [])
   end
 
-  def memorized(verdict, best_run: 30, models: ["Claude Opus"])
+  def memorized(verdict, best_run: 30, models: [ "Claude Opus" ])
     step(summary: { verdict: verdict, best_run: best_run, models_fired: models,
                     spans_tested: 3, probes: 9 })
   end
@@ -48,19 +48,19 @@ class VerdictTest < ActiveSupport::TestCase
   # --- question 1 -------------------------------------------------------------------------------
 
   test "a blocked crawler is a no, whatever else the page does right" do
-    a = verdict({"retrieval" => retrieval(allowed: false, md: true)}).retrieval_answer
+    a = verdict({ "retrieval" => retrieval(allowed: false, md: true) }).retrieval_answer
     assert_equal :no, a.tone
     assert_match(/robots\.txt/, a.headline)
   end
 
   test "reachable without a markdown route is a qualified yes, not a clean one" do
-    a = verdict({"retrieval" => retrieval}).retrieval_answer
+    a = verdict({ "retrieval" => retrieval }).retrieval_answer
     assert_equal :mixed, a.tone
     assert_match(/rendered HTML/, a.headline)
   end
 
   test "a markdown twin makes it a clean yes" do
-    a = verdict({"retrieval" => retrieval(md: true)}).retrieval_answer
+    a = verdict({ "retrieval" => retrieval(md: true) }).retrieval_answer
     assert_equal :yes, a.tone
     assert_equal :pass, a.cues.find { |c| c.label == "clean text for agents" }.status
   end
@@ -68,8 +68,8 @@ class VerdictTest < ActiveSupport::TestCase
   # --- question 2: the honesty rules ------------------------------------------------------------
 
   test "no recall is never phrased as absence from the training data" do
-    a = verdict({"code_channel" => code, "web_channel" => web(crawled: false),
-                "memorization" => memorized("none")}).training_answer
+    a = verdict({ "code_channel" => code, "web_channel" => web(crawled: false),
+                "memorization" => memorized("none") }).training_answer
 
     refute_match(/not in the training data/i, "#{a.headline} #{a.detail}")
     assert_match(/no model reproduced it/i, a.headline)
@@ -78,8 +78,8 @@ class VerdictTest < ActiveSupport::TestCase
   end
 
   test "a closed door plus no recall is the only case that reads as a no" do
-    a = verdict({"code_channel" => code(present: false), "web_channel" => web(crawled: false),
-                "memorization" => memorized("none")}).training_answer
+    a = verdict({ "code_channel" => code(present: false), "web_channel" => web(crawled: false),
+                "memorization" => memorized("none") }).training_answer
     assert_equal :no, a.tone
     assert_match(/unlikely/i, a.headline)
   end
@@ -88,24 +88,24 @@ class VerdictTest < ActiveSupport::TestCase
   # perfectly eligible page into a confident negative on stage.
   test "a check that could not run keeps the answer unknown instead of hardening it into a no" do
     rate_limited = step(present: false, transient: true, reason: "GitHub rate limit reached")
-    a = verdict({"code_channel" => rate_limited, "web_channel" => web(crawled: false),
-                "memorization" => memorized("none")}).training_answer
+    a = verdict({ "code_channel" => rate_limited, "web_channel" => web(crawled: false),
+                "memorization" => memorized("none") }).training_answer
 
     assert_equal :unknown, a.tone
     refute_match(/unlikely/i, a.headline)
   end
 
   test "verbatim reproduction is the one strong yes" do
-    a = verdict({"code_channel" => code, "web_channel" => web,
-                "memorization" => memorized("strong", best_run: 91)}).training_answer
+    a = verdict({ "code_channel" => code, "web_channel" => web,
+                "memorization" => memorized("strong", best_run: 91) }).training_answer
 
     assert_equal :yes, a.tone
     assert_match(/91 consecutive words/, a.headline)
   end
 
   test "a short run is a maybe, not a yes" do
-    a = verdict({"code_channel" => code, "web_channel" => web,
-                "memorization" => memorized("partial", best_run: 9)}).training_answer
+    a = verdict({ "code_channel" => code, "web_channel" => web,
+                "memorization" => memorized("partial", best_run: 9) }).training_answer
 
     assert_equal :mixed, a.tone
     assert_match(/maybe/i, a.headline)
@@ -120,18 +120,18 @@ class VerdictTest < ActiveSupport::TestCase
   end
 
   test "the answer sharpens as steps land and only settles once recall is measured" do
-    partial = verdict({"code_channel" => code}).training_answer
+    partial = verdict({ "code_channel" => code }).training_answer
     assert_equal :partial, partial.state
     assert_match(/code path is open/i, partial.headline)
     assert_match(/still checking/i, partial.detail)
 
-    settled = verdict({"code_channel" => code, "web_channel" => web,
-                      "memorization" => memorized("none")}).training_answer
+    settled = verdict({ "code_channel" => code, "web_channel" => web,
+                      "memorization" => memorized("none") }).training_answer
     assert_equal :final, settled.state
   end
 
   test "an unarchived repo names Software Heritage as the gate that closed" do
-    a = verdict({"code_channel" => code(swh: false)}).training_answer
+    a = verdict({ "code_channel" => code(swh: false) }).training_answer
     assert_match(/Software Heritage/, a.detail)
     assert_equal :fail, a.cues.find { |c| c.label == "code path" }.status
   end
@@ -140,19 +140,19 @@ class VerdictTest < ActiveSupport::TestCase
   # all-rights-reserved text is in the train set; karafka/karafka's LGPL is out), so the observed
   # index must beat every license- and archival-based inference, in both directions.
   test "observed v3 membership opens the code path over a disqualifying license" do
-    a = verdict({"code_channel" => code(kept: false, swh: false, in_v3: true)}).training_answer
+    a = verdict({ "code_channel" => code(kept: false, swh: false, in_v3: true) }).training_answer
     assert_equal :pass, a.cues.find { |c| c.label == "code path" }.status
     assert_match(/The Stack v3/, a.detail)
   end
 
   test "observed v3 absence closes the code path over a permissive license" do
-    a = verdict({"code_channel" => code(kept: true, swh: true, in_v3: false)}).training_answer
+    a = verdict({ "code_channel" => code(kept: true, swh: true, in_v3: false) }).training_answer
     assert_equal :fail, a.cues.find { |c| c.label == "code path" }.status
     assert_match(/not in The Stack v3/, a.detail)
   end
 
   test "a post-cutoff absence blames the crawl date, not the license" do
-    a = verdict({"code_channel" => code(kept: true, in_v3: false, post_cutoff: true)}).training_answer
+    a = verdict({ "code_channel" => code(kept: true, in_v3: false, post_cutoff: true) }).training_answer
     assert_match(/cutoff/, a.detail)
     refute_match(/non-permissive/, a.detail)
   end
@@ -177,7 +177,7 @@ class VerdictTest < ActiveSupport::TestCase
   # Nothing is inferred any more, so an empty repo box leaves the code channel UNMEASURED. Drawing
   # that as a closed gate would tell someone their repo is disqualified when we never looked at one.
   test "an empty repo box leaves the code channel unmeasured rather than closed" do
-    a = verdict({"web_channel" => web(crawled: false), "memorization" => memorized("none")},
+    a = verdict({ "web_channel" => web(crawled: false), "memorization" => memorized("none") },
                 repo: nil).training_answer
 
     assert_equal :unknown, a.tone
@@ -188,10 +188,10 @@ class VerdictTest < ActiveSupport::TestCase
   # Both halves are probed now, and they routinely disagree. A headline that says "30 consecutive
   # words of it" without naming the source sends people to fix the wrong thing.
   test "a strong result names which half was reproduced" do
-    payload = step(summary: { verdict: "strong", best_run: 30, models_fired: ["Claude Opus"],
+    payload = step(summary: { verdict: "strong", best_run: 30, models_fired: [ "Claude Opus" ],
                               spans_tested: 4, probes: 12 },
                    by_source: { "docs" => { best_run: 2 }, "repo" => { best_run: 30 } })
-    a = verdict({"code_channel" => code, "memorization" => payload}).training_answer
+    a = verdict({ "code_channel" => code, "memorization" => payload }).training_answer
 
     assert_match(/your repo/, a.headline)
   end

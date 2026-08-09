@@ -68,14 +68,14 @@ class ActionsTest < ActiveSupport::TestCase
 
   test "an unarchived repo asks for archival rather than for a licence change" do
     items = actions({ "code_channel" => code(swh: false) }).items
-    assert_equal [:archive], items.map(&:key)
+    assert_equal [ :archive ], items.map(&:key)
     assert_match(/Software Heritage/, items.first.title)
     assert_equal "software-heritage", items.first.anchor
   end
 
   test "a dropped licence names the licence and offers the docs directory" do
     items = actions({ "code_channel" => code(kept: false, label: "FSL-1.1") }).items
-    assert_equal [:license], items.map(&:key)
+    assert_equal [ :license ], items.map(&:key)
     assert_match(/FSL-1\.1/, items.first.why)
   end
 
@@ -86,8 +86,8 @@ class ActionsTest < ActiveSupport::TestCase
     closed_code = { "code_channel" => code(present: false),
                     "web_channel" => web(crawled: false, quality: false, score: 1.6) }
 
-    assert_equal [:low, :low], actions(open_code).items.select { |i| %i[crawl quality].include?(i.key) }.map(&:impact)
-    assert_equal [:medium, :medium], actions(closed_code).items.select { |i| %i[crawl quality].include?(i.key) }.map(&:impact)
+    assert_equal [ :low, :low ], actions(open_code).items.select { |i| %i[crawl quality].include?(i.key) }.map(&:impact)
+    assert_equal [ :medium, :medium ], actions(closed_code).items.select { |i| %i[crawl quality].include?(i.key) }.map(&:impact)
   end
 
   test "a robots block is treated as a decision, not as a mistake" do
@@ -111,7 +111,7 @@ class ActionsTest < ActiveSupport::TestCase
                  "memorization" => step(summary: { verdict: "strong", best_run: 34 }) }
     items = actions(payloads).items
 
-    assert_equal [:canonical], items.map(&:key)
+    assert_equal [ :canonical ], items.map(&:key)
     assert_equal :low, items.first.impact
   end
 
@@ -124,7 +124,7 @@ class ActionsTest < ActiveSupport::TestCase
   # as "you have no repo" would be the tool telling someone something it never checked.
   test "an empty repo box asks for the repo rather than announcing there is none" do
     items = actions({}, repo: nil).items
-    assert_equal [:repo], items.map(&:key)
+    assert_equal [ :repo ], items.map(&:key)
     assert_match(/repo box empty/, items.first.why)
     refute_match(/we found no public repository/i, items.first.why)
   end

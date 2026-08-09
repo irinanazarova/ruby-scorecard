@@ -37,11 +37,11 @@ class Analysis < ApplicationRecord
   # `references` is deliberately absent: it is the scale on the recall chart, not evidence about
   # this target, and listing it here would invite reading it as one.
   STEPS = [
-    ["retrieval",     "What a crawler sees on your docs", "robots, crawlability, sitemap, markdown twins"],
-    ["repo_signals",  "What an agent finds in your repo", "README, description, licence, releases, activity"],
-    ["code_channel",  "The code funnel",                  "public repo, Software Heritage, licence"],
-    ["web_channel",   "The web funnel",                   "Common Crawl, then the quality filter"],
-    ["memorization",  "The memorization probe",           "the slow one: both sources against every model"]
+    [ "retrieval",     "What a crawler sees on your docs", "robots, crawlability, sitemap, markdown twins" ],
+    [ "repo_signals",  "What an agent finds in your repo", "README, description, licence, releases, activity" ],
+    [ "code_channel",  "The code funnel",                  "public repo, Software Heritage, licence" ],
+    [ "web_channel",   "The web funnel",                   "Common Crawl, then the quality filter" ],
+    [ "memorization",  "The memorization probe",           "the slow one: both sources against every model" ]
   ].freeze
 
   # Finished step payloads, keyed by step name, ready for the `analyses/step` partial.
@@ -88,7 +88,7 @@ class Analysis < ApplicationRecord
   end
 
   def self.free_remaining(session_token)
-    [AnalyzerConfig::FREE_ANALYSES_PER_SESSION - free_used(session_token), 0].max
+    [ AnalyzerConfig::FREE_ANALYSES_PER_SESSION - free_used(session_token), 0 ].max
   end
 
   private

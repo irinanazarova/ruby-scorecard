@@ -24,7 +24,7 @@ def sitemap_total(base)
   fetch("#{base}/robots.txt", 8).each_line do |l|
     candidates << l.split(":", 2)[1].to_s.strip if l.strip.downcase.start_with?("sitemap:")
   end
-  candidates += ["#{base}/sitemap.xml", "#{base}/sitemap_index.xml", "#{base}/sitemap-index.xml"]
+  candidates += [ "#{base}/sitemap.xml", "#{base}/sitemap_index.xml", "#{base}/sitemap-index.xml" ]
 
   candidates.each do |sm|
     xml = fetch(sm, 20)
@@ -33,11 +33,11 @@ def sitemap_total(base)
     if xml.include?("<sitemapindex")
       children = xml.scan(%r{<loc>\s*([^<]+?)\s*</loc>}).flatten
       total = children.first(40).sum { |c| fetch(c.strip, 20).scan("<loc>").size }
-      return [total, "sitemap-index"]
+      return [ total, "sitemap-index" ]
     end
-    return [xml.scan("<loc>").size, "sitemap"]
+    return [ xml.scan("<loc>").size, "sitemap" ]
   end
-  [nil, nil]
+  [ nil, nil ]
 end
 
 def crawl_est(base, cap: 300, fanout: 70)
@@ -65,7 +65,7 @@ def crawl_est(base, cap: 300, fanout: 70)
 
   home = fetch(base)
   l1 = links.call(home, base)
-  seen = ([norm.call(base)] + l1).uniq
+  seen = ([ norm.call(base) ] + l1).uniq
   fetched = 0
   l1.each do |u|
     break if fetched >= fanout || seen.size >= cap
@@ -73,7 +73,7 @@ def crawl_est(base, cap: 300, fanout: 70)
     seen = (seen + links.call(fetch(u), u)).uniq
     fetched += 1
   end
-  [[seen.size, cap].min, seen.size >= cap ? "crawl-capped" : "crawl"]
+  [ [ seen.size, cap ].min, seen.size >= cap ? "crawl-capped" : "crawl" ]
 end
 
 CC = {

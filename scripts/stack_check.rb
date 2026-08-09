@@ -43,7 +43,7 @@ end
 def repos_in_stack(owner)
   post = curl("-X", "POST", "#{SPACE}/gradio_api/call/check_username",
               "-H", "Content-Type: application/json",
-              "-d", JSON.generate({ data: [owner] }))
+              "-d", JSON.generate({ data: [ owner ] }))
   event = post && JSON.parse(post)["event_id"] rescue nil
   return nil unless event
 

@@ -1,0 +1,67 @@
+# Lint, security scan and tests, on every push and pull request.
+#
+# This runs on PRs as well as on main, which fly-deploy.yml deliberately does not: deploying is a
+# main-only action, but a branch should be able to prove itself before it gets there.
+#
+# The FineWeb-Edu ONNX model (vendor/fwedu, 419 MB) is gitignored and NOT needed here. Only
+# scripts/quality_core.rb loads it, and the scripts are standalone programs run by hand rather than
+# part of the app or its test suite.
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    name: RuboCop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+      - run: bundle exec rubocop --parallel
+
+  security:
+    name: Brakeman
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+      - run: bundle exec brakeman --no-pager
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    env:
+      RAILS_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+      - run: bin/rails db:test:prepare
+      - run: bin/rails test
+
+  # The generated half of the site is committed in dist/, and the generators read only data/ and
+  # src/. So regenerating has to be a no-op: if it is not, dist/ was edited by hand or someone
+  # changed a generator without rebuilding, and the deployed pages no longer match their source.
+  # Cheap to check and it catches a class of drift nothing else would.
+  generators:
+    name: dist/ is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+      - run: ruby scripts/build.rb
+      - run: git diff --exit-code -- dist/scorecard.html
+        # A failure here means: run ./build.sh and commit dist/.

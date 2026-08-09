@@ -31,11 +31,11 @@ module Analyzer
     # breaks every multi-word alternative ("permission is hereby granted" stops matching) and sends
     # ordinary MIT repos to :unknown. Single-line /i patterns only.
     PATTERNS = [
-      [:source_available, /o'?saasy|functional source license|FSL-1\.1|business source license|\bBUSL\b|server side public license|\bSSPL\b|elastic license|sustainable use license|commons clause|fair source|polyform/i],
-      [:proprietary,      /all rights reserved(?!.{0,400}(permission is hereby granted|redistribution))/im],
-      [:copyleft,         /gnu affero|affero general public|gnu general public license|lesser general public|mozilla public license|\bAGPL\b|\bGPL\b|\bLGPL\b/i],
-      [:content,          /creative commons|\bCC[- ]BY\b|attribution-sharealike/i],
-      [:permissive,       /permission is hereby granted, free of charge|apache license|redistribution and use in source and binary forms|\bISC License\b|this is free and unencumbered software/i]
+      [ :source_available, /o'?saasy|functional source license|FSL-1\.1|business source license|\bBUSL\b|server side public license|\bSSPL\b|elastic license|sustainable use license|commons clause|fair source|polyform/i ],
+      [ :proprietary,      /all rights reserved(?!.{0,400}(permission is hereby granted|redistribution))/im ],
+      [ :copyleft,         /gnu affero|affero general public|gnu general public license|lesser general public|mozilla public license|\bAGPL\b|\bGPL\b|\bLGPL\b/i ],
+      [ :content,          /creative commons|\bCC[- ]BY\b|attribution-sharealike/i ],
+      [ :permissive,       /permission is hereby granted, free of charge|apache license|redistribution and use in source and binary forms|\bISC License\b|this is free and unencumbered software/i ]
     ].freeze
 
     RATE_LIMIT_REASON = "GitHub rate limit reached for this server, so the code channel could not " \
@@ -143,9 +143,9 @@ module Analyzer
     def license_text(branch)
       LICENSE_FILES.each do |f|
         r = Http.probe("https://raw.githubusercontent.com/#{@repo}/#{branch}/#{f}", timeout: 8)
-        return [f, r[:body]] if r[:ok] && r[:body].to_s.strip.length > 40
+        return [ f, r[:body] ] if r[:ok] && r[:body].to_s.strip.length > 40
       end
-      [nil, nil]
+      [ nil, nil ]
     end
 
     def classify(text)
@@ -196,7 +196,7 @@ module Analyzer
     def in_stack_v3?(full_name)
       owner = full_name.split("/").first.downcase
       post = Http.post_json("#{STACK_SPACE}/gradio_api/call/check_username",
-                            { data: [owner] }, timeout: 30)
+                            { data: [ owner ] }, timeout: 30)
       event = post && post["event_id"]
       return nil unless event
 

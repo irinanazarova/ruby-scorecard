@@ -6,7 +6,7 @@ namespace :analyzer do
   task :warm, %i[docs repo] => :environment do |_t, args|
     targets =
       if args[:docs].present? || args[:repo].present?
-        [Analyzer::Target.new(docs_url: args[:docs], repo: args[:repo])]
+        [ Analyzer::Target.new(docs_url: args[:docs], repo: args[:repo]) ]
       else
         AnalyzerConfig::EXAMPLES.map { |e| Analyzer::Target.new(docs_url: e[:docs], repo: e[:repo]) }
       end

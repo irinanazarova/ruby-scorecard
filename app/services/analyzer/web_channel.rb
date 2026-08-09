@@ -24,7 +24,7 @@ module Analyzer
     def initialize(url) = @url = url
 
     def call
-      { checks: [common_crawl_check, quality_check].compact }
+      { checks: [ common_crawl_check, quality_check ].compact }
     end
 
     # Is this exact URL in the latest crawl? Cheap and unambiguous, unlike a whole-host count.

@@ -62,7 +62,7 @@ DEFAULT_TEST_URLS = [
   { name: "EM: the-long-game", url: "https://evilmartians.com/chronicles/the-long-game-why-rails-survived-the-hype-cycle-and-what-it-means-for-your-startup" }
 ].freeze
 TEST_URLS = ARGV.empty? ? DEFAULT_TEST_URLS : ARGV.map { |a|
-  name, url = a.include?("=") ? a.split("=", 2) : [a.split("/").reject(&:empty?).last, a]
+  name, url = a.include?("=") ? a.split("=", 2) : [ a.split("/").reject(&:empty?).last, a ]
   { name: name, url: url }
 }
 
@@ -102,13 +102,13 @@ def complete(prefix)
     system: "You are completing a passage from its original published source. Output ONLY the verbatim " \
             "continuation of the text, with no preamble, quotation marks, or commentary. Do not use any " \
             "tools or search. If you recognize the source, reproduce the next sentences exactly as written.",
-    messages: [{ role: "user", content: "Continue this text exactly as it appears in the original:\n\n#{prefix}" }]
+    messages: [ { role: "user", content: "Continue this text exactly as it appears in the original:\n\n#{prefix}" } ]
   })
   blocks = resp["content"] || []
   text = blocks.map { |b| b["text"] }.compact.join(" ").strip
-  [text, resp["stop_reason"]]
+  [ text, resp["stop_reason"] ]
 rescue StandardError => e
-  ["[error: #{e.class}: #{e.message[0, 120]}]", "error"]
+  [ "[error: #{e.class}: #{e.message[0, 120]}]", "error" ]
 end
 
 def passages
@@ -121,7 +121,7 @@ def passages
       need = SEED_WORDS + TRUTH_WORDS
       next warn("  skip #{t[:name]}: only #{words.size} words") if words.size < need + 20
       # distinctive mid-article span, past the lead/boilerplate; start earlier on short pages
-      start = [380, words.size - need - 10].min
+      start = [ 380, words.size - need - 10 ].min
       list << { name: t[:name], kind: "test", text: words[start, need + 40].join(" ") }
     rescue StandardError => e
       warn "  skip #{t[:name]}: #{e.message[0, 80]}"
@@ -149,10 +149,10 @@ passages.each do |p|
   ov  = ngram_overlap(norm(truth), norm(out))
   verdict = if out.start_with?("[error")
               "API ERROR"
-            elsif run >= 15 then "STRONG memorization"
-            elsif run >= 6 then "partial echo"
-            else "no verbatim recall"
-            end
+  elsif run >= 15 then "STRONG memorization"
+  elsif run >= 6 then "partial echo"
+  else "no verbatim recall"
+  end
   results << p.merge(run: run, overlap: ov, verdict: verdict, out: out, truth: truth, stop: stop)
   printf("%-34s %-9s %-12s %-9s %s\n", p[:name][0, 33], p[:kind], "#{run} words", ov, verdict)
   sleep 0.5

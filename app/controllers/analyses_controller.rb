@@ -62,7 +62,7 @@ class AnalysesController < ApplicationController
 
   def show
     @analysis = Analysis.find(params[:id])
-    return head :not_found unless owns?(@analysis)
+    head :not_found unless owns?(@analysis)
   end
 
   private

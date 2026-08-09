@@ -147,3 +147,14 @@ does) or wire a search API. Then rebuild.
 
 `dist/` is self-contained. Copy the whole folder to the ruby.evilmartians.com host, e.g.
 `rsync -a dist/ <host>`.
+
+## License
+
+[MIT](LICENSE). Permissive on purpose: this project's own guidance is that a permissive licence or
+none is what keeps files in a code corpus, and it would be odd to publish that advice unlicensed.
+
+---
+
+<img src="https://cdn.evilmartians.com/badges/logo-no-label.svg" alt="" width="22" height="16" />  The Ruby &amp; Rails LLM discoverability scorecard is built by <b><a href="https://evilmartians.com/">Evil Martians</a></b>, an American design and engineering consultancy for <b>developer tools, AI, and cybersecurity startups</b>.
+
+---

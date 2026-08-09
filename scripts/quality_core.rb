@@ -59,17 +59,17 @@ module QualityCore
         doc.css(CHROME.join(",")).remove
         main = doc.at_css("article, main, [role=main]") || doc.at_css("body") || doc
         text = main.text.gsub(/\s+/, " ").strip
-        return [text, "nokogiri"] if text.length >= 50
+        return [ text, "nokogiri" ] if text.length >= 50
       rescue LoadError, StandardError
         # fall through to regex
       end
-      [regex_text(html), "regex"]
+      [ regex_text(html), "regex" ]
     end
 
     def score_window(text)
       enc = tokenizer.encode(text)
-      out = model.predict({ "input_ids" => [enc.ids], "attention_mask" => [enc.attention_mask],
-                            "token_type_ids" => [enc.type_ids] })
+      out = model.predict({ "input_ids" => [ enc.ids ], "attention_mask" => [ enc.attention_mask ],
+                            "token_type_ids" => [ enc.type_ids ] })
       logit = out["logits"].flatten.first.to_f
       logit.clamp(0.0, 5.0)
     end
@@ -92,11 +92,11 @@ module QualityCore
       {
         words: words.size,
         curly: text.include?("{"),
-        code_density: (code_chars.to_f / [lead.length, 1].max).round(4),
+        code_density: (code_chars.to_f / [ lead.length, 1 ].max).round(4),
         opens_with_definition: !OPENING_DEF.match(opening).nil?,
         leading_meta: !LEADING_META.match(words.first(30).join(" ")).nil?,
         boiler_in_lead: !BOILER.match(lead).nil?,
-        avg_sentence_words: (lead_words.size.to_f / [stops, 1].max).round(1)
+        avg_sentence_words: (lead_words.size.to_f / [ stops, 1 ].max).round(1)
       }
     end
 
@@ -139,7 +139,7 @@ module QualityCore
     end
 
     def check(content, is_html: true)
-      text, method = is_html ? extract_text(content) : [content, "raw"]
+      text, method = is_html ? extract_text(content) : [ content, "raw" ]
       return { ok: false, error: "No extractable text (client-rendered or blocked)." } if text.length < 50
 
       sc = score_text(text)

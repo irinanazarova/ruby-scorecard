@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #
 # REPO MEMORIZATION PROBE + COVARIATE COLLECTOR
 #
@@ -130,13 +131,13 @@ def pick_file(repo, branch)
   return nil if md.empty?
 
   docs = md.select { |n| n["path"].include?("docs/") || n["path"].include?("content/") }
-  pool = (docs.empty? ? md : docs).sort_by { |n| [-n["size"].to_i, n["path"]] }.first(10)
+  pool = (docs.empty? ? md : docs).sort_by { |n| [ -n["size"].to_i, n["path"] ] }.first(10)
 
   pool.map { |n|
     raw = raw_file(repo, branch, n["path"])
-    [raw ? prose(raw).split.size : 0, n["path"]]
+    [ raw ? prose(raw).split.size : 0, n["path"] ]
   }.select { |words, _| words >= MIN_BODY }
-    .sort_by { |words, path| [-words, path] }
+    .sort_by { |words, path| [ -words, path ] }
     .first(PASSAGES_PER_REPO)
     .map(&:last)
 end
@@ -181,7 +182,7 @@ def longest_common_run(a, b)
   prev = Array.new(b.size + 1, 0); best = 0
   a.each do |wa|
     cur = Array.new(b.size + 1, 0)
-    b.each_with_index { |wb, j| (cur[j + 1] = prev[j] + 1; best = [best, cur[j + 1]].max) if wa == wb }
+    b.each_with_index { |wb, j| (cur[j + 1] = prev[j] + 1; best = [ best, cur[j + 1] ].max) if wa == wb }
     prev = cur
   end
   best
@@ -226,7 +227,7 @@ def complete(prefix)
     system: "You are completing a passage from its original published source. Output ONLY the verbatim " \
             "continuation, with no preamble or commentary. Do not use any tools or search. If you " \
             "recognize the source, reproduce the next sentences exactly as written.",
-    messages: [{ role: "user", content: "Continue this text exactly as it appears in the original:\n\n#{prefix}" }]
+    messages: [ { role: "user", content: "Continue this text exactly as it appears in the original:\n\n#{prefix}" } ]
   })
   (res["content"] || []).map { |b| b["text"] }.compact.join(" ").strip
 rescue StandardError => e
@@ -243,10 +244,10 @@ def probe(label, kind, text, meta = {})
   run   = longest_common_run(norm(truth), norm(out))
   ov    = ngram_overlap(norm(truth), norm(out))
   verdict = if out.start_with?("[error") then "API ERROR"
-            elsif run >= 15 then "STRONG"
-            elsif run >= 6 then "partial"
-            else "none"
-            end
+  elsif run >= 15 then "STRONG"
+  elsif run >= 6 then "partial"
+  else "none"
+  end
   printf("%-34s %-7s run=%-4s 5g=%-6s %-8s stars=%-7s lic=%-11s swh=%-13s copies=%s\n",
          label[0, 33], kind, run, ov, verdict, meta[:stars] || "-", meta[:license] || "-",
          meta[:swh] || "-", meta[:copies].nil? ? "-" : meta[:copies])
@@ -265,7 +266,7 @@ puts "-" * 130
   next warn("  skip #{repo}: repo not found") unless info && info["default_branch"]
 
   branch = info["default_branch"]
-  paths  = explicit ? [explicit] : pick_file(repo, branch)
+  paths  = explicit ? [ explicit ] : pick_file(repo, branch)
   next warn("  skip #{repo}: no suitable markdown file") if paths.nil? || paths.empty?
 
   # Repo-level covariates, fetched once.
@@ -286,7 +287,7 @@ puts "-" * 130
     words = prose(raw).split
     next warn("  skip #{repo}:#{path}: only #{words.size} prose words") if words.size < MIN_BODY
 
-    start   = [200, words.size - SEED_WORDS - TRUTH_WORDS - 10].min
+    start   = [ 200, words.size - SEED_WORDS - TRUTH_WORDS - 10 ].min
     passage = words[start, SEED_WORDS + TRUTH_WORDS + 40].join(" ")
 
     last = gh_api("repos/#{repo}/commits?path=#{URI.encode_www_form_component(path)}&per_page=1")

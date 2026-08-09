@@ -22,14 +22,14 @@ CDX_SLEEP = 2.0
 SKIP_EXT = %w[.css .js .png .jpg .jpeg .svg .gif .pdf .zip .xml .ico .woff .woff2 .webp .json .txt].freeze
 
 PRINT_ONLY = !ARGV.delete("--print").nil?
-TARGETS = ARGV.empty? ? ["Inertia Rails", "AnyCable"] : ARGV.dup
+TARGETS = ARGV.empty? ? [ "Inertia Rails", "AnyCable" ] : ARGV.dup
 Thread.report_on_exception = false   # keep a flaky fetch from spamming stderr / killing the run
 
 def curl(url, timeout: 25)
   out, _err, st = Open3.capture3("curl", "-sSL", "-A", UA, "--max-time", timeout.to_s, url)
-  [out, st.success?]
+  [ out, st.success? ]
 rescue StandardError
-  ["", false]
+  [ "", false ]
 end
 
 # scheme/www/trailing-slash-insensitive key: host + path (no query/fragment)
@@ -85,7 +85,7 @@ end
 def crawl(start_url)
   host_key = norm(start_url).split("/").first
   seen = Set.new
-  queue = [start_url]
+  queue = [ start_url ]
   pages = Set.new
   until queue.empty? || pages.size >= CRAWL_CAP
     url = queue.shift
