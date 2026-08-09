@@ -23,6 +23,10 @@ class Analysis < ApplicationRecord
     self[:repo].presence || legacy_target.repo
   end
 
+  # Which slides the deck shows. A run that is only a pasted paragraph has no site to fetch and no
+  # repo to read, so two of the four slides would be nothing but "nothing given to check".
+  def passage_only? = passage.present? && docs_url.blank? && repo.blank?
+
   # The measurements, in the order the deck argues them: what an agent sees today, then whether
   # either funnel is open, then whether recall actually happened.
   #
@@ -60,7 +64,8 @@ class Analysis < ApplicationRecord
     # Every region on the page has to know which of the two boxes was filled in, because that is
     # what separates "this channel is closed" from "we never looked". The run emits a target step
     # first thing, so this only fills in for rows written before it did.
-    payloads["target"] ||= { result: { docs_url: docs_url, repo: repo, label: input },
+    payloads["target"] ||= { result: { docs_url: docs_url, repo: repo, passage: passage,
+                                       label: input },
                              cache_hit: false, cached_at: nil }
     payloads
   end

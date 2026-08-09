@@ -30,75 +30,92 @@
           <a href="https://github.com/<%= @analysis.repo %>" rel="noopener"><%= @analysis.repo %></a>
         </span>
       <% end %>
+      <% if @analysis.passage.present? %>
+        <span class="chip chip--passage"><span class="chip__key">paragraph</span>
+          <%= @analysis.passage.split.size %> words
+        </span>
+      <% end %>
     </div>
+
+    <%# The pasted text itself, shown rather than summarised. A probe you cannot see the input to is
+        not evidence of anything, and on stage the paragraph IS the point. %>
+    <% if @analysis.passage.present? %>
+      <details class="deck__passage">
+        <summary>The paragraph being checked</summary>
+        <blockquote><%= @analysis.passage %></blockquote>
+      </details>
+    <% end %>
     <%= render "analyses/status", analysis: @analysis %>
   </header>
 
+  <%# The deck adapts to what was actually filled in. A run that is only a pasted paragraph has no
+      site to fetch and no repo to read, so the first two slides would be nothing but "nothing given
+      to check", and the numbering has to follow or the visitor is told they are on slide 3 of 4
+      with two missing. %>
+  <% slides = [
+       ["agent",  "Agent experience", "Can an agent discover your product, evaluate it, and suggest it?"],
+       ["funnel", "How text reaches a model", "Two pipelines, each throwing most of its input away. Where does yours stop?"],
+       ["recall", "Model recall", "The same probe on every column: the opening words in, longest exact continuation out."],
+       ["actions", "What to do next", "Ranked by how much it changes, for this result rather than in general."]
+     ] %>
+  <% slides = slides.reject { |key, _, _| %w[agent funnel actions].include?(key) } if @analysis.passage_only? %>
+
   <div class="deck__stages">
-    <%# --- 1. can an agent use you today ------------------------------------------------------ %>
-    <section class="stage" data-reveal-target="stage" id="stage-agent">
-      <p class="stage__number">1 of 4</p>
-      <h2 class="stage__title">Agent experience</h2>
-      <p class="stage__lead">Can an agent discover your product, evaluate it, and suggest it?</p>
-      <%= render "analyses/discoverability", payloads: stored %>
-    </section>
+    <% slides.each_with_index do |(key, title, lead), i| %>
+      <section class="stage" data-reveal-target="stage" id="stage-<%= key %>">
+        <p class="stage__number"><%= i + 1 %> of <%= slides.size %></p>
+        <h2 class="stage__title"><%= title %></h2>
+        <p class="stage__lead"><%= lead %></p>
 
-    <%# --- 2. the two funnels ------------------------------------------------------------------ %>
-    <section class="stage" data-reveal-target="stage" id="stage-funnel">
-      <p class="stage__number">2 of 4</p>
-      <h2 class="stage__title">How text reaches a model</h2>
-      <p class="stage__lead">Two pipelines, each throwing most of its input away. Where does yours
-      stop?</p>
-      <%= render "analyses/funnel", payloads: stored %>
-    </section>
+        <% case key
+           when "agent" %>
+          <%= render "analyses/discoverability", payloads: stored %>
+        <% when "funnel" %>
+          <%= render "analyses/funnel", payloads: stored %>
+        <% when "recall" %>
+          <%= render "analyses/recall", payloads: stored %>
+        <% when "actions" %>
+          <%= render "analyses/actions", payloads: stored %>
+        <% end %>
 
-    <%# --- 3. did it actually happen ----------------------------------------------------------- %>
-    <section class="stage" data-reveal-target="stage" id="stage-recall">
-      <p class="stage__number">3 of 4</p>
-      <h2 class="stage__title">Model recall</h2>
-      <p class="stage__lead">The same probe on every column: 55 words in, longest exact
-      continuation out.</p>
-      <%= render "analyses/recall", payloads: stored %>
-    </section>
+        <%# The working hangs off the LAST slide, whichever that turns out to be.
 
-    <%# --- 4. what to do ----------------------------------------------------------------------- %>
-    <section class="stage" data-reveal-target="stage" id="stage-actions">
-      <p class="stage__number">4 of 4</p>
-      <h2 class="stage__title">What to do next</h2>
-      <p class="stage__lead">Ranked by how much it changes, for this result rather than in
-      general.</p>
-      <%= render "analyses/actions", payloads: stored %>
-
-      <details class="deck__evidence" id="evidence">
-        <summary>All the working, check by check</summary>
-
-        <%# A step that has already answered renders from the stored results, so a reload or a
+            A step that has already answered renders from the stored results, so a reload or a
             shared permalink shows the finished analysis. Only steps still in flight render the
             placeholder and wait for their broadcast. Finished steps render the partial bare: it
             carries the step id itself, which is what the broadcast replaces, so wrapping it would
             nest the same id twice. %>
-        <div class="steps">
-          <% Analysis::STEPS.each do |step, title, hint| %>
-            <% if (payload = stored[step]) %>
-              <%= render "analyses/step", step: step, payload: payload, analysis: @analysis %>
-            <% else %>
-              <%= tag.div id: "step_#{step}" do %>
-                <%= render "analyses/pending", title: title, hint: hint %>
+        <% if i == slides.size - 1 %>
+          <details class="deck__evidence" id="evidence">
+            <summary>All the working, check by check</summary>
+            <div class="steps">
+              <% Analysis::STEPS.each do |step, step_title, hint| %>
+                <% next if @analysis.passage_only? && step != "memorization" %>
+                <% if (payload = stored[step]) %>
+                  <%= render "analyses/step", step: step, payload: payload, analysis: @analysis %>
+                <% else %>
+                  <%= tag.div id: "step_#{step}" do %>
+                    <%= render "analyses/pending", title: step_title, hint: hint %>
+                  <% end %>
+                <% end %>
               <% end %>
-            <% end %>
-          <% end %>
-        </div>
-      </details>
-    </section>
+            </div>
+          </details>
+        <% end %>
+      </section>
+    <% end %>
   </div>
 
   <%# The deck controls. Fixed to the bottom of the viewport, so the prompt to advance is visible
-      whatever the visitor has scrolled to. %>
-  <nav class="deck__nav" aria-label="Slides" data-no-advance>
+      whatever the visitor has scrolled to.
+
+      A one-slide run gets none: a disabled Next button and a single dot are controls for a deck
+      that does not exist. %>
+  <nav class="deck__nav" aria-label="Slides" data-no-advance <%= "hidden" if slides.size < 2 %>>
     <button type="button" class="deck__btn" data-reveal-target="back" data-action="reveal#back"
             aria-label="Previous slide">&larr;</button>
     <span class="deck__dots" aria-hidden="true">
-      <% 4.times do %><span class="dot" data-reveal-target="dot"></span><% end %>
+      <% slides.size.times do %><span class="dot" data-reveal-target="dot"></span><% end %>
     </span>
     <button type="button" class="deck__btn deck__btn--go" data-reveal-target="forward"
             data-action="reveal#next">Next &rarr;</button>

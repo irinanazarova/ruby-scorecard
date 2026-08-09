@@ -66,6 +66,9 @@ module Analyzer
 
     def own_columns
       [
+        # The pasted paragraph leads, because someone who typed one in came for that answer.
+        (target[:passage].present? ? Column.new(key: "passage", label: "Your paragraph", kind: :yours,
+                                                sublabel: "#{target[:passage].split.size} words") : nil),
         (target[:docs_url].present? ? Column.new(key: "docs", label: "Your docs", kind: :yours,
                                                  sublabel: host_of(target[:docs_url]),
                                                  href: target[:docs_url]) : nil),

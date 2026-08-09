@@ -30,7 +30,13 @@ module Analyzer
     end
 
     # Open items, most valuable first.
+    #
+    # A run that is only a pasted paragraph gets none. Every item here is advice about a site or a
+    # repo, and someone who pasted a paragraph asked about neither: telling them to ship a sitemap
+    # would be the page answering a question nobody put to it.
     def items
+      return [] if passage_only?
+
       list = training_items + retrieval_items + repo_items
       list.compact.sort_by { |item| IMPACT_ORDER.fetch(item.impact, 3) }
     end
@@ -38,6 +44,8 @@ module Analyzer
     # Things that are already true. Shown collapsed, because a visitor who did the work should see
     # it acknowledged rather than have it disappear into a green tick they have to hunt for.
     def settled
+      return [] if passage_only?
+
       out = []
       out << "The docs source is in a public repo, archived and licensed for inclusion." if code_open?
       out << "Common Crawl has this URL." if pass?("web_channel", "In Common Crawl")
@@ -263,6 +271,10 @@ module Analyzer
     # --- shared ---------------------------------------------------------------------------------
 
     def target = result("target") || {}
+
+    def passage_only?
+      target[:passage].present? && target[:docs_url].blank? && target[:repo].blank?
+    end
 
     def code_open?
       code = result("code_channel")

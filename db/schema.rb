@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_08_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_09_090000) do
   create_table "analyses", force: :cascade do |t|
     t.integer "cost_millicents", default: 0, null: false
     t.datetime "created_at", null: false
@@ -19,6 +19,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_08_120000) do
     t.string "input", null: false
     t.string "ip_hash"
     t.string "kind"
+    t.text "passage"
     t.string "repo"
     t.json "results"
     t.string "session_token", null: false

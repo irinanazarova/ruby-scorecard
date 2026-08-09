@@ -26,8 +26,7 @@ class AnalyzeJob < ApplicationJob
     analysis.update!(status: "running")
     broadcast_status(analysis)
 
-    target = Analyzer::Target.new(docs_url: analysis.docs_url, repo: analysis.repo)
-    run = Analyzer::Run.new(target, models: Analyzer::Memorization.available_models)
+    run = Analyzer::Run.new(target_for(analysis), models: Analyzer::Memorization.available_models)
     results = {}
     spent = 0
 
@@ -59,6 +58,15 @@ class AnalyzeJob < ApplicationJob
     Rails.logger.error("[analyze_job] #{e.class}: #{e.message}")
     analysis&.update(status: "failed", results: { error: "#{e.class}: #{e.message[0, 200]}" })
     broadcast_status(analysis) if analysis
+  end
+
+  # Rebuilds what the visitor filled in. Public and named so it can be tested on its own: this is
+  # the one place a new form field gets silently dropped, because every check downstream reads the
+  # target rather than the record. Adding the pasted paragraph and forgetting it here produced a
+  # finished run reporting "No testable prose found" about text typed out in front of us.
+  def target_for(analysis)
+    Analyzer::Target.new(docs_url: analysis.docs_url, repo: analysis.repo,
+                         passage: analysis.passage)
   end
 
   private

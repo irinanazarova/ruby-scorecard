@@ -216,6 +216,46 @@ class SlidesTest < ActiveSupport::TestCase
     assert_equal false, Analyzer::RecallGrid.new(target.merge("memorization" => broken)).controls_ok?
   end
 
+  # --- a pasted paragraph -----------------------------------------------------------------------
+
+  def pasted(words: 80)
+    { "target" => step(docs_url: nil, repo: nil, passage: (1..words).map { |i| "w#{i}" }.join(" ")) }
+  end
+
+  test "the paragraph leads the grid and carries its own length" do
+    probes = [{ provider: "Claude Opus", source: "passage", run: 31, verdict: "strong", offset: 0 }]
+    payload = step(summary: Analyzer::Memorization.summarize(probes),
+                   matrix: Analyzer::Memorization.matrix(probes), controls: [])
+
+    grid = Analyzer::RecallGrid.new(pasted.merge("memorization" => payload))
+    first = grid.columns.first
+
+    assert_equal "Your paragraph", first.label
+    assert_equal "80 words", first.sublabel
+    assert_equal 31, grid.rows.first.cells["passage"].run
+  end
+
+  # A paragraph has no channels. Saying "one channel could not be checked" about a run that never
+  # had one reads as a fault in the tool rather than as a finding.
+  test "a paragraph-only run says nothing about channels" do
+    quiet = step(summary: { verdict: "none", best_run: 2, spans_tested: 1, probes: 3 })
+    answer = Analyzer::Verdict.new(pasted.merge("memorization" => quiet)).training_answer
+
+    assert_equal "No model reproduced this paragraph.", answer.headline
+    refute_match(/channel/i, answer.headline)
+    assert_match(/weak evidence/i, answer.caveat)
+  end
+
+  test "a paragraph-only run is given no advice about sites or repos" do
+    assert_empty Analyzer::Actions.new(pasted).items
+    assert_empty Analyzer::Actions.new(pasted).settled
+  end
+
+  test "the retrieval slide refuses to answer for a paragraph" do
+    answer = Analyzer::Verdict.new(pasted).retrieval_answer
+    assert_match(/pasted a paragraph/i, answer.headline)
+  end
+
   # Two nearly identical bars invite the room to ask why they disagree, which is not the question
   # you want from the audience.
   test "a reference that is the target's own repo is dropped from the grid" do

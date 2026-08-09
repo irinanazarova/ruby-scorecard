@@ -124,7 +124,7 @@ module Analyzer
     #
     # `probes` per cell is carried too: a cell reading 0 after three attempts and a cell reading 0
     # because it was never asked are different answers, and only one of them is evidence.
-    def self.matrix(results, sources: %w[docs repo])
+    def self.matrix(results, sources: %w[passage docs repo])
       tested = results.reject { |r| r[:error] }
       MODELS.values.map { |spec| spec[:label] }.filter_map do |label|
         rows = tested.select { |r| r[:provider] == label }

@@ -40,6 +40,7 @@ module Analyzer
     # --- question 1: retrieval -------------------------------------------------------------------
 
     def retrieval_answer
+      return passage_only_answer if passage_only?
       return no_docs_answer if target[:docs_url].blank?
 
       r = result("retrieval")
@@ -141,6 +142,14 @@ module Analyzer
     # No model recalled it. What that MEANS depends entirely on whether a path into a corpus is
     # even open, which is why the two channel checks exist.
     def null_recall_wording(mem, code, web)
+      # A paragraph has no channels to report on, and saying "one channel could not be checked"
+      # about a run that never had one reads as a fault in the tool.
+      if passage_only?
+        return { tone: :mixed, headline: "No model reproduced this paragraph.",
+                 detail: "Which is the common outcome even for text that is in a corpus.",
+                 caveat: probe_caveat(mem) }
+      end
+
       open_paths = [code, web].select { |state, _| state == :open }
 
       if open_paths.any?
@@ -171,6 +180,12 @@ module Analyzer
     # Still running. Say what is known, name what is still outstanding, and never pre-announce the
     # part that has not happened.
     def filling_training_wording(code, web)
+      if passage_only?
+        return { tone: :unknown, headline: "Asking every model for these exact words.",
+                 detail: "We show each one the opening of your paragraph and compare what it writes " \
+                         "next against the rest." }
+      end
+
       pending = []
       pending << "the web path" if web.first == :waiting
       pending << "model recall" if memorization_summary.nil?
@@ -241,7 +256,7 @@ module Analyzer
       return "it" if by.blank?
 
       key = by.max_by { |_source, summary| summary[:best_run].to_i }&.first
-      key.to_s == "repo" ? "your repo" : "your docs page"
+      { "repo" => "your repo", "passage" => "your paragraph" }.fetch(key.to_s, "your docs page")
     end
 
     # --- the two channels ------------------------------------------------------------------------
@@ -356,6 +371,18 @@ module Analyzer
       answer(key, state: :final, tone: :unknown, headline: "This check did not complete.",
              detail: error.to_s, cues: [])
     end
+
+    # Nothing on the agent-experience slide applies to a pasted paragraph: there is no URL to fetch
+    # and no repo to read. The deck drops the slide entirely, and this exists for the case where
+    # something renders it anyway.
+    def passage_only_answer
+      answer(:retrieval, state: :final, tone: :unknown,
+             headline: "Not checked. You pasted a paragraph, not a site.",
+             detail: "Retrieval is a property of something an agent can fetch. This run answers one " \
+                     "question: do the models already have these words.", cues: [])
+    end
+
+    def passage_only? = target[:passage].present? && target[:docs_url].blank? && target[:repo].blank?
 
     def no_docs_answer
       answer(:retrieval, state: :final, tone: :unknown,

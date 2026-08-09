@@ -258,6 +258,42 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
     assert_match "analysis-sync", response.body, "an in-flight page needs the fallback controller"
   end
 
+  # A paragraph is a target on its own, and half the page does not apply to it: there is no site to
+  # fetch and no repo to read. Rendering those slides anyway would tell the visitor they are on
+  # slide 3 of 4 with two slides of "nothing given to check" behind them.
+  test "a pasted paragraph runs on its own and drops the slides that do not apply" do
+    text = (1..80).map { |i| "word#{i}" }.join(" ")
+    post "/analyses", params: { passage: text }
+    analysis = Analysis.last
+
+    assert_equal text, analysis.passage
+    assert analysis.passage_only?
+    assert_nil analysis.docs_url
+
+    analysis.update!(status: "done", results: {
+      "memorization" => { "result" => { "summary" => {
+        "verdict" => "none", "best_run" => 3, "models_fired" => [], "models_strong" => [],
+        "spans_tested" => 1, "probes" => 3
+      } } }
+    })
+
+    get "/analyses/#{analysis.id}"
+    assert_response :success
+    assert_match "1 of 1", response.body, "a paragraph run is one slide, and says so"
+    assert_match "Model recall", response.body
+    assert_match "No model reproduced this paragraph", response.body
+    assert_match "The paragraph being checked", response.body, "the tested text must be visible"
+    refute_match "Agent experience", response.body
+    refute_match "Ship a sitemap.xml", response.body
+  end
+
+  test "a paragraph too short to split is refused before anything is created" do
+    post "/analyses", params: { passage: "far too short to probe" }
+    assert_redirected_to test_path
+    assert_match(/at least/, flash[:alert])
+    assert_equal 0, Analysis.count
+  end
+
   # The listed examples are the tour: clicking all four must never cost a visitor their allowance
   # or trip the per-IP limit, however cold the cache is.
   test "listed examples never consume the free allowance" do

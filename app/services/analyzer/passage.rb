@@ -17,6 +17,20 @@ module Analyzer
     TRUTH_WORDS = 60   # what we compare against, never shown to the model
     MIN_WORDS   = SEED_WORDS + TRUTH_WORDS + 40
 
+    # Pasted text is held to a lower bar than a fetched page, on purpose.
+    #
+    # MIN_WORDS exists because a PAGE has to be long enough to take a mid-document span: the opening
+    # of any docs page is boilerplate that would match for reasons unrelated to memory. A paragraph
+    # someone pasted has no boilerplate to skip past, so the only real requirement is that it can be
+    # split into something to show and something to compare against.
+    #
+    # 30 shown and 20 compared is the floor. Below that the comparison is too short to mean
+    # anything: the longest possible run would sit under the 15-word bar for half the reasons, and a
+    # probe that can only ever answer "no" is worse than refusing to run.
+    MIN_SEED  = 30
+    MIN_TRUTH = 20
+    MIN_PASTED_WORDS = MIN_SEED + MIN_TRUTH
+
     # Above this much HTML, a page that still yields almost no prose is client-rendered rather than
     # genuinely short, and those two cases deserve different answers.
     CLIENT_RENDERED_BYTES = 10_000
@@ -91,6 +105,29 @@ module Analyzer
         end
       end
       nil
+    end
+
+    # Text pasted straight into the form.
+    #
+    # Split from the START rather than from the middle, which is the opposite of what a page gets
+    # and is right for the same reason: the visitor chose these words, so there is no navigation or
+    # preamble to skip past, and moving the window would test something they did not ask about.
+    #
+    # A long paste is treated as a document and gets several spans; a short one is a single span
+    # sized to whatever is there.
+    def self.candidates_from_text(text, count: 2)
+      words = text.to_s.split
+      return [Result.new(ok: false, source_label: "your paragraph", total_words: words.size,
+                         error: "Only #{words.size} words; the probe needs #{MIN_PASTED_WORDS}.")] if words.size < MIN_PASTED_WORDS
+
+      return candidates(words.join(" "), "your paragraph", count: count) if words.size >= MIN_WORDS + 200
+
+      seed  = [SEED_WORDS, words.size - MIN_TRUTH].min
+      truth = [words.size - seed, TRUTH_WORDS].min
+
+      [Result.new(ok: true, source_label: "your paragraph", total_words: words.size, offset: 0,
+                  prefix: words.first(seed).join(" "),
+                  truth: words[seed, truth].join(" "))]
     end
 
     def self.candidates_from_url(url, count: 3)

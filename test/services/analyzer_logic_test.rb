@@ -143,6 +143,59 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
     assert_nil t.url
   end
 
+  # --- a pasted paragraph -----------------------------------------------------------------------
+
+  def paragraph(words) = (1..words).map { |i| "word#{i}" }.join(" ")
+
+  test "a pasted paragraph is a target on its own" do
+    t = Analyzer::Target.new(passage: paragraph(80))
+    assert t.valid?
+    assert t.passage_only?
+    assert_equal :passage, t.kind
+    assert_match(/80-word paragraph/, t.label)
+  end
+
+  # Below the floor the longest possible run sits under the 15-word bar, so the probe could only
+  # ever answer "no". Refusing is more honest than running it.
+  test "a paragraph too short to split is refused with the count" do
+    t = Analyzer::Target.new(passage: paragraph(20))
+    refute t.valid?
+    assert_match(/20 words/, t.error)
+    assert_match(/at least #{Analyzer::Passage::MIN_PASTED_WORDS}/, t.error)
+  end
+
+  # The cache key travels through logs and cache backends, so it carries a digest rather than
+  # whatever the visitor pasted.
+  test "the cache key digests the paragraph instead of carrying it" do
+    text = paragraph(80)
+    key = Analyzer::Target.new(passage: text).cache_key
+    refute_includes key, "word5"
+    assert_equal key, Analyzer::Target.new(passage: text).cache_key
+    refute_equal key, Analyzer::Target.new(passage: paragraph(81)).cache_key
+  end
+
+  test "pasted text is split from the start, not from the middle" do
+    words = (1..90).map { |i| "word#{i}" }
+    span = Analyzer::Passage.candidates_from_text(words.join(" ")).first
+
+    assert span.ok
+    assert_equal 0, span.offset
+    assert_equal "word1", span.prefix.split.first
+    assert_equal Analyzer::Passage::SEED_WORDS, span.prefix.split.size
+    assert_equal "word#{Analyzer::Passage::SEED_WORDS + 1}", span.truth.split.first,
+                 "the comparison must start exactly where the prefix ends"
+  end
+
+  # A short paste still has to leave something to compare against, so the seed shrinks rather than
+  # the truth vanishing.
+  test "a short paragraph shrinks the seed rather than the comparison" do
+    span = Analyzer::Passage.candidates_from_text(paragraph(55)).first
+
+    assert span.ok
+    assert_equal 35, span.prefix.split.size
+    assert_equal Analyzer::Passage::MIN_TRUTH, span.truth.split.size
+  end
+
   test "one box, split, still works for an old permalink" do
     assert_equal "rails/rails", Analyzer::Target.from_input("rails/rails").repo
     assert_equal "https://example.com/docs", Analyzer::Target.from_input("example.com/docs").url

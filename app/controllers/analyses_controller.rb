@@ -53,7 +53,7 @@ class AnalysesController < ApplicationController
 
     analysis = Analysis.create!(
       user: current_user, session_token: session_token,
-      input: target.label, docs_url: target.url, repo: target.repo,
+      input: target.label, docs_url: target.url, repo: target.repo, passage: target.passage,
       kind: target.kind.to_s, status: "pending", ip_hash: ip_hash, from_cache: cached
     )
     AnalyzeJob.perform_later(analysis.id)
@@ -92,10 +92,12 @@ class AnalysesController < ApplicationController
   # parsing twice let them disagree about what was being run.
   def build_target
     @build_target ||=
-      if params[:input].present? && params[:docs_url].blank? && params[:repo].blank?
+      if params[:input].present? && params[:docs_url].blank? && params[:repo].blank? &&
+         params[:passage].blank?
         Analyzer::Target.from_input(params[:input])
       else
-        Analyzer::Target.new(docs_url: params[:docs_url], repo: params[:repo])
+        Analyzer::Target.new(docs_url: params[:docs_url], repo: params[:repo],
+                             passage: params[:passage])
       end
   end
 

@@ -77,6 +77,18 @@
 .probe-form__hint { font-size: .8rem; color: var(--text-soft); line-height: 1.4; }
 .probe-form__submit { grid-column: 1 / -1; display: flex; align-items: center; gap: .8rem;
   flex-wrap: wrap; }
+
+/* Collapsed by default: most visitors are checking a site, and a third box open by default makes
+   the form read as three things you must fill in rather than three you may. */
+.probe-form__paste { grid-column: 1 / -1; }
+.probe-form__paste > summary { cursor: pointer; font-size: .85rem; font-weight: 650;
+  color: var(--link); }
+.probe-form__paste[open] > summary { margin-bottom: .5rem; }
+.probe-form textarea { width: 100%; padding: .8rem 1rem; font: inherit;
+  font-family: var(--font-mono, monospace); font-size: .9rem; line-height: 1.5;
+  border: 2px solid var(--line-strong); border-radius: var(--radius, 10px);
+  background: var(--surface); color: var(--text); resize: vertical; }
+.probe-form textarea:focus { outline: none; border-color: var(--accent); }
 .probe-form input[type="text"] {
   width: 100%; padding: .8rem 1rem; font: inherit; font-family: var(--font-mono, monospace);
   font-size: .95rem; border: 2px solid var(--line-strong);
@@ -142,6 +154,15 @@
   color: var(--text-soft); font-family: var(--font-grotesk, sans-serif); }
 .chip--docs { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
 .chip--repo { border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.chip--passage { border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
+
+/* The pasted text, shown rather than summarised: a probe you cannot see the input to is not
+   evidence of anything. */
+.deck__passage > summary { cursor: pointer; font-size: .85rem; color: var(--text-soft); }
+.deck__passage > summary:hover { color: var(--accent); }
+.deck__passage blockquote { margin: .5rem 0 0; padding: .8rem 1rem; background: var(--code-bg);
+  border-left: 3px solid var(--warn); border-radius: var(--radius, 10px); font-size: .9rem;
+  line-height: 1.6; white-space: pre-wrap; max-width: var(--measure, 68ch); }
 
 .status { padding: .6rem .9rem; border-radius: var(--radius, 10px);
   background: var(--code-bg); color: var(--text); font-size: .9rem; }
@@ -168,6 +189,9 @@
   display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; justify-content: center;
   padding: .5rem .8rem; border: 1px solid var(--line-strong); border-radius: 999px;
   background: var(--surface); box-shadow: 0 6px 24px rgb(0 0 0 / 18%); max-width: calc(100vw - 2rem); }
+/* The UA rule for [hidden] is `display: none` at element specificity, so the class above wins and a
+   hidden nav keeps rendering. Restate it. */
+.deck__nav[hidden] { display: none; }
 .deck__btn { font: inherit; font-size: .85rem; cursor: pointer; border-radius: 999px;
   border: 1px solid var(--line-strong); background: var(--bg); color: var(--text);
   padding: .3rem .8rem; }

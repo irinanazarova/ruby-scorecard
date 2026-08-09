@@ -24,11 +24,12 @@ module Analyzer
 
     BARE_HOST = %r{\A[\w.-]+\.[a-z]{2,}(/.*)?\z}i
 
-    attr_reader :url, :repo, :error, :docs_input, :repo_input
+    attr_reader :url, :repo, :passage, :error, :docs_input, :repo_input
 
-    def initialize(docs_url: nil, repo: nil)
+    def initialize(docs_url: nil, repo: nil, passage: nil)
       @docs_input = docs_url.to_s.strip
       @repo_input = repo.to_s.strip
+      @passage = passage.to_s.strip.presence
       resolve
     end
 
@@ -47,32 +48,62 @@ module Analyzer
 
     def docs? = url.present?
     def repo? = repo.present?
+    def passage? = passage.present?
+
+    # A run with nothing but a pasted paragraph answers ONE question, and half the page does not
+    # apply to it: there is no URL to fetch and no repo to read. The deck asks this to decide which
+    # slides to show rather than rendering two slides of "nothing given to check".
+    def passage_only? = passage? && !docs? && !repo?
 
     def kind
+      return :passage if passage_only?
       return :both if docs? && repo?
 
       docs? ? :url : :repo
     end
 
-    # What the run is called on screen and in the database. Both halves, because a result page that
-    # is titled with only one of them hides which repo the licence verdict came from.
-    def label = [url, repo].compact_blank.join("  +  ")
+    # What the run is called on screen and in the database. Every part, because a result page titled
+    # with only one of them hides which repo the licence verdict came from.
+    def label
+      parts = [url, repo].compact_blank
+      parts << "a #{passage.split.size}-word paragraph" if passage?
+      parts.join("  +  ")
+    end
 
-    def to_h = { docs_url: url, repo: repo, kind: kind, label: label, error: error }
+    def to_h
+      { docs_url: url, repo: repo, passage: passage, kind: kind, label: label, error: error }
+    end
 
-    # The key every per-check cache entry hangs off. Both halves, because the memorization probe now
-    # covers both and a run with a repo attached is not the same measurement as one without.
-    def cache_key = "#{url}|#{repo}"
+    # The key every per-check cache entry hangs off. Every part, because the memorization probe now
+    # covers all of them and a run with a repo attached is not the same measurement as one without.
+    # The paragraph is digested rather than included: it can be arbitrarily long, and a cache key
+    # carrying someone's text in the clear is a worse idea than a hash of it.
+    def cache_key = "#{url}|#{repo}|#{passage && Digest::SHA256.hexdigest(passage)[0, 16]}"
 
     private
 
     def resolve
-      if @docs_input.blank? && @repo_input.blank?
-        return @error = "Enter your documentation site, your repo, or both"
+      if @docs_input.blank? && @repo_input.blank? && @passage.blank?
+        return @error = "Enter your documentation site, your repo, or a paragraph to check"
       end
 
       resolve_docs
       resolve_repo unless @error
+      resolve_passage unless @error
+    end
+
+    # The probe shows a model the opening words and compares what it writes next against the rest,
+    # so a paragraph has to be long enough to be split in two. Below the floor there is nothing to
+    # compare against and the answer would always be "no recall", which is worse than refusing.
+    def resolve_passage
+      return if @passage.blank?
+
+      words = @passage.split.size
+      return if words >= Passage::MIN_PASTED_WORDS
+
+      @error = "That paragraph is #{words} words. The probe shows a model the opening words and " \
+               "compares what it writes next against the rest, so it needs at least " \
+               "#{Passage::MIN_PASTED_WORDS}."
     end
 
     def resolve_docs

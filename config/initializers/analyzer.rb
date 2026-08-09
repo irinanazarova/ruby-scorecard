@@ -22,11 +22,12 @@ module AnalyzerConfig
   RATE_LIMIT_PER_IP = { count: Integer(ENV.fetch("RATE_LIMIT_IP_COUNT", 10)), within: 5.minutes }.freeze
   RATE_LIMIT_PER_IP_DAILY = { count: Integer(ENV.fetch("RATE_LIMIT_IP_DAILY", 60)), within: 1.day }.freeze
 
-  # 2 spans x 2 sources x 3 models. The cap is a spend guard, but set it too low and it silently
-  # costs accuracy instead of money: at 6 calls the third model squeezed out the third span, and a
-  # page that scores a 91-word verbatim run from its repo source came back "partial" at 10. Spans
-  # are where the signal is, so the cap must leave room for every one of them on BOTH sources.
-  MAX_MODEL_CALLS_PER_ANALYSIS = Integer(ENV.fetch("MAX_MODEL_CALLS_PER_ANALYSIS", 12))
+  # 2 spans x up to 3 sources x 3 models. The cap is a spend guard, but set it too low and it
+  # silently costs accuracy instead of money: at 6 calls the third model squeezed out the third
+  # span, and a page that scores a 91-word verbatim run from its repo source came back "partial" at
+  # 10. Spans are where the signal is, so the cap must leave room for every one of them on every
+  # source the visitor actually filled in.
+  MAX_MODEL_CALLS_PER_ANALYSIS = Integer(ENV.fetch("MAX_MODEL_CALLS_PER_ANALYSIS", 15))
 
   # Wall-clock ceiling for the whole memorization step. The call cap bounds SPEND; this bounds TIME,
   # which the call cap cannot — per-call timeouts multiply, and a run that looks healthy per-probe

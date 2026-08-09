@@ -133,8 +133,11 @@ module Analyzer
     def build_passages
       docs = @target.url ? tag(Passage.candidates_from_url(@target.url, count: SPANS_PER_SOURCE), :docs) : []
       repo = @target.repo ? tag(repo_passages, :repo) : []
+      # The pasted paragraph goes FIRST and is never interleaved away. It is the one thing the
+      # visitor typed out by hand, so it must not be the source the call budget runs out on.
+      pasted = @target.passage ? tag(Passage.candidates_from_text(@target.passage, count: SPANS_PER_SOURCE), :passage) : []
 
-      interleave(docs, repo)
+      pasted + interleave(docs, repo)
     end
 
     def tag(passages, source)
