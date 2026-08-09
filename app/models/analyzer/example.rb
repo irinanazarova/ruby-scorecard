@@ -84,6 +84,16 @@ module Analyzer
               "rather than its docs: Claude and GPT-5.5 each continued it for 50+ words on two " \
               "separate measurements." },
 
+      # The two channels splitting inside ONE product, which is the cleanest version of the argument
+      # available: Stripe's docs are not in any public repo and its SDKs are.
+      { docs: "https://docs.stripe.com/payments/payment-intents",
+        repo: "stripe/stripe-ruby",
+        file: "lib/stripe/stripe_client.rb",
+        label: "Stripe",
+        note: "Closed docs, open SDK. Three prose-rich docs pages give two or three words on every " \
+              "model; the Ruby client's own source clears the recall bar. Same product, and only " \
+              "one channel delivers." },
+
       { docs: "https://guides.rubyonrails.org/active_support_core_extensions.html",
         repo: "rails/rails",
         file: "activesupport/lib/active_support/core_ext/object/blank.rb",

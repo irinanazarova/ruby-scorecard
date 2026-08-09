@@ -67,7 +67,12 @@ module Analyzer
       # 4. Recall. Costs money, so it is last and strictly capped.
       step(:memorization) { memorization_payload }.then { |p| block&.call(:memorization, p) }
 
-      # 5. The pages that are known to be in the corpus, so the recall chart has a scale. Cached for
+      # 5. Why, if anything fired: how widely the winning passage is duplicated in public code.
+      #    Runs only when there is recall to explain, because the code-search endpoint allows ten
+      #    requests a minute for the whole app and an unexplained null needs no explaining.
+      step(:copies) { copies_payload }.then { |p| block&.call(:copies, p) }
+
+      # 6. The pages that are known to be in the corpus, so the recall chart has a scale. Cached for
       #    30 days apiece, so this is free on all but one run a month.
       step(:references, key: "-") { { items: References.all(models: @models) } }
         .then { |p| block&.call(:references, p) }
@@ -113,6 +118,22 @@ module Analyzer
         matrix: Memorization.matrix(probes),
         skipped: passages.reject(&:ok).map { |p| { source: p.source, error: p.error } },
         controls: controls }
+    end
+
+    # The passage that actually fired, run through the copy count, so the page can say WHY a model
+    # has this rather than only that it does. Attributed to the winning probe specifically: a run
+    # with three passages and one hit should explain the hit, not the average.
+    def copies_payload
+      mem = @results.dig(:memorization, :result)
+      return { skipped: "the probe did not run" } unless mem.is_a?(Hash) && mem[:probes]
+
+      best = Array(mem[:probes]).reject { |p| p[:error] }.max_by { |p| p[:run].to_i }
+      return { skipped: "no recall to explain" } if best.nil? || best[:run].to_i < Copies::MIN_RUN
+
+      found = Copies.for("#{best[:prefix]} #{best[:truth]}")
+      return { skipped: "no distinctive phrase to search for" } if found.nil?
+
+      found.merge(source: best[:source], source_label: best[:source_label], run: best[:run])
     end
 
     # Controls are byte-identical on every run, so paying for them per analysis is pure waste: they

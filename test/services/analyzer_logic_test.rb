@@ -135,6 +135,43 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
     end
   end
 
+  # --- why a model has the text -----------------------------------------------------------------
+  #
+  # The count is only meaningful if the phrase we search for is a real substring of the passage. The
+  # first version assembled the first eight word-like tokens found anywhere in the span, producing
+  # "res.status function if 100 code throw new status": a string in no file on earth, which returned
+  # zero copies for a file vendored into a million node_modules.
+
+  test "the searched phrase is always a literal substring of the passage" do
+    [ "res.status = function status(code) { if (code < 100) { throw new RangeError(\'Status code must be an integer.\') } }",
+      "class Array # An array is blank if it\'s empty: # # @return [true, false] alias_method :blank?, :empty?",
+      "We as members, contributors, and leaders pledge to make participation in our community a " \
+      "harassment-free experience for everyone, regardless of age or body size" ].each do |text|
+      phrase, = Analyzer::Copies.phrase_for(text)
+      next if phrase.nil?
+
+      assert text.include?(phrase.sub(/\A\. /, "")),
+             "#{phrase.inspect} is not in the passage, so any count for it is meaningless"
+    end
+  end
+
+  # A phrase we cannot vouch for is worse than none: a mangled query returns zero, and a zero beside
+  # a verbatim hit reads as "nobody else has this" rather than "we could not form a query".
+  test "an unsearchable passage yields no phrase rather than a misleading zero" do
+    phrase, kind = Analyzer::Copies.phrase_for("}); }; ok(); => {} @x.y(&z) ||= [1,2] #=> nil ~~~ %w[]")
+    assert_nil phrase
+    assert_nil kind
+  end
+
+  test "prose is searched by its opening sentence and code by its most distinctive string" do
+    prose = "The i18n API is primarily intended for translating user facing text within the " \
+            "application, and you should use it for that purpose wherever you can."
+    assert_equal :prose, Analyzer::Copies.phrase_for(prose).last
+
+    code = "if (code < 100 || code > 999) { throw new RangeError(\'Status code must be an integer.\') }"
+    assert_equal :code, Analyzer::Copies.phrase_for(code).last
+  end
+
   test "a pinned example file wins over the picker" do
     assert_equal "lib/response.js", Analyzer::Example.pinned_file("expressjs/express")
     assert_nil Analyzer::Example.pinned_file("some/unmeasured-repo")

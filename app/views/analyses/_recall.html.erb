@@ -83,6 +83,47 @@
       </p>
     <% end %>
 
+    <%# Why the models have it, when they do. Recall on its own is a fact with no handle on it; the
+        thing a visitor can act on is that the text is duplicated, because duplication is what the
+        study found predicts recall. %>
+    <% why = payloads.dig("copies", :result) %>
+    <% if why.present? && why[:skipped].blank? %>
+      <section class="why">
+        <h3 class="why__title">Why the models have this</h3>
+
+        <% if why[:count].nil? %>
+          <p class="why__lead">The duplication check could not run just now, which is a fact about
+          our GitHub rate limit rather than about your text.</p>
+        <% elsif why[:count].to_i.positive? %>
+          <p class="why__lead">
+            The passage that fired appears in <strong><%= number_with_delimiter(why[:count]) %></strong>
+            public <%= "repository".pluralize(why[:count]) %>, none of them forks of each other.
+          </p>
+          <ul class="why__repos">
+            <% Array(why[:repos]).each do |repo| %>
+              <li><a href="<%= repo[:url] %>" rel="noopener"><%= repo[:name] %></a></li>
+            <% end %>
+            <li><a href="<%= why[:search_url] %>" rel="noopener">see the search on GitHub &rarr;</a></li>
+          </ul>
+          <p class="why__note">
+            Copies are what recall tracks: in our 168-repo study the number of independent copies
+            predicted verbatim recall (&rho; +0.70) and stars did not (&rho; +0.28).
+            <a href="/learn#copies">The working &rarr;</a>
+          </p>
+        <% else %>
+          <p class="why__lead">No other public repository carries this passage.</p>
+          <p class="why__note">Which makes the recall harder to explain, not easier to dismiss. This
+          search covers public code only, so text duplicated across the web scores zero here.
+          <a href="/learn#copies">What copies predict &rarr;</a></p>
+        <% end %>
+
+        <p class="why__phrase">
+          Searched for the <%= why[:kind].to_s == "code" ? "most distinctive string in" : "opening of" %>
+          the passage that fired: <code><%= why[:phrase] %></code>
+        </p>
+      </section>
+    <% end %>
+
     <p class="recall__caveat">
       A null result is weak evidence. Models memorize a fraction of what they read, so an empty row
       does not prove your text is absent from any corpus. The reference columns are there so an
