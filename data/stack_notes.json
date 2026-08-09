@@ -1,0 +1,21 @@
+{
+  "_comment": "Hand-curated reasons for repos absent from The Stack v3 train set, keyed by repo slug. scripts/stack_check.rb writes the observed facts to data/stack.json and never touches this file; this file records WHY when the reason took human digging (opt-out issues, private-until dates). A repo missing from both files' explanations renders as 'not in the set, reason not established', never as a guessed cause.",
+  "rspec/rspec.github.io": {
+    "reason": "opt-out",
+    "note": "The rspec org opted out of The Stack; the whole org is absent from v3.",
+    "url": "https://github.com/bigcode-project/opt-out-v2/issues/985"
+  },
+  "bridgetownrb/bridgetown": {
+    "reason": "opt-out",
+    "note": "The bridgetownrb org opted out of The Stack; the whole org is absent from v3.",
+    "url": "https://github.com/bigcode-project/opt-out-v2/issues/3734"
+  },
+  "ruby/ruby": {
+    "reason": "unexplained",
+    "note": "170 other ruby-org repos are in the v3 train set, ruby/ruby is not, and no opt-out is on record. The Ruby License is not on the Blue Oak permissive list, so file-level license filtering is the plausible cause, but the pipeline's actual decision is not observable from outside."
+  },
+  "basecamp/fizzy": {
+    "reason": "post-cutoff",
+    "note": "Public since 2025-12-02, after the v3 crawl cutoff of 2025-08-07. The GitHub created_at (2024-06-21) predates the cutoff because the repo existed privately; a private repo is invisible to the crawl."
+  }
+}

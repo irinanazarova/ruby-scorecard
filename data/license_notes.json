@@ -1,10 +1,26 @@
 {
-  "_comment": "Hand-verified license readings, keyed by repo slug. GitHub's API collapses every license it cannot identify into spdx_id NOASSERTION (name 'Other'), so a source-available license and a bespoke permissive one look identical in the metadata. Where we opened the license file ourselves, the real terms are recorded here. `stack_eligible` overrides the metadata-derived verdict: the corpus builders scan license TEXT, not GitHub's label.",
+  "_comment": "Hand-verified license readings, keyed by repo slug. GitHub's API collapses every license it cannot identify into spdx_id NOASSERTION (name 'Other'), so a source-available license and a bespoke permissive one look identical in the metadata. Where we opened the license file ourselves, the real terms are recorded here. Since data/stack.json records OBSERVED Stack v3 membership, these readings explain a verdict rather than decide it; `stack_eligible` remains as the forward-looking call for the next snapshot and as the fallback when a repo has no observed answer.",
   "basecamp/fizzy": {
     "actual": "O'Saasy License Agreement",
     "class": "source-available",
     "file": "LICENSE.md",
-    "note": "MIT-style grant plus a clause forbidding use as a competing hosted/SaaS product, so it is not permissive.",
+    "note": "MIT-style grant plus a clause forbidding use as a competing hosted/SaaS product, so it is not permissive. Went public 2025-12-02, after the Stack v3 crawl cutoff (2025-08-07), so its absence from v3 is timing; the license would keep its files out of the permissive set in the next snapshot regardless.",
+    "stack_eligible": false,
+    "read": "2026-08"
+  },
+  "rubygems/guides": {
+    "actual": "CC-BY-SA (Creative Commons Attribution-ShareAlike)",
+    "class": "content",
+    "file": "CC-LICENSE",
+    "note": "README: article content is CC, example code is MIT. GitHub cannot match the CCPL text, hence NOASSERTION, and share-alike terms make file-level keeping a judgment call only the corpus itself can settle.",
+    "stack_eligible": true,
+    "read": "2026-08"
+  },
+  "karafka/wiki": {
+    "actual": "custom, 'All Rights Reserved' for original wiki content",
+    "class": "proprietary",
+    "file": "LICENSE.md",
+    "note": "Original content is all-rights-reserved with permitted non-commercial use; third-party content (librdkafka, Kafka docs) is carved out under its own terms. By the text this is non-permissive; the v3 file-level scanner evidently read it differently, which is exactly why the observed answer outranks the reading.",
     "stack_eligible": false,
     "read": "2026-08"
   }

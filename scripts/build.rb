@@ -29,6 +29,10 @@ swh_path = File.join(ROOT, "data", "swh.json")
 swh = File.exist?(swh_path) ? JSON.parse(File.read(swh_path)) : {}
 ln_path = File.join(ROOT, "data", "license_notes.json")
 license_notes = File.exist?(ln_path) ? JSON.parse(File.read(ln_path)).reject { |k, _| k.start_with?("_") } : {}
+stack_path = File.join(ROOT, "data", "stack.json")
+stack = File.exist?(stack_path) ? JSON.parse(File.read(stack_path)).reject { |k, _| k.start_with?("_") } : {}
+sn_path = File.join(ROOT, "data", "stack_notes.json")
+stack_notes = File.exist?(sn_path) ? JSON.parse(File.read(sn_path)).reject { |k, _| k.start_with?("_") } : {}
 
 # Evil Martians favicon set (+ the martian used as the footer lurker), self-hosted at the site root.
 DIST = File.join(ROOT, "dist")
@@ -38,9 +42,9 @@ FileUtils.mkdir_p(DIST)
   FileUtils.cp(src, File.join(DIST, f)) if File.exist?(src)
 end
 
-# Publish the long-form guide alongside the scorecard so "read more" links resolve at /guide.
-guide_src = File.join(ROOT, "docs", "how-devtooling-gets-into-training-data.html")
-FileUtils.cp(guide_src, File.join(DIST, "guide.html")) if File.exist?(guide_src)
+# The long-form guide used to be generated here into dist/guide.html. It was folded into /learn,
+# which is rendered by Rails because every result on /test deep-links into its anchors. Nothing to
+# copy: "read more" links below point at /learn, and routes.rb 301s the old /guide URL there.
 
 OK  = '<span class="ok" title="yes">&#10003;</span>'
 BAD = '<span class="bad" title="no">&#10007;</span>'
@@ -97,65 +101,101 @@ def cov_cell(c, scoped: false)
 end
 
 # ---- Training-channel helpers ----
-# Code channel: are the docs in a public repo whose license does not exclude them? That puts the
-# Markdown in The Stack and bypasses the web quality filter. The Stack v2/v3 keep `permissive` AND
-# `no_license` files and drop only `non_permissive` (copyleft, proprietary), so an absent license is
-# not a disqualifier; v1 was stricter. The web gates (Common Crawl, quality) are then secondary and muted.
+# Code channel: is the docs repo actually in The Stack v3 train set? That is an OBSERVED fact, not
+# an inference: scripts/stack_check.rb asks the official "Am I in The Stack?" index and records the
+# answer in data/stack.json. v3 is a direct GitHub crawl (cutoff 2025-08-07), license-filtered per
+# file: permissive (Blue Oak list) and unlicensed files are kept, non-permissive files are dropped.
+# The per-file decisions are not reproducible from outside, and they surprise in both directions
+# (karafka/wiki's all-rights-reserved text is in; karafka/karafka's LGPL is out; sidekiq's LGPL is
+# in), which is exactly why the verdict must come from the observed list, with the license reading
+# kept as the explanation and as the forecast for the next snapshot.
 #
-# The cell shows the license string GitHub's API actually returns, verbatim, because that string is
-# what most tooling reads and it is lossier than it looks: every license GitHub cannot identify comes
-# back as `NOASSERTION` ("Other"), so a bespoke permissive license and a source-available one that
-# forbids commercial hosting are indistinguishable in the metadata. Where we opened the license file
-# ourselves, data/license_notes.json carries the real terms and overrides the verdict.
+# The cell still shows the license string GitHub's API returns, verbatim, because that string is
+# what most tooling reads and it is lossier than it looks: every license GitHub cannot identify
+# comes back as `NOASSERTION` ("Other"). Where we opened the license file ourselves,
+# data/license_notes.json carries the real terms; data/stack_notes.json carries hand-verified
+# reasons for absences (opt-outs, private-until dates). A repo with no observed answer falls back
+# to the license inference and says so in the tooltip.
 GH_META = { nil => "(no license file)", "NOASSERTION" => "NOASSERTION" }.freeze
 NOASSERT_TIP = "GitHub's API reports spdx_id NOASSERTION (name \"Other\") for every license it cannot " \
                "identify, so custom, proprietary, and source-available licenses all look the same here"
+V3_TIP = "The Stack v3 train set (a direct GitHub crawl, cutoff 2025-08-07, license-filtered per " \
+         "file), checked against the official Am-I-in-The-Stack index"
 
-def cell_code(rp, note = nil)
+def cell_code(rp, note = nil, st = nil, snote = nil)
   return %(<span class="cc-na" title="no public docs repo found">&mdash;</span>) unless rp && rp["docs_repo"]
 
   raw = rp["docs_license"]
   label = GH_META.fetch(raw, raw)
   repo = esc(rp["docs_repo"])
-  in_stack = code_in_stack?(rp, note)
+  lic_html = note ? %(#{esc(label)} <em>= #{esc(note["actual"])}</em>) : esc(label)
+  cls = note ? "sub lic lic--read" : (raw == "NOASSERTION" ? "sub lic lic--vague" : "sub lic")
+  reading = note ? " Reading #{esc(note["file"])}: #{esc(note["actual"])} (#{esc(note["class"])}). #{esc(note["note"])}" : ""
 
-  if note
-    # Verified by reading the license text: show what GitHub says, and what it really is.
-    tip = "GitHub metadata says #{label}. Reading #{esc(note["file"])} in #{repo}: #{esc(note["actual"])} " \
-          "(#{esc(note["class"])}). #{esc(note["note"])}"
-    verdict = in_stack ? OK : BAD
-    return verdict + %(<span class="sub lic lic--read" title="#{tip}">#{esc(label)} <em>= #{esc(note["actual"])}</em></span>)
+  case st && st["in_stack"]
+  when true
+    tip = "Observed: github.com/#{repo} is in #{V3_TIP}. GitHub metadata says #{esc(label)}.#{reading}"
+    OK + %(<span class="#{cls}" title="#{tip}">#{lic_html}</span>)
+  when false
+    why, sub = absence_reason(st, snote)
+    tip = "Observed: github.com/#{repo} is NOT in #{V3_TIP}. #{why}#{reading}"
+    BAD + %(<span class="#{cls}" title="#{tip}">#{sub || lic_html}</span>)
+  else
+    # No observed answer yet: infer from the license and say so, never dressing a guess as a fact.
+    verdict = code_in_stack?(rp, note)
+    tip = if note
+            "Not yet checked against the v3 index; inferred from the license text.#{reading}"
+          elsif raw.nil?
+            "Not yet checked against the v3 index. GitHub reports no license file for #{repo}; " \
+            "The Stack keeps unlicensed files, so the docs would qualify once crawled"
+          elsif raw == "NOASSERTION"
+            "Not yet checked against the v3 index. #{NOASSERT_TIP}. We have not read #{repo}'s " \
+            "license text, so its terms are unverified"
+          else
+            "Not yet checked against the v3 index; inferred from GitHub's reported license, #{esc(label)}"
+          end
+    (verdict ? OK : BAD) + %(<span class="#{cls}" title="#{tip}">#{lic_html}</span>)
   end
-
-  tip = if raw.nil?
-          "GitHub reports no license file for #{repo}; The Stack v2/v3 keep no_license files"
-        elsif raw == "NOASSERTION"
-          "#{NOASSERT_TIP}. We have not read #{repo}'s license text, so its terms are unverified"
-        else
-          "GitHub reports #{esc(label)} for #{repo}"
-        end
-  cls = raw == "NOASSERTION" ? "sub lic lic--vague" : "sub lic"
-  (in_stack ? OK : BAD) + %(<span class="#{cls}" title="#{tip}">#{esc(label)}</span>)
 end
 
-# A verified reading of the license text beats GitHub's label: the corpus builders scan the text too.
+# Why is a repo not in the set? Hand-verified reasons (data/stack_notes.json) beat the automated
+# created-after-cutoff flag, which itself beats silence; an absence with no established reason says
+# so instead of blaming the license. Returns [tooltip sentence, optional cell label override].
+def absence_reason(st, snote)
+  if snote && snote["reason"] == "opt-out"
+    [%(#{esc(snote["note"])} (#{esc(snote["url"])})), "opted out"]
+  elsif snote && snote["reason"] == "post-cutoff"
+    [esc(snote["note"]), "after cutoff"]
+  elsif snote
+    [esc(snote["note"]), nil]
+  elsif st["post_cutoff"]
+    ["The repo was created #{esc(st["created"])}, after the crawl cutoff, so no license could have " \
+     "put it in this snapshot.", %(after cutoff)]
+  else
+    ["The reason is not established; the license reading below is the best predictor.", nil]
+  end
+end
+
+# Fallback for repos with no observed answer: a verified reading of the license text beats
+# GitHub's label, and the hand-curated docs_in_stack call is last.
 def code_in_stack?(rp, note = nil)
   return note["stack_eligible"] unless note.nil? || note["stack_eligible"].nil?
 
   rp && rp["docs_in_stack"] == "yes"
 end
 
-# Code channel, collection step: The Stack is built from the Software Heritage archive, so a
-# permissive docs repo only reaches the code corpus if SWH has actually collected it.
+# Collection evidence: The Stack v2 was built from the Software Heritage archive, so SWH decided
+# collection for v2. v3 crawls GitHub directly (GH Archive + the SWH graph), so for v3 this column
+# is supporting evidence rather than the gate; the observed-membership column is the verdict.
 def cell_swh(sw, rp)
   return %(<span class="cc-na" title="no public docs repo found">&mdash;</span>) unless rp && rp["docs_repo"]
   return %(<span class="cc-na" title="not checked yet">&mdash;</span>) if sw.nil? || sw["archived"].nil?
 
   slug = esc(sw["repo"])
   if sw["archived"]
-    %(<span class="ok" title="github.com/#{slug} is in the Software Heritage archive, the source The Stack is built from">&#10003;</span>)
+    %(<span class="ok" title="github.com/#{slug} is in the Software Heritage archive, the source The Stack v2 was built from (v3 crawls GitHub directly)">&#10003;</span>)
   else
-    %(<span class="bad" title="Software Heritage has no record of github.com/#{slug}; request archival at archive.softwareheritage.org/save/">&#10007;</span><span class="sub">not collected</span>)
+    %(<span class="bad" title="Software Heritage has no record of github.com/#{slug}; SWH-built corpora like The Stack v2 never saw it. Request archival at archive.softwareheritage.org/save/">&#10007;</span><span class="sub">not collected</span>)
   end
 end
 
@@ -214,6 +254,8 @@ neg         = rows.count { |r| r["content_neg"] }
 md          = rows.count { |r| r["md_route"] }
 sm          = rows.count { |r| r["sitemap"] }
 blocked     = rows.select { |r| r["robots_ai"] == "block" || r["bot_fetch"] == "block" }.map { |r| r["name"] }
+stk_checked = stack.values.count { |v| !v["in_stack"].nil? }
+stk_in      = stack.values.count { |v| v["in_stack"] }
 
 # ---- table rows ----
 present_cats = CAT_ORDER.select { |c| rows.any? { |r| r["category"] == c } }
@@ -226,18 +268,24 @@ present_cats.each do |cat|
     sw = swh[r["name"]]
     qs = quality_sample[r["name"]]
     note = rp && license_notes[rp["docs_repo"]]
-    # When the docs already reach The Stack via a permissive repo, the web gates are secondary: mute
-    # them. A repo Software Heritage has verifiably not collected is not in The Stack, so it keeps
-    # the web gates live.
-    in_code = code_in_stack?(rp, note) && !(sw && sw["archived"] == false)
+    st = stack[r["name"]]
+    snote = rp && stack_notes[rp["docs_repo"]&.downcase]
+    # When code from the docs repo is observed in The Stack v3, the web gates are secondary: mute
+    # them. Without an observed answer, fall back to the license inference, and let a verified SWH
+    # absence keep the web gates live (an uncollected repo never reached the v2 corpus).
+    in_code = if st && !st["in_stack"].nil?
+                st["in_stack"]
+              else
+                code_in_stack?(rp, note) && !(sw && sw["archived"] == false)
+              end
     mute = in_code ? " muted" : ""
-    muted_tip = in_code ? %( title="already eligible via the code corpus; the web gates are secondary here") : ""
+    muted_tip = in_code ? %( title="code from this repo is in The Stack v3, so the web gates are secondary here") : ""
     trows << %(<tr data-cat="#{slug(cat)}" data-name="#{esc(r["name"].downcase)}" data-cc="#{cov_sortkey(c)}">) \
       "<td class=\"res\"><a href=\"#{esc(r["docs"])}\">#{esc(r["name"])}</a></td>" \
       "<td>#{cell_robots(r)}</td><td>#{cell_bot(r)}</td>" \
       "<td>#{mark(r["sitemap"])}</td><td>#{mark(r["llms_txt"])}</td>" \
       "<td>#{mark(r["content_neg"])}</td><td>#{mark(r["md_route"])}</td>" \
-      "<td class=\"train train--code\">#{cell_code(rp, note)}</td>" \
+      "<td class=\"train train--code\">#{cell_code(rp, note, st, snote)}</td>" \
       "<td class=\"train\">#{cell_swh(sw, rp)}</td>" \
       "<td class=\"train cc#{mute}\"#{muted_tip}>#{cov_cell(c, scoped: !r["cc_scope"].to_s.empty?)}</td>" \
       "<td class=\"train#{mute}\"#{muted_tip}>#{cell_quality(qs)}</td></tr>"
@@ -320,13 +368,14 @@ filter (kept at score&nbsp;&ge;&nbsp;3). Even counting each resource's <em>best<
 the best of five scores below&nbsp;2. The filter rewards educational prose and penalizes reference and code,
 exactly the docs developers need.</p>
 <p class="note">There is a way around it. Docs in a <strong>public repo</strong> reach
-the code corpus (<a href="https://huggingface.co/datasets/bigcode/the-stack-v2">The Stack</a>) and
-<strong>skip the quality filter entirely</strong>, the Training column shows which resources qualify. A
-permissive license is the safe choice, and a <em>missing</em> one is no barrier: The Stack v2 and v3 keep
-unlicensed files and drop only copyleft and proprietary ones. And
+the code corpus (<a href="https://huggingface.co/datasets/HuggingFaceCode/stack-v3-train">The Stack v3</a>,
+a direct GitHub crawl with an August 2025 cutoff) and <strong>skip the quality filter entirely</strong>;
+the "in The Stack v3" column shows the observed answer per docs repo. A permissive license is the safe
+choice, and a <em>missing</em> one is no barrier: v3 filters file by file, keeps permissive and unlicensed
+files, and drops only files whose detected license is non-permissive. And
 once a snippet is in public code and copied widely, models reproduce it verbatim: Supabase Auth and
 Resend's quickstart both <em>fail</em> this filter yet Claude recites them from memory.
-<a href="/guide">Read the full guide &rarr;</a></p>
+<a href="/learn#code-channel">Why the code channel decides this &rarr;</a></p>
 QUAL
 else
   ""
@@ -340,11 +389,16 @@ LICENSES = begin
   seen = rows.filter_map { |r| repos[r["name"]] }.select { |rp| rp["docs_repo"] }
   tally = seen.group_by { |rp| rp["docs_license"] }.transform_values(&:size).sort_by { |lic, cnt| [lic.nil? ? 1 : 0, -cnt] }
   vague = tally.to_h["NOASSERTION"].to_i
+  observed = stack.values.to_h { |v| [v["repo"].to_s.downcase, v["in_stack"]] }
   read = license_notes.map do |slug, nt|
+    outcome = case observed[slug.downcase]
+              when true  then "and the repo <strong>is</strong> observed in the v3 train set"
+              when false then "and the repo is observed <strong>absent</strong> from the v3 train set"
+              else "and the repo has no observed answer yet"
+              end
     %(<li><code>#{esc(slug)}</code> reports <strong>NOASSERTION</strong>, and its #{esc(nt["file"])} is the
       <strong>#{esc(nt["actual"])}</strong>: #{esc(nt["note"])} That makes it
-      <em>#{esc(nt["class"])}</em>, so the docs are #{nt["stack_eligible"] ? "still eligible for" : "<strong>not</strong> eligible for"}
-      the code corpus, which GitHub's label alone would never tell you.</li>)
+      <em>#{esc(nt["class"])}</em> by the text, #{outcome}.</li>)
   end.join("\n    ")
   items = tally.map do |lic, cnt|
     label = GH_META.fetch(lic, lic)
@@ -369,6 +423,16 @@ established by opening the file. Where we have done so:</p>
 <p class="note">This matters because the corpus builders read the license <em>text</em>, not GitHub's label:
 a repo that looks merely "custom" in the metadata can be firmly excluded, or firmly fine. Treat
 <code>NOASSERTION</code> as "unknown", never as "probably OK".</p>
+<p class="note"><strong>The reading predicts; the train set decides.</strong> The Stack v3 filters
+file by file with an automated scanner, and its decisions are observable only in the result:
+<code>karafka/wiki</code>, whose license text says "All Rights Reserved", is in the train set, while
+<code>karafka/karafka</code> (LGPL) is out and <code>sidekiq/sidekiq</code> (also LGPL) is in. So this page
+reports membership as measured against the official
+<a href="https://huggingface.co/spaces/HuggingFaceCode/in-the-stack">Am I in The Stack?</a> index and keeps
+the license reading as the explanation and the forecast for the next snapshot.
+<strong>Opting out works</strong>: the <code>rspec</code> and <code>bridgetownrb</code> orgs
+<a href="https://github.com/bigcode-project/opt-out-v2/issues/985">asked to be removed</a> and are absent
+from v3 org-wide, permissive licenses and all.</p>
 LIC
 end
 
@@ -404,7 +468,7 @@ PAGE = <<HTML
     Yet models rarely reach for them: across the open whichlang benchmark, 13 models picked Ruby
     <strong>0 times in 1,267 solutions</strong>. That is a discoverability problem, and it starts with the
     docs. We score #{n} ecosystem resources on whether agents can <strong>find</strong> them and whether
-    they would reach a model's <strong>training</strong> data. <a href="/guide">How docs get into training
+    they would reach a model's <strong>training</strong> data. <a href="/learn">How docs get into training
     &rarr;</a></p>
     <div class="stats">
       <stat-counter class="stat" value="#{llms}" total="#{n}"><b class="stat__num" data-ref="num">#{llms}/#{n}</b><span>ship an llms.txt</span></stat-counter>
@@ -424,12 +488,13 @@ PAGE = <<HTML
 (<span class="ok">&#10003;</span> good, <span class="bad">&#10007;</span> missing). Columns split into two
 questions: <strong>Retrieval</strong>, can an agent find the docs at request time, and
 <strong>Training</strong>, would they reach a model's corpus, either through the <strong>code corpus</strong>
-(docs in a public repo whose license is not copyleft, <em>and</em> which
-<a href="https://www.softwareheritage.org/">Software Heritage</a> has collected; The Stack is built from
-that archive, skipping the web filters) or the <strong>web corpus</strong>
-(Common Crawl coverage, then best-of-5 FineWeb-Edu quality). Where the code corpus already qualifies, the
-web cells are <span style="opacity:.45">dimmed</span> as secondary. Click any heading to sort;
-<a href="/guide">what each column means &rarr;</a></p>
+or the <strong>web corpus</strong> (Common Crawl coverage, then best-of-5 FineWeb-Edu quality). The code
+column is <strong>observed, not inferred</strong>: each docs repo is checked against the official
+<a href="https://huggingface.co/spaces/HuggingFaceCode/in-the-stack">Am I in The Stack?</a> index for
+<a href="https://huggingface.co/datasets/HuggingFaceCode/stack-v3-train">The Stack v3</a> train set, the
+corpus that skips the web filters (#{stk_in} of #{stk_checked} checked repos are in). Where code from the
+repo is already in, the web cells are <span style="opacity:.45">dimmed</span> as secondary. Click any heading to sort;
+<a href="/learn#glossary">what each column means &rarr;</a></p>
 
 <scorecard-table>
   <div class="controls">
@@ -454,8 +519,8 @@ web cells are <span style="opacity:.45">dimmed</span> as secondary. Click any he
       <th class="sortable" data-col="4">llms.txt <span class="arrow">&#9650;</span></th>
       <th class="sortable" data-col="5">content<br>negotiation <span class="arrow">&#9650;</span></th>
       <th class="sortable" data-col="6">.md<br>routes <span class="arrow">&#9650;</span></th>
-      <th class="sortable train" data-col="7">code corpus<br><span class="th-sub">docs repo license</span> <span class="arrow">&#9650;</span></th>
-      <th class="sortable train" data-col="8">Software<br>Heritage <span class="th-sub">repo collected</span> <span class="arrow">&#9650;</span></th>
+      <th class="sortable train" data-col="7">in The Stack v3<br><span class="th-sub">observed; docs repo license</span> <span class="arrow">&#9650;</span></th>
+      <th class="sortable train" data-col="8">Software<br>Heritage <span class="th-sub">archived (v2 source)</span> <span class="arrow">&#9650;</span></th>
       <th class="sortable train" data-col="9">Common<br>Crawl <span class="arrow">&#9650;</span></th>
       <th class="sortable train" data-col="10">quality<br><span class="th-sub">best of 5, &ge;3</span> <span class="arrow">&#9650;</span></th>
     </tr></thead>
@@ -538,9 +603,11 @@ shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; 
       the agentic benchmarks, where modern coding ability is measured; adding a language to an eval
       measurably improves models on it (<a href="https://github.com/nuprl/MultiPL-T">MultiPL-T</a>,
       <a href="https://arxiv.org/abs/2410.18957">Bridge-Coder</a>).</li>
-    <li>Grow Ruby's share of the training corpus. Code models also learn from curated GitHub archives
-      (Software Heritage &rarr; <a href="https://huggingface.co/datasets/bigcode/the-stack-v2">The Stack</a>),
-      where Ruby is ~6.8&nbsp;GB against Python's ~60 and JavaScript's ~65, and capability tracks that share.
+    <li>Grow Ruby's share of the training corpus. Code models also learn from curated GitHub corpora
+      (<a href="https://huggingface.co/datasets/HuggingFaceCode/stack-v3-train">The Stack v3</a> today;
+      <a href="https://huggingface.co/datasets/bigcode/the-stack-v2">v2</a> was built from Software
+      Heritage), where Ruby in v2 is ~6.8&nbsp;GB against Python's ~60 and JavaScript's ~65, and capability
+      tracks that share.
       Publish an open, idiomatic-Rails instruction dataset and contribute permissively-licensed Ruby to open
       corpora like <a href="https://huggingface.co/datasets/PleIAs/common_corpus">Common Corpus</a>;
       rebalancing a corpus toward under-represented languages measurably lifts them.</li>
@@ -566,8 +633,13 @@ shared conventions. Each layer shows its <strong>goal</strong> as a live gauge; 
 robots.txt parsed for AI user-agents (CCBot, GPTBot, ClaudeBot, Google-Extended) with
 <code>Disallow: /</code>; crawlability tested by fetching as CCBot (to catch Cloudflare/WAF blocks); content
 negotiation via <code>Accept: text/markdown</code>; <code>.md</code> routes and llms.txt checked for a 200.
-Software Heritage collection checked per docs repo via the archive's public
-<a href="https://archive.softwareheritage.org/api/">origin API</a>; a missing repo can be submitted at
+The Stack v3 membership checked per docs repo against the official
+<a href="https://huggingface.co/spaces/HuggingFaceCode/in-the-stack">Am I in The Stack?</a> index (one
+lookup per repo owner); absences are attributed only where the reason is verified (an opt-out issue, a
+repo public only after the 2025-08-07 crawl cutoff), and say "not established" otherwise.
+Software Heritage archival checked per docs repo via the archive's public
+<a href="https://archive.softwareheritage.org/api/">origin API</a> (SWH was the source of The Stack v2;
+v3 crawls GitHub directly); a missing repo can be submitted at
 <a href="https://archive.softwareheritage.org/save/">Save Code Now</a>.
 The language-choice figure is from the open whichlang benchmark (13 models, 1,267 classified solutions, 0
 Ruby; <a href="https://github.com/chad/whichlang">github.com/chad/whichlang</a>). That the same models write
@@ -586,7 +658,7 @@ and unblocking bots, is Layer 0.</p>
 <footer>
   <span class="label">Evil Martians</span>
   <p>Built by Evil Martians. A living scorecard, re-run the probes to update it. Read more: our
-  <a href="/guide">guide to how devtooling docs get into training data</a>, plus
+  <a href="/learn">guide to how devtooling docs get into training data</a>, plus
   <a href="https://evilmartians.com/chronicles/how-to-make-your-website-visible-to-llms">&ldquo;How to make
   your website visible to LLMs&rdquo;</a> and
   <a href="https://evilmartians.com/chronicles/3-rules-for-getting-ai-agents-to-find-use-and-not-exploit-your-devtool">&ldquo;3

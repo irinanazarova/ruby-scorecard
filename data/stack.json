@@ -1,0 +1,439 @@
+{
+  "Ruby (language)": {
+    "repo": "ruby/ruby",
+    "in_stack": false,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08",
+    "created": "2010-02-27"
+  },
+  "Rails Guides": {
+    "repo": "rails/rails",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Rails API": {
+    "repo": "rails/rails",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "RubyGems Guides": {
+    "repo": "rubygems/guides",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Bundler": {
+    "repo": "rubygems/bundler-site",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Hotwire": {
+    "repo": "hotwired/hotwire-site",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Turbo": {
+    "repo": "hotwired/turbo-site",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Stimulus": {
+    "repo": "hotwired/stimulus-site",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "ViewComponent": {
+    "repo": "ViewComponent/view_component",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Phlex": {
+    "repo": "yippee-fun/phlex.fun",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Ruby UI": {
+    "repo": "ruby-ui/ruby_ui",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Inertia Rails": {
+    "repo": "inertiajs/inertia-rails",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Lookbook": {
+    "repo": "lookbook-hq/lookbook",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Roda": {
+    "repo": "jeremyevans/roda",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Sinatra": {
+    "repo": "sinatra/sinatra.github.com",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Hanami": {
+    "repo": "hanami/guides",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Bridgetown": {
+    "repo": "bridgetownrb/bridgetown",
+    "in_stack": false,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08",
+    "created": "2020-04-07"
+  },
+  "Jekyll": {
+    "repo": "jekyll/jekyll",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Sequel": {
+    "repo": "jeremyevans/sequel",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "ROM": {
+    "repo": "rom-rb/rom-rb.org",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "dry-rb": {
+    "repo": "dry-rb/dry-rb.org",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Sidekiq": {
+    "repo": "sidekiq/sidekiq",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "AnyCable": {
+    "repo": "anycable/docs.anycable.io",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Kamal": {
+    "repo": "basecamp/kamal-site",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Sorbet": {
+    "repo": "sorbet/sorbet",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "RuboCop": {
+    "repo": "rubocop/rubocop",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "RSpec": {
+    "repo": "rspec/rspec.github.io",
+    "in_stack": false,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08",
+    "created": "2011-10-09"
+  },
+  "TestProf": {
+    "repo": "test-prof/test-prof",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "GraphQL Ruby": {
+    "repo": "rmosolgo/graphql-ruby",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Rodauth": {
+    "repo": "jeremyevans/rodauth",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Action Policy": {
+    "repo": "palkan/action_policy",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Shrine": {
+    "repo": "shrinerb/shrine",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Avo": {
+    "repo": "avo-hq/docs.avohq.io",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "ActiveAdmin": {
+    "repo": "activeadmin/activeadmin",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Ransack": {
+    "repo": "activerecord-hackery/ransack",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Pagy": {
+    "repo": "ddnexus/pagy",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Nokogiri": {
+    "repo": "sparklemotion/nokogiri.org",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Faraday": {
+    "repo": "lostisland/faraday",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Capistrano": {
+    "repo": "capistrano/capistrano",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Pry": {
+    "repo": "pry/pry.github.io",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Trailblazer": {
+    "repo": "trailblazer/website",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Rage": {
+    "repo": "rage-rb/website",
+    "in_stack": false,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08",
+    "created": "2025-10-13",
+    "post_cutoff": true
+  },
+  "Falcon": {
+    "repo": "socketry/falcon",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Karafka": {
+    "repo": "karafka/wiki",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "RubyLLM": {
+    "repo": "crmne/ruby_llm",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Brakeman": {
+    "repo": "presidentbeef/brakeman-site",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "imgproxy": {
+    "repo": "imgproxy/imgproxy-docs",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Vite Ruby": {
+    "repo": "ElMassimo/vite_ruby",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Flipper": {
+    "repo": "flippercloud/flipper",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "RubyEvents": {
+    "repo": "rubyevents/rubyevents",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Riding Rails": {
+    "repo": "rails/website",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Joe Masilotti": {
+    "repo": "joemasilotti/masilotti.com-bridgetown",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Ruby News": {
+    "repo": "ruby/www.ruby-lang.org",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Devise": {
+    "repo": "heartcombo/devise",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Pundit": {
+    "repo": "varvet/pundit",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "CanCanCan": {
+    "repo": "CanCanCommunity/cancancan",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Standard": {
+    "repo": "standardrb/standard",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Sentry": {
+    "repo": "getsentry/sentry-docs",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "New Relic": {
+    "repo": "newrelic/docs-website",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Datadog": {
+    "repo": "DataDog/documentation",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Rollbar": {
+    "repo": "rollbar/docs",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Scout APM": {
+    "repo": "scoutapp/scout_help_sphinx",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Skylight": {
+    "repo": "skylightio/skylight-docs",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "GitHub Actions": {
+    "repo": "github/docs",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Fly.io": {
+    "repo": "superfly/docs",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Railway": {
+    "repo": "railwayapp/docs",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "AWS Elastic Beanstalk": {
+    "repo": "awsdocs/aws-elastic-beanstalk-developer-guide",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "PlanetScale": {
+    "repo": "planetscale/docs",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Supabase": {
+    "repo": "supabase/supabase",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Neon": {
+    "repo": "neondatabase/website",
+    "in_stack": true,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08"
+  },
+  "Fizzy (37signals)": {
+    "repo": "basecamp/fizzy",
+    "in_stack": false,
+    "dataset": "the-stack-v3-train",
+    "checked": "2026-08",
+    "created": "2024-06-21"
+  },
+  "_meta": {
+    "dataset": "the-stack-v3-train",
+    "cutoff": "2025-08-07",
+    "source": "https://huggingfacecode-in-the-stack.hf.space (official checker backed by the train set repo list)"
+  }
+}

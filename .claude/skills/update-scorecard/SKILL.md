@@ -82,17 +82,37 @@ CC recommends the columnar index via Amazon Athena (needs AWS; not wired up here
 (`0/210`, `0/30` Opus 4.8, `4.2/5`) are **constants in `scripts/build.rb`** ("What we cannot find" and the
 "final boss" callout); update them there when the source benchmark is re-run.
 
+### Refresh the "in The Stack v3" column (observed membership)
+```bash
+ruby scripts/stack_check.rb   # official Am-I-in-The-Stack index -> data/stack.json
+ruby scripts/build.rb         # re-render (no asset rebuild needed)
+```
+This is the code-corpus verdict, and it is **observed, not inferred**: the official checker
+(huggingface.co/spaces/HuggingFaceCode/in-the-stack) is queried once per unique docs-repo OWNER and
+returns every repo of theirs in The Stack v3 train set. v3 is a **direct GitHub crawl** (GH Archive +
+the SWH graph, cutoff **2025-08-07**), license-filtered per file, and its per-file calls are not
+reproducible from outside; they surprise in both directions (karafka/wiki's all-rights-reserved text is
+in; karafka/karafka's LGPL is out; sidekiq/sidekiq's LGPL is in). Never override an observed answer
+with a license argument. Incremental by default, `--refresh` for the quarterly re-check; an API failure
+keeps previous answers, never fabricates a "no".
+
+For repos absent from the set, the script records `created` and flags `post_cutoff` automatically, but
+`created_at` cannot see private-until dates (basecamp/fizzy was created 2024, public 2025-12-02).
+Reasons that took human digging go in **`data/stack_notes.json`** (hand-curated, never script-written),
+keyed by repo slug: opt-outs with the issue URL (rspec #985, bridgetownrb #3734), private-until dates,
+or `"reason": "unexplained"` (ruby/ruby). An absence with no note renders as "reason not established".
+
 ### Refresh the Software Heritage column
 ```bash
 ruby scripts/swh_check.rb     # SWH origin lookups per docs repo -> data/swh.json
 ruby scripts/build.rb         # re-render (no asset rebuild needed)
 ```
 For each resource with a `docs_repo` in `data/repos.json`, this asks the Software Heritage archive
-whether the repo is collected (The Stack is built from that archive, so an uncollected repo never
-reaches the code corpus, whatever its license). Serial, ~1.2s between calls, one lookup per unique
-repo; the anonymous API allows ~120 requests/hour, so the full run fits. On a 429 it stops and keeps
-known answers; unknown values render as "not checked". A repo verifiably absent from SWH also keeps
-that row's web-gate cells live (unmuted) even when the license would qualify it for The Stack.
+whether the repo is collected. SWH was the source **The Stack v2** was built from and stays on the page
+as collection evidence and the one archival step a maintainer can trigger; for v3 it is no longer the
+gate (v3 crawls GitHub directly), so the observed-membership column above is the verdict. Serial,
+~1.2s between calls, one lookup per unique repo; the anonymous API allows ~120 requests/hour, so the
+full run fits. On a 429 it stops and keeps known answers; unknown values render as "not checked".
 
 ### Record what a license really says
 The code-corpus column prints GitHub's `license.spdx_id` **verbatim**, because that string is what
@@ -106,9 +126,11 @@ When you open a license file yourself, record it in `data/license_notes.json`, k
 {"owner/repo": {"actual": "...", "class": "source-available", "file": "LICENSE.md",
                 "note": "...", "stack_eligible": false, "read": "2026-08"}}
 ```
-`stack_eligible` overrides the metadata-derived verdict in both the code-corpus cell and the web-gate
-muting, since corpus builders scan license *text*, not GitHub's label. The file is curated by hand and
-never written by a script. Read the text before adding an entry; do not infer terms from the name.
+With observed membership in `data/stack.json`, a reading **explains** a verdict rather than deciding
+it; `stack_eligible` remains the forecast for the next snapshot and the fallback verdict for repos the
+index has no answer for. Do not restate the observed outcome in `note` (the page appends it). The file
+is curated by hand and never written by a script. Read the text before adding an entry; do not infer
+terms from the name.
 
 ### Update the benchmark figures
 The model benchmark and capability numbers come from the `whichlang` project. When it is re-run on new
