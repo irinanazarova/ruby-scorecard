@@ -232,7 +232,7 @@ PAGE = <<HTML
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Top Ruby Open Source Contributors &amp; Projects, 2026</title>
 <meta name="description" content="Who builds Ruby's open source: the top contributors (US and worldwide) ranked by 2026 Ruby-first commits, and the actively-maintained top Ruby projects with their maintainers. Built from the GitHub API by Evil Martians.">
-<script>(function(){try{var t=localStorage.getItem('rsc-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('rsc-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}})();</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg#{asset_q("favicon.svg")}">
 <link rel="icon" sizes="32x32" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">

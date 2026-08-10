@@ -49,8 +49,8 @@ def site_nav(current: nil, toggle: false)
   end.join("\n    ")
   switch = toggle ? <<~T.strip : ""
     <theme-toggle>
-          <button type="button" data-ref="button" class="theme-toggle" aria-pressed="false" aria-label="Toggle colour theme">
-            <span class="theme-toggle__dot"></span><span class="theme-toggle__label">Light</span>
+          <button type="button" data-ref="button" class="theme-toggle" aria-label="Colour theme: following your device. Click for light.">
+            <span class="theme-toggle__dot"></span><span class="theme-toggle__label">Auto</span>
           </button>
         </theme-toggle>
   T

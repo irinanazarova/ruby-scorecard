@@ -559,7 +559,7 @@ PAGE = <<HTML
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ruby &amp; Rails LLM Discoverability Scorecard</title>
 <meta name="description" content="A measured scorecard of how discoverable Ruby, Rails, and the wider ecosystem's documentation is to LLMs and AI coding agents, and what the community can do to move the needle.">
-<script>(function(){try{var t=localStorage.getItem('rsc-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}})();</script>
+<script>(function(){try{var t=localStorage.getItem('rsc-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}})();</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg#{asset_q("favicon.svg")}">
 <link rel="icon" sizes="32x32" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">

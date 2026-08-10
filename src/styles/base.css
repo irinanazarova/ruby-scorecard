@@ -125,6 +125,11 @@ theme-toggle { display: inline-flex; }
 }
 .theme-toggle:hover { border-color: var(--red); background: color-mix(in srgb, var(--red) 14%, transparent); }
 .theme-toggle__dot { width: .6em; height: .6em; border-radius: 50%; background: var(--red); }
+/* Hollow while following the device, solid once you have chosen. The label says which, but the dot
+   says whether a choice has been made at all, which is the part that is otherwise invisible. */
+.theme-toggle[data-state="auto"] .theme-toggle__dot {
+  background: transparent; box-shadow: inset 0 0 0 2px var(--red);
+}
 
 /* ---------- Sections ---------- */
 main { padding-bottom: clamp(4rem, 10vw, 7rem); }

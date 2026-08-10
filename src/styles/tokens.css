@@ -66,6 +66,17 @@
   --hero-soft: #b79caa;
 }
 
+/* The device's own preference, which is what a visitor gets until they touch the toggle.
+ *
+ * This block MUST carry every token [data-theme="dark"] carries. It was missing --hero-text, and
+ * that one is not cosmetic: light sets it to near-black and the hero background here is #0d0008, so
+ * anyone whose OS was in dark mode and who had never pressed the toggle read the front page's
+ * headline as black on black. The toggle fixed it, which is exactly why it went unnoticed — every
+ * person who checked had pressed it.
+ *
+ * Keep the two lists identical. A missing token does not fall back to the dark value; it falls back
+ * to the LIGHT one, which is the worst possible default on a dark background.
+ */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     --bg: var(--plum-ink);
@@ -75,12 +86,14 @@
     --text-soft: #c4a9b8;
     --line: #3a2231;
     --line-strong: #4f2f43;
+    --accent: var(--red);
     --link: #ff8a78;
     --ok: var(--olive-bright);
     --bad: #ff7a68;
     --warn: var(--orange);
     --code-bg: #2c1322;
     --hero-bg: #0d0008;
+    --hero-text: var(--cream);
     --hero-soft: #b79caa;
   }
 }
