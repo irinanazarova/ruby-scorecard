@@ -825,7 +825,7 @@
       "robots_note": "blocks gptbot",
       "bot_fetch": "block",
       "bot_code": "403",
-      "sitemap": true,
+      "sitemap": false,
       "llms_txt": false,
       "content_neg": false,
       "md_route": false,

@@ -220,11 +220,24 @@ end
 
 def has?(url) = status(url) == "200"
 
+# A declared sitemap counts, and is FETCHED rather than trusted.
+#
+# `Sitemap:` in robots.txt is the line CCBot follows, so the file need not sit at a conventional
+# path: six of the 93 pass on the declaration alone. But a declaration pointing at a 404 buys a
+# crawler nothing, and counting it rewards a line in a text file over a working sitemap.
+# driftingruby.com declares /sitemap.xml.gz, which 404s.
+#
+# Kept in step with Analyzer::Retrieval#sitemap, so the scorecard and /test cannot contradict each
+# other about the same site.
 def sitemap?(root)
   return true if has?("#{root}/sitemap.xml") || has?("#{root}/sitemap_index.xml")
 
   _headers, body = head_body("#{root}/robots.txt")
-  body.each_line.any? { |l| l.strip.downcase.start_with?("sitemap:") }
+  declared = body.each_line.filter_map do |line|
+    line.sub(/#.*/, "").strip.match(/\Asitemap:\s*(\S+)\z/i)&.[](1)
+  end.uniq.first(3)
+
+  declared.any? { |u| has?(u) }
 end
 
 def content_neg?(docs_url)
