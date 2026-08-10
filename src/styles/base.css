@@ -289,6 +289,9 @@ tr.grp td { left: 0; }
 tbody tr:not(.grp):hover { background: var(--bg-warm); }
 tr[hidden] { display: none; }
 
+/* Rails-products table: the blurb wraps inside the sticky product column instead of widening it. */
+.products td.res .sub { white-space: normal; max-width: 30ch; }
+
 .ok { color: var(--ok); font-weight: 700; }
 .bad { color: var(--bad); font-weight: 700; }
 .warn { color: var(--warn); font-weight: 700; font-family: var(--font-mono); font-size: .8em; }

@@ -401,6 +401,156 @@ org-wide. Where we read a license file ourselves, that row's tooltip carries the
 LIC
 end
 
+# ---- Rails products: full applications, tested against the code corpus and the RL harvest filters ----
+# data/products.json is written by scripts/products_check.rb. Two column groups: the code path the
+# main table uses (license as GitHub reports it, SWH collection, observed Stack v3 membership), and
+# the mechanical filters the SWE-bench-family pipelines run when they turn a repo into RL training
+# tasks (a derivable test command, its runtime, a container recipe, issue-closing PRs that touch
+# tests). Everything rendered is observed; absences carry their reason only when verified.
+products_path = File.join(ROOT, "data", "products.json")
+products = File.exist?(products_path) ? JSON.parse(File.read(products_path)).reject { |k, _| k.start_with?("_") } : {}
+
+PRODUCTS_SECTION = if products.empty?
+  ""
+else
+  prows = products.values.sort_by { |e| -e["stars"].to_i }
+  v3_in       = prows.count { |e| e["in_stack"] }
+  v3_answered = prows.count { |e| !e["in_stack"].nil? }
+  linked      = prows.count { |e| e["prs_harvestable"].to_i.positive? }
+  issues_off  = prows.count { |e| e["has_issues"] == false }
+
+  cells = prows.map do |e|
+    slug = e["repo"]
+    note = license_notes[slug]
+    snote = stack_notes[slug.downcase]
+
+    sub = esc(e["blurb"])
+    sub += "; archived #{esc(e["pushed"])}" if e["gh_archived"]
+    prod = %(<td class="res"><a href="https://github.com/#{esc(slug)}">#{esc(e["name"])}</a><span class="sub">#{sub}</span></td>)
+
+    stars = %(<td>#{commate(e["stars"])}</td>)
+
+    raw = e["license"]
+    label = GH_META.fetch(raw, raw)
+    lic_html = note ? %(#{esc(label)} <em>= #{esc(note["actual"])}</em>) : esc(label)
+    lic_tip = if note
+                "Reading #{esc(note["file"])}: #{esc(note["actual"])} (#{esc(note["class"])}). #{esc(note["note"])}"
+    elsif raw == "NOASSERTION"
+                NOASSERT_TIP
+    else
+                "The license string GitHub's API reports for github.com/#{esc(slug)}"
+    end
+    lic_cls = note ? "sub lic lic--read" : (raw == "NOASSERTION" ? "sub lic lic--vague" : "sub lic")
+    lic = %(<td class="train train--code"><span class="#{lic_cls}" title="#{lic_tip}">#{lic_html}</span></td>)
+
+    swh_cell = if e["swh_archived"].nil?
+                 %(<td class="train"><span class="cc-na" title="not checked">&mdash;</span></td>)
+    elsif e["swh_archived"]
+                 %(<td class="train" title="Software Heritage has collected github.com/#{esc(slug)}; SWH is the archive The Stack v2 was assembled from">#{OK}</td>)
+    else
+                 %(<td class="train" title="Software Heritage has no record of github.com/#{esc(slug)}; a maintainer can request archival at archive.softwareheritage.org/save/">#{BAD}</td>)
+    end
+
+    v3 = case e["in_stack"]
+    when true
+           %(<td class="train" title="Observed: github.com/#{esc(slug)} is in #{V3_TIP}">#{OK}</td>)
+    when false
+           why, subl = snote ? absence_reason({ "post_cutoff" => e["post_cutoff"] }, snote) :
+                               absence_reason({ "post_cutoff" => e["post_cutoff"], "created" => e["created"] }, nil)
+           why = why.sub("the license reading below", "the license in this row")
+           %(<td class="train" title="Observed: github.com/#{esc(slug)} is NOT in #{V3_TIP}. #{why}">#{BAD}#{subl ? %(<span class="sub">#{subl}</span>) : ""}</td>)
+    else
+           %(<td class="train"><span class="cc-na" title="not checked">&mdash;</span></td>)
+    end
+
+    ci = if e["ci_name"]
+           %(<td title="an active workflow under .github/workflows a pipeline can derive the test command from">#{OK}<span class="sub">#{esc(e["ci_name"])}</span></td>)
+    elsif e["workflows"].to_i.positive?
+           %(<td title="#{e["workflows"]} workflows exist, and none is an active test suite; mirrors run their CI elsewhere">#{BAD}<span class="sub">no test workflow</span></td>)
+    else
+           %(<td title="no workflows under .github/workflows">#{BAD}<span class="sub">no workflows</span></td>)
+    end
+
+    mins = if e["ci_median_min"]
+             val = e["ci_median_min"].zero? ? "&lt;1" : commate(e["ci_median_min"])
+             tip = "median of #{e["ci_runs_sampled"]} recent successful runs of &quot;#{esc(e["ci_name"])}&quot;; " \
+                   "path-filtered workflows can complete as skips, so a short median can undercount the full suite"
+             %(<td><span class="cc-val" title="#{tip}">#{val}<span class="cc-den"> min</span></span></td>)
+    else
+             %(<td><span class="cc-na" title="no timed runs">&mdash;</span></td>)
+    end
+
+    dock = if e["container"]
+             %(<td title="#{esc((e["container_files"] || []).join(", "))} at the repo root">#{OK}</td>)
+    else
+             %(<td title="no Dockerfile, compose file, or .devcontainer at the repo root">#{BAD}</td>)
+    end
+
+    harvest = if e["prs_sampled"].to_i.zero?
+                %(<td><span class="cc-na" title="no merged pull requests on GitHub">&mdash;</span></td>)
+    else
+                h = e["prs_harvestable"].to_i
+                tip = "of the last #{e["prs_sampled"]} merged PRs (#{e["prs_from"]} to #{e["prs_to"]}), " \
+                      "#{e["prs_closing_issue"]} close a GitHub issue and #{h} of those also modify tests; " \
+                      "each such PR is the raw shape of one SWE-bench task"
+                tip += ". GitHub issues are disabled on this repo, so no PR can close one" if e["has_issues"] == false
+                %(<td><span class="#{h.positive? ? "ok" : "bad"}" title="#{tip}">#{h}/#{e["prs_sampled"]}</span></td>)
+    end
+
+    %(<tr>#{prod}#{stars}#{lic}#{swh_cell}#{v3}#{ci}#{mins}#{dock}#{harvest}</tr>)
+  end.join("\n")
+
+  <<PROD
+<section>
+<h2><span class="num">02</span>Rails products, tested against the harvest filters</h2>
+<p class="note">The table above tracks documentation. Models also learn Rails from complete
+applications, and agentic RL pipelines mine them mechanically. The
+<a href="https://arxiv.org/abs/2310.06770">SWE-bench</a> family selects top-starred repos, derives
+the test command from CI config, rebuilds the environment in a container, and turns each merged PR
+that closes an issue and touches tests into one verifiable training task;
+<a href="https://www.swebench.com/multilingual.html">SWE-bench Multilingual</a> discards about 30%
+of candidate repos whose tests will not build or run too slowly. Below: the top-starred open-source
+Rails products, measured against exactly those filters over the GitHub API.</p>
+<div class="table-scroll">
+<table class="products">
+  <thead>
+  <tr class="grouprow">
+    <th class="res" rowspan="2">Product</th>
+    <th rowspan="2">stars</th>
+    <th class="grouphead grouphead--train" colspan="3">Code corpus <span class="grouphead__sub">would the code reach a pretraining set</span></th>
+    <th class="grouphead" colspan="4">RL harvest <span class="grouphead__sub">could a SWE-bench-style pipeline mine it</span></th>
+  </tr>
+  <tr class="colrow">
+    <th class="train">license<br><span class="th-sub">as GitHub reports it</span></th>
+    <th class="train">SWH<br>archive</th>
+    <th class="train">in The Stack v3<br><span class="th-sub">observed</span></th>
+    <th>test CI</th>
+    <th>median<br>run</th>
+    <th>container<br>recipe</th>
+    <th>issue-linked<br>PRs w/ tests<br><span class="th-sub">of last 50 merged</span></th>
+  </tr>
+  </thead>
+  <tbody>
+#{cells}
+  </tbody>
+</table>
+</div>
+<p class="note"><strong>Copyleft keeps the Rails flagships out of the permissive code corpus.</strong>
+#{v3_in} of #{v3_answered} products are observed in The Stack v3 train set, and every AGPL- and
+GPL-licensed product is absent, because v3 keeps permissively licensed and unlicensed files. All six
+that are in report MIT or <code>NOASSERTION</code> terms.
+<strong>Most products also fail the PR-to-issue linkage filter.</strong> #{linked} of #{prows.size}
+merged at least one issue-closing, test-touching PR in the sampled window, and #{issues_off} of
+#{prows.size} have GitHub issues disabled (Discourse and OpenProject triage on their own forums;
+GitLab and Redmine are mirrors of development that happens elsewhere), so a pipeline mining GitHub
+finds no harvestable instances there. The runtime filter bites too: Zammad's suite runs a 93-minute
+median, the kind SWE-bench Multilingual discards. The direct workaround is
+<a href="https://github.com/multi-swe-bench/multi-swe-bench">Multi-SWE-RL</a>: its task pipeline is
+open, it accepts community contributions, and Ruby is absent from it today.</p>
+</section>
+PROD
+end
+
 PAGE = <<HTML
 <!doctype html>
 <html lang="en">
@@ -490,8 +640,9 @@ already in The Stack skips the web filters, so its web cells
 #{LICENSES}
 </section>
 
+#{PRODUCTS_SECTION}
 <section>
-<h2><span class="num">02</span>What will move the needle</h2>
+<h2><span class="num">03</span>What will move the needle</h2>
 <p>Four levers, ordered by depth, all pushing the same number. Rails is plural by design, so the work
 is shared defaults and shared conventions. Each layer shows its <strong>goal</strong> as a live gauge;
 all of them feed the <strong>final boss</strong> below.</p>
@@ -575,7 +726,7 @@ all of them feed the <strong>final boss</strong> below.</p>
 </section>
 
 <section>
-<h2><span class="num">03</span>Methodology</h2>
+<h2><span class="num">04</span>Methodology</h2>
 <p class="note">Probed over HTTP, June 2026, against each project's documentation URL: robots.txt parsed
 for AI user-agents; crawlability fetched as CCBot, which catches WAF blocks; content negotiation asked
 with <code>Accept: text/markdown</code>; <code>.md</code> routes and llms.txt checked for a 200.
@@ -584,7 +735,9 @@ The Stack v3 membership is read from the official
 lookup per repo owner. An absence is attributed only when the reason is verified (an opt-out issue, a
 repo public after the 2025-08-07 crawl cutoff) and says "not established" otherwise. The language-choice
 figure is <a href="https://github.com/chad/whichlang">whichlang</a>'s: 13 models, 1,267 classified
-solutions, 0 Ruby.</p>
+solutions, 0 Ruby. The Rails-products table is measured in August 2026 over the GitHub API (stars,
+license, workflows and their run durations, the last 50 merged PRs via GraphQL), the Software
+Heritage origin API, and the same Am-I-in-The-Stack index.</p>
 <p class="note"><strong>Why Common Crawl?</strong> It seeds most open web corpora (C4, FineWeb, behind
 GPT and Llama), samples by domain centrality, and never copies a site in full, so coverage is a proxy for
 whether a model saw the docs at all. It also reflects crawls already taken: the one column you cannot fix

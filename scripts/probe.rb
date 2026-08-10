@@ -67,8 +67,9 @@ RESOURCES = [
   [ "GoRails", "community & resources", "https://gorails.com/" ],
   [ "Drifting Ruby", "community & resources", "https://www.driftingruby.com/" ],
   [ "RubyEvents", "community & resources", "https://www.rubyevents.org/" ],
+  # Fizzy moved to the Rails-products table (scripts/products_check.rb): it is an application,
+  # not a docs resource, and its story is the code path.
   [ "Rails at Scale (Shopify)", "community & resources", "https://railsatscale.com/" ],
-  [ "Fizzy (37signals)", "community & resources", "https://github.com/basecamp/fizzy" ],
   [ "SF Ruby", "community & resources", "https://sfruby.com/" ],
 
   # --- Blogs & newsletters (Rails Developer Survey 2024 top blogs) ---

@@ -919,16 +919,6 @@
     "docs_license": null,
     "docs_in_stack": "yes"
   },
-  "Fizzy (37signals)": {
-    "repo": "basecamp/fizzy",
-    "license": "NOASSERTION",
-    "kind": "content",
-    "code_channel": "other",
-    "docs_repo": "basecamp/fizzy",
-    "docs_location": "in-repo",
-    "docs_license": "NOASSERTION",
-    "docs_in_stack": "no"
-  },
   "SF Ruby": {
     "repo": null,
     "license": null,

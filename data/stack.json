@@ -424,13 +424,6 @@
     "dataset": "the-stack-v3-train",
     "checked": "2026-08"
   },
-  "Fizzy (37signals)": {
-    "repo": "basecamp/fizzy",
-    "in_stack": false,
-    "dataset": "the-stack-v3-train",
-    "checked": "2026-08",
-    "created": "2024-06-21"
-  },
   "_meta": {
     "dataset": "the-stack-v3-train",
     "cutoff": "2025-08-07",
