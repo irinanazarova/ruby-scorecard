@@ -64,12 +64,12 @@ module Analyzer
                      "content negotiation. Without it an agent spends its budget parsing your theme.",
              anchor: "clean-text", anchor_label: "content negotiation and markdown twins"),
 
-        item("Listed in sitemap.xml", pass?("retrieval", "Sitemap"),
+        item("Sitemap a crawler can find", pass?("retrieval", "Sitemap"),
              detail: detail("retrieval", "Sitemap"),
-             action: "Ship a sitemap.xml. CCBot reads the one declared in robots.txt, so a listed " \
-                     "URL can be found without an inbound link. Cheap and worth doing, but not a " \
-                     "lever: across our own 93 resources it made no measurable difference to " \
-                     "Common Crawl coverage.",
+             action: "Publish a sitemap and declare it in robots.txt with a Sitemap: line. That " \
+                     "line is what CCBot follows, and it is why the file does not have to sit at " \
+                     "/sitemap.xml. Cheap and worth doing, but not a lever: across our own 93 " \
+                     "resources it made no measurable difference to Common Crawl coverage.",
              anchor: "sitemap", anchor_label: "crawl budget"),
 
         # Deliberately not a failure. It is widely adopted and currently used by no major AI system,

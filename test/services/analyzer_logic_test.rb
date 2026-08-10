@@ -109,15 +109,12 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
     end
   end
 
-  test "real prose survives the stricter test, including every pinned reference" do
+  # The pinned-reference half of this test went with the reference columns: there are no pinned
+  # passages left to keep selectable.
+  test "real prose survives the stricter test" do
     prose = "In this tutorial we will first take a look at how to enable autowiring and the " \
             "various ways to autowire beans, as well as the exceptions you can expect."
     assert Analyzer::Passage.prose?(prose.split)
-
-    Analyzer::References.passages.each do |key, passage|
-      assert Analyzer::Passage.prose?(passage["prefix"].split),
-             "pinned reference #{key} would no longer be selectable"
-    end
   end
 
   # A test suite is the largest thing in plenty of well-tested repos and the last thing anyone would
@@ -141,6 +138,43 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
   # first version assembled the first eight word-like tokens found anywhere in the span, producing
   # "res.status function if 100 code throw new status": a string in no file on earth, which returned
   # zero copies for a file vendored into a million node_modules.
+
+  # --- sitemaps ----------------------------------------------------------------------------------
+  #
+  # `Sitemap:` is a global directive, and it is the line CCBot follows, so the file does not have to
+  # sit at /sitemap.xml. Probing only the conventional paths reported "no sitemap.xml" about
+  # evilmartians.com, which declares its index at /sitemap/sitemap-index.xml, and about expressjs.com.
+
+  def declared(robots)
+    Analyzer::Retrieval.new("https://example.com/docs").send(:declared_sitemaps, robots)
+  end
+
+  test "a sitemap declared anywhere in robots.txt is found" do
+    robots = <<~ROBOTS
+      User-agent: *
+      Disallow: /admin
+
+      Sitemap: https://evilmartians.com/sitemap/sitemap-index.xml
+    ROBOTS
+    assert_equal [ "https://evilmartians.com/sitemap/sitemap-index.xml" ], declared(robots)
+  end
+
+  test "declarations are read regardless of which agent block they sit in, and comments ignored" do
+    robots = <<~ROBOTS
+      Sitemap: https://a.example/one.xml  # the main one
+      User-agent: CCBot
+      Disallow:
+      sitemap: https://a.example/two.xml
+      # Sitemap: https://a.example/commented-out.xml
+      Sitemap: https://a.example/one.xml
+    ROBOTS
+    assert_equal [ "https://a.example/one.xml", "https://a.example/two.xml" ], declared(robots)
+  end
+
+  test "a robots.txt with no Sitemap line declares nothing" do
+    assert_empty declared("User-agent: *\nDisallow: /private\n")
+    assert_empty declared("")
+  end
 
   test "the searched phrase is always a literal substring of the passage" do
     [ "res.status = function status(code) { if (code < 100) { throw new RangeError(\'Status code must be an integer.\') } }",

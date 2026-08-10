@@ -29,11 +29,11 @@ module Analyzer
           bool_check("Reachable by a crawler", crawlable?,
                      detail: crawlable? ? "fetches cleanly as CCBot" : "blocked or unreachable as CCBot",
                      why: "A WAF or bot rule can block crawlers even when robots.txt allows them."),
-          bool_check("Sitemap", sitemap?(root),
-                     detail: sitemap?(root) ? "sitemap.xml found" : "no sitemap.xml",
-                     why: "CCBot reads sitemaps declared in robots.txt, so a listed URL can be found without an " \
-                          "inbound link. It does not decide what gets fetched: Common Crawl prioritises by " \
-                          "harmonic centrality."),
+          bool_check("Sitemap", sitemap(root, robots[:body]).any?,
+                     detail: sitemap_detail(root, robots[:body]),
+                     why: "CCBot reads the sitemap declared in robots.txt, so a listed URL can be found " \
+                          "without an inbound link. It does not decide what gets fetched: Common Crawl " \
+                          "prioritises by harmonic centrality."),
           bool_check("Markdown content negotiation", md_negotiation,
                      detail: md_negotiation ? "serves text/markdown on Accept" : "returns HTML only",
                      why: "The durable way to hand agents clean text instead of rendered HTML."),
@@ -90,9 +90,53 @@ module Analyzer
       @crawlable ||= Http.probe(@url, headers: { "User-Agent" => Http::CCBOT }, timeout: 12)[:ok]
     end
 
-    def sitemap?(root)
-      @sitemap ||= Http.probe("#{root}/sitemap.xml", timeout: 8)[:ok] ||
-                   Http.probe("#{root}/sitemap_index.xml", timeout: 8)[:ok]
+    # A sitemap DECLARED IN robots.txt counts, and counts first.
+    #
+    # `Sitemap:` is a global directive in the robots.txt standard, and it is the one CCBot follows,
+    # so a site that declares its index anywhere is doing the thing that matters. Probing only
+    # /sitemap.xml and /sitemap_index.xml failed anyone who files theirs elsewhere:
+    # evilmartians.com declares `Sitemap: https://evilmartians.com/sitemap/sitemap-index.xml` and we
+    # reported "no sitemap.xml" about a site with a perfectly good one.
+    #
+    # The declared URL is FETCHED rather than trusted. A line pointing at a 404 is worse than no
+    # line, because it reads as done to anyone auditing the file by eye.
+    MAX_DECLARED = 3
+
+    # [kind, url] for whatever we could actually retrieve, declared ones first.
+    def sitemap(root, robots_body)
+      return @sitemap if defined?(@sitemap)
+
+      declared = declared_sitemaps(robots_body).first(MAX_DECLARED)
+                                               .select { |u| Http.probe(u, timeout: 8)[:ok] }
+                                               .map { |u| [ :declared, u ] }
+      return @sitemap = declared if declared.any?
+
+      conventional = %w[sitemap.xml sitemap_index.xml]
+                     .map { |name| "#{root}/#{name}" }
+                     .select { |u| Http.probe(u, timeout: 8)[:ok] }
+                     .map { |u| [ :conventional, u ] }
+      @sitemap = conventional
+    end
+
+    # Global directive: it applies to the whole file regardless of which User-agent block it sits in,
+    # so this is parsed independently of the Disallow rules rather than alongside them.
+    def declared_sitemaps(robots_body)
+      robots_body.to_s.each_line.filter_map do |line|
+        m = line.sub(/#.*/, "").strip.match(/\Asitemap:\s*(\S+)\z/i)
+        m && m[1]
+      end.uniq
+    end
+
+    def sitemap_detail(root, robots_body)
+      found = sitemap(root, robots_body)
+      kind, url = found.first
+      return "declared in robots.txt: #{url}" if kind == :declared
+      return "#{url.split('/').last} found" if kind == :conventional
+
+      declared = declared_sitemaps(robots_body)
+      return "robots.txt declares #{declared.first}, which does not fetch" if declared.any?
+
+      "no sitemap.xml, and robots.txt declares none"
     end
 
     def llms_txt?(root)

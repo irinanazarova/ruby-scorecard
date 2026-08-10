@@ -46,7 +46,7 @@ class SlidesTest < ActiveSupport::TestCase
                                                    "repo_signals" => signals, "code_channel" => code))
     docs = d.columns.first
 
-    sitemap = docs.items.find { |i| i.label == "Listed in sitemap.xml" }
+    sitemap = docs.items.find { |i| i.label == "Sitemap a crawler can find" }
     assert_equal :fail, sitemap.status
     assert sitemap.action.present?, "an unticked box with no fix is a dead end"
 
@@ -176,7 +176,7 @@ class SlidesTest < ActiveSupport::TestCase
 
   test "one scale across the grid, never one per row" do
     grid = Analyzer::RecallGrid.new(target.merge("memorization" => memorization))
-    assert_equal 31, grid.scale, "the widest bar anywhere on the grid sets the scale"
+    assert_equal 30, grid.scale, "the widest bar anywhere on the grid sets the scale"
 
     big = Analyzer::RecallGrid.new(target.merge("memorization" => memorization(repo_run: 55)))
     assert_equal 55, big.scale
@@ -256,18 +256,13 @@ class SlidesTest < ActiveSupport::TestCase
     assert_match(/pasted a paragraph/i, answer.headline)
   end
 
-  # Two nearly identical bars invite the room to ask why they disagree, which is not the question
-  # you want from the audience.
-  test "a reference that is the target's own repo is dropped from the grid" do
-    references = step(items: [
-                        { label: "Tailwind CSS docs", repo: "acme/docs", stars: 140, license: "none",
-                          by_model: [] },
-                        { label: "Rails guides", repo: "rails/rails", stars: 59_000, license: "MIT",
-                          by_model: [] }
-                      ])
-    grid = Analyzer::RecallGrid.new(target.merge("memorization" => memorization, "references" => references))
+  # Reference columns are gone: they restated one point three times between the visitor's own result
+  # and the controls. What remains has to be only the visitor's own text, or the grid is comparing
+  # things the caption does not explain.
+  test "the grid draws your own text and nothing else" do
+    grid = Analyzer::RecallGrid.new(target.merge("memorization" => memorization))
 
-    labels = grid.columns.select { |c| c.kind == :reference }.map(&:label)
-    assert_equal [ "Rails guides" ], labels
+    assert_equal [ :yours ], grid.columns.map(&:kind).uniq
+    assert_equal [ "Your docs", "Your repo" ], grid.columns.map(&:label)
   end
 end

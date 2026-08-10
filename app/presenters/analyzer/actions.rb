@@ -224,10 +224,11 @@ module Analyzer
 
       Item.new(key: :sitemap, impact: :low,
                title: "Ship a sitemap.xml",
-               why: "CCBot reads the sitemap declared in robots.txt, so a listed URL can be found " \
-                    "without an inbound link. Worth the hour, but not a lever: across our own 93 " \
-                    "resources, having one made no measurable difference to Common Crawl coverage. " \
-                    "Click depth and inbound links are what centrality reads.",
+               why: "Publish one and declare it in robots.txt with a Sitemap: line, which is what " \
+                    "CCBot follows and why the file need not sit at /sitemap.xml. Worth the hour, " \
+                    "but not a lever: across our own 93 resources, having one made no measurable " \
+                    "difference to Common Crawl coverage. Click depth and inbound links are what " \
+                    "centrality reads.",
                anchor: "sitemap", anchor_label: "what a sitemap does and does not do")
     end
 
