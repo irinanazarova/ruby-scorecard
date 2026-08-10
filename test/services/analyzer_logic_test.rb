@@ -238,6 +238,37 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
     assert_nil t.url
   end
 
+  # A browser address bar hides the scheme, so the thing people actually paste is
+  # `github.com/owner/repo`. That used to be rejected with "not an owner/repo slug or a github.com
+  # link", which is a confusing thing to be told about a github.com link.
+  test "a github link is accepted without the scheme, and with the noise around it" do
+    {
+      "github.com/rails/rails" => "rails/rails",
+      "www.github.com/rails/rails" => "rails/rails",
+      "github.com/rails/rails/" => "rails/rails",
+      "github.com/rails/rails.git" => "rails/rails",
+      "github.com/rails/rails/tree/main/activesupport" => "rails/rails",
+      "https://github.com/rails/rails" => "rails/rails",
+      "rails/rails" => "rails/rails",
+      "  rails/rails  " => "rails/rails"
+    }.each do |given, expected|
+      t = Analyzer::Target.new(repo: given)
+      assert t.valid?, "#{given.inspect} should parse: #{t.error}"
+      assert_equal expected, t.repo, given.inspect
+    end
+  end
+
+  # The scheme being optional must not turn every dotted string into a repo: a docs host is still a
+  # docs host, and the owner side of a slug still cannot contain dots (or "example.com/docs" would
+  # parse as the repo "docs" owned by "example.com").
+  test "making the scheme optional does not swallow docs hosts" do
+    t = Analyzer::Target.new(docs_url: "docs.example.com/page")
+    assert_equal "https://docs.example.com/page", t.url
+    assert_nil t.repo
+
+    refute Analyzer::Target.new(repo: "example.com/docs").valid?
+  end
+
   # --- a pasted paragraph -----------------------------------------------------------------------
 
   def paragraph(words) = (1..words).map { |i| "word#{i}" }.join(" ")

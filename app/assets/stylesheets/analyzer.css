@@ -75,6 +75,19 @@
 .probe-form__field { display: flex; flex-direction: column; gap: .3rem; }
 .probe-form__field label { font-size: .85rem; font-weight: 650; }
 .probe-form__hint { font-size: .8rem; color: var(--text-soft); line-height: 1.4; }
+
+/* Label on the left, live word count on the right, so the number sits where the eye already is when
+   you start typing rather than below the box where it would be hidden by the keyboard on a phone. */
+.probe-form__labelrow { display: flex; align-items: baseline; justify-content: space-between;
+  gap: .75rem; }
+
+/* WORDS, not characters, because words are what the probe requires. Tabular figures so the number
+   does not jitter sideways as it counts. Muted until it means something: a count that turns red on
+   the first keystroke reads as an error when it is really just "keep going". */
+.wordcount { font-size: .78rem; font-family: var(--font-mono, monospace);
+  font-variant-numeric: tabular-nums; color: var(--text-soft); white-space: nowrap; }
+.wordcount--short { color: var(--warn); }
+.wordcount--ok { color: var(--ok); }
 .probe-form__submit { grid-column: 1 / -1; display: flex; align-items: center; gap: .8rem;
   flex-wrap: wrap; }
 
@@ -723,3 +736,29 @@
 .why__phrase { font-size: .8rem; color: var(--text-soft); margin: .6rem 0 0; }
 .why__phrase code { font-family: var(--font-mono, monospace); background: var(--code-bg);
   padding: .1rem .35rem; border-radius: 4px; word-break: break-word; }
+
+/* --- check another paragraph, from a result ----------------------------------------------------
+ *
+ * Sits under the recall grid because that is where the question occurs to you: a null row invites
+ * "would anything of mine fire?", and until now answering it meant navigating back to the form.
+ *
+ * Deliberately quieter than the hero form. It is a follow-up, not the main event, so it borrows the
+ * field styling and drops the emphasis.
+ */
+.recheck { margin: 1.5rem 0 0; padding: 1rem 1.1rem; border: 1px solid var(--line);
+  border-radius: var(--radius, 10px); background: var(--surface); }
+.recheck__title { font-family: var(--font-grotesk); font-size: 1rem; font-weight: 700;
+  margin: 0 0 .6rem; }
+.recheck__label { font-size: .85rem; font-weight: 650; }
+.recheck__form textarea { width: 100%; margin-top: .3rem; padding: .7rem .85rem; font: inherit;
+  font-size: .92rem; line-height: 1.5; border: 1px solid var(--line-strong);
+  border-radius: var(--radius, 10px); background: var(--bg); color: var(--text); resize: vertical; }
+.recheck__form textarea:focus { outline: none; border-color: var(--accent); }
+.recheck__go { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin-top: .6rem; }
+.recheck__go input[type="submit"] { padding: .5rem 1.1rem; font: inherit; font-size: .9rem;
+  font-weight: 600; cursor: pointer; color: #fff; background: var(--accent);
+  border: 1px solid var(--accent); border-radius: var(--radius, 10px); }
+/* Disabled says "the counter above is the reason", which is why the button stays visible rather
+   than being hidden until the paragraph is long enough. */
+.recheck__go input[type="submit"]:disabled { background: var(--line-strong);
+  border-color: var(--line-strong); color: var(--bg); cursor: not-allowed; }

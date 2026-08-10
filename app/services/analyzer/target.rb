@@ -15,7 +15,10 @@ module Analyzer
   # the result: docs with no repo has only the web channel, which is the channel that discards most
   # developer documentation.
   class Target
-    GITHUB_URL = %r{\Ahttps?://(?:www\.)?github\.com/([^/]+)/([^/#?]+)}i
+    # The scheme is optional because a browser address bar hides it, so the thing people actually
+    # paste is `github.com/owner/repo`. Requiring https:// rejected that with "not an owner/repo slug
+    # or a github.com link", which is a confusing thing to be told about a github.com link.
+    GITHUB_URL = %r{\A(?:https?://)?(?:www\.)?github\.com/([^/]+)/([^/#?]+)}i
 
     # The owner part is [\w-]+ with NO dots, because GitHub usernames and org names cannot contain
     # them. Allowing dots made "example.com/docs" parse as the repo "docs" owned by "example.com".

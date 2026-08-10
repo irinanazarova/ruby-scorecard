@@ -130,5 +130,30 @@
       empty row can be read against what a positive looks like under the identical probe.
       <a href="/learn#memorization">What this can and cannot prove &rarr;</a>
     </p>
+
+    <%# Checking a second paragraph is the obvious next move from a result, and until now it meant
+        navigating back to the form. Paragraph only: this runs the probe and nothing else, so it
+        costs one model call per model rather than a full analysis, and it does not carry the docs
+        URL or repo over -- a different paragraph is a different question about a different text. %>
+    <section class="recheck">
+      <h3 class="recheck__title">Check another paragraph</h3>
+      <%= form_with url: analyses_path, method: :post, class: "recheck__form",
+                    data: { controller: "word-count",
+                            word_count_min_value: Analyzer::Passage::MIN_PASTED_WORDS } do |f| %>
+        <div class="probe-form__labelrow">
+          <%= f.label :passage, "Paste the text", class: "recheck__label" %>
+          <span class="wordcount" data-word-count-target="output" aria-live="polite"></span>
+        </div>
+        <%= f.text_area :passage, rows: 4, spellcheck: "false",
+              placeholder: "Paste a paragraph, a README section, a config snippet…",
+              data: { word_count_target: "input", action: "input->word-count#update" } %>
+        <div class="recheck__go">
+          <%= f.submit "Check recall", data: { word_count_target: "submit" } %>
+          <span class="probe-form__hint">Needs
+          <%= Analyzer::Passage::MIN_PASTED_WORDS %> words: we show a model the opening
+          <%= Analyzer::Passage::MIN_SEED %> and compare what it writes next against the rest.</span>
+        </div>
+      <% end %>
+    </section>
   <% end %>
 </div>

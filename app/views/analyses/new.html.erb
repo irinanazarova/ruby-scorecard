@@ -36,9 +36,16 @@
         paragraph is already inside the models. %>
     <details class="probe-form__paste" <%= "open" if params[:passage].present? %>>
       <summary>Or check a paragraph directly</summary>
-      <div class="probe-form__field">
-        <%= f.label :passage, "Paste the text" %>
-        <%= f.text_area :passage, value: params[:passage], rows: 5, spellcheck: "false" %>
+      <div class="probe-form__field" data-controller="word-count"
+           data-word-count-min-value="<%= Analyzer::Passage::MIN_PASTED_WORDS %>">
+        <div class="probe-form__labelrow">
+          <%= f.label :passage, "Paste the text" %>
+          <%# Words rather than characters: words are what the probe requires, so a character
+              counter would say "fine" and the server would then refuse. %>
+          <span class="wordcount" data-word-count-target="output" aria-live="polite"></span>
+        </div>
+        <%= f.text_area :passage, value: params[:passage], rows: 5, spellcheck: "false",
+              data: { word_count_target: "input", action: "input->word-count#update" } %>
         <span class="probe-form__hint">We show each model the opening words and compare what it
         writes next against the rest, so this needs at least
         <%= Analyzer::Passage::MIN_PASTED_WORDS %> words. Text repeated across many repos is the
