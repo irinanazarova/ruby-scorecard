@@ -16,7 +16,11 @@ module Analyzer
   # Everything goes through Analyzer::Cache, so a run done before the demo replays instantly and is
   # labelled as cached rather than passed off as live.
   class Run
-    STEPS = %i[target retrieval repo_signals code_channel web_channel memorization references].freeze
+    # What actually executes, in order. `references` is gone: it probed three known-memorized pages
+    # purely to give the recall chart a scale, and the chart no longer draws them. Keeping it would
+    # have meant three model calls a run for numbers nobody sees. `copies` was missing from this
+    # list while the run emitted it, which is the drift a comment-only constant invites.
+    STEPS = %i[target retrieval repo_signals code_channel web_channel memorization copies].freeze
 
     # Spans per source. Two rather than three, because the probe now covers docs AND repo and the
     # call budget has to stretch across both. Memorization is sparse, so spans are where the signal
@@ -71,11 +75,6 @@ module Analyzer
       #    Runs only when there is recall to explain, because the code-search endpoint allows ten
       #    requests a minute for the whole app and an unexplained null needs no explaining.
       step(:copies) { copies_payload }.then { |p| block&.call(:copies, p) }
-
-      # 6. The pages that are known to be in the corpus, so the recall chart has a scale. Cached for
-      #    30 days apiece, so this is free on all but one run a month.
-      step(:references, key: "-") { { items: References.all(models: @models) } }
-        .then { |p| block&.call(:references, p) }
 
       @results
     end

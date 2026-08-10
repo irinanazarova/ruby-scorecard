@@ -83,11 +83,7 @@ class AnalyzeJob < ApplicationJob
     (cents * 10).round
   end
 
-  # References are the scale on the recall chart, not a measurement of this target, so they get no
-  # evidence tile of their own.
   def broadcast_step(analysis, step, payload)
-    return if step == :references
-
     Turbo::StreamsChannel.broadcast_replace_to(
       analysis, target: "step_#{step}",
       partial: "analyses/step",

@@ -224,10 +224,17 @@ module Analyzer
       "The likely route: #{clauses(open_paths)}."
     end
 
+    # "The comparison below" used to point at the reference columns on the grid. Those are gone, so
+    # the sentence was promising the reader something the page no longer contains. What still backs
+    # the number is the control pair, which runs on every probe and is reported under the grid.
+    #
+    # `passages` was hardcoded plural and printed "1 passages" on every single-span run, which is
+    # the sort of thing that makes a measured page look unmeasured.
     def probe_caveat(mem)
+      spans = mem[:spans_tested].to_i
       "A null result is weak evidence: models memorize a fraction of what they read. " \
-        "#{mem[:spans_tested]} passages, #{mem[:probes]} probes. The comparison below shows what a " \
-        "positive looks like under the identical probe."
+        "#{spans} #{'passage'.pluralize(spans)}, #{mem[:probes]} probes, each one checked against " \
+        "controls that must fire and must not."
     end
 
     def models_fired(mem) = Array(mem[:models_fired]).to_sentence.presence || "Models"

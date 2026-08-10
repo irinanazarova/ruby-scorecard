@@ -7,8 +7,7 @@ module Analyzer
   # THE LAYER RULE, and the reason this directory exists at all: a presenter reads. It never
   # fetches, never writes, never touches the cache or the network. Anything that measures belongs in
   # app/services/analyzer. That line is what separates Verdict (reads five payloads and writes a
-  # sentence) from References (probes real pages against real models and costs money), which is why
-  # only one of the two moved here.
+  # sentence) from the probes in app/services, which hit real pages and real models and cost money.
   #
   # All five subclasses used to carry an identical copy of the payload-reading tail below, down to
   # the same `Array(...).find`. Five copies of the same accessor is how they drift: Verdict's copy

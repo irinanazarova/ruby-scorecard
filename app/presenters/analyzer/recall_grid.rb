@@ -1,44 +1,51 @@
 # frozen_string_literal: true
 
 module Analyzer
-  # The recall chart: three models down the side, five things across the top.
+  # The recall chart: the models down the side, your text across the top.
   #
-  #                     your docs   your repo   Tailwind   Rails   MIT licence   invented text
-  #   Claude Opus            0          28         30        30         31             0
-  #   GPT-5.5                0           2         14         3         31             0
-  #   Gemini 2.5 Pro         0           0          9         2         28             0
+  #                                  your paragraph   your docs   your repo
+  #   Claude Opus  claude-opus-4-8         41             0           28
+  #   GPT-5.5      gpt-5.5                 41             0            2
+  #   Gemini 2.5 Pro  gemini-2.5-pro       41             0            0
   #
-  # Everything in one grid because every number in it came from the SAME probe: 55 words in, longest
-  # exact continuation out. A bar chart of your page alone is unreadable, and a bar chart against a
-  # reference with no controls is unfalsifiable. The two control columns are what make the middle
-  # columns mean anything: the MIT licence text must fire on every model, and the invented passage
-  # must fire on none. When those two misbehave, nothing else in the grid is interpretable.
+  # Every number came from the same probe: the opening words in, longest exact continuation out.
   #
-  # A reference is dropped when it is the target's own repo. Showing tailwindlabs/tailwindcss.com as
-  # both "your repo" and "the reference" produces two nearly identical bars and invites the audience
-  # to ask why they disagree, which is not the question you want from the room.
+  # The grid used to carry two more column groups and no longer does. Reference pages (Tailwind,
+  # Rails, Supabase) were three columns of somebody else's numbers sitting between the visitor's
+  # result and the calibration pair, all making one point, and each one inviting "why am I looking
+  # at Supabase". The controls were two more.
+  #
+  # THE CONTROLS ARE STILL PROBED. Only their columns are gone. They are what makes a null row
+  # readable: the MIT licence text must fire on every model and the invented passage must fire on
+  # none, and when they misbehave nothing here is interpretable. That verdict is now one sentence
+  # under the grid instead of two columns inside it, so the guarantee survives without costing the
+  # table a third of its width. `controls_ok?` is what the view reads for it.
   class RecallGrid < Presenter
-    # kind drives the styling and the reading order: yours, then what a positive looks like, then
-    # the calibration pair.
     Column = Struct.new(:key, :label, :sublabel, :kind, :href, keyword_init: true)
     # state: :measured | :waiting | :missing (never asked, which is not the same as zero)
     Cell = Struct.new(:run, :verdict, :state, :matched, keyword_init: true)
-    Row = Struct.new(:model, :cells, keyword_init: true)
+    # model_id is the exact string sent to the provider. The label alone ("Claude Opus") does not
+    # say which snapshot answered, and a result that cannot name the model it came from is not
+    # reproducible six months from now when the label points at different weights.
+    Row = Struct.new(:model, :model_id, :cells, keyword_init: true)
 
     # Never scale to less than this. A grid whose widest bar is 3 words would draw that 3 as a full
     # bar and read as a hit.
     MIN_SCALE = Memorization::STRONG_RUN * 2
 
-    def ready? = memorization.present? || references.any?
+    def ready? = memorization.present?
 
     def threshold = Memorization::STRONG_RUN
 
     def columns
-      @columns ||= [ own_columns, reference_columns, control_columns ].flatten
+      @columns ||= own_columns
     end
 
     def rows
-      models.map { |model| Row.new(model: model, cells: columns.to_h { |c| [ c.key, cell(model, c) ] }) }
+      models.map do |model|
+        Row.new(model: model, model_id: model_id_for(model),
+                cells: columns.to_h { |c| [ c.key, own_cell(model, c.key) ] })
+      end
     end
 
     # The widest bar on the grid, so every row is drawn against one scale. Comparing a row against
@@ -74,35 +81,18 @@ module Analyzer
       ].compact
     end
 
-    def reference_columns
-      references.reject { |ref| ref[:repo].to_s == target[:repo].to_s }.map do |ref|
-        Column.new(key: "ref:#{ref[:repo]}", label: ref[:label], kind: :reference,
-                   sublabel: "#{ref[:stars]} stars, #{ref[:license]}", href: ref[:url])
-      end
-    end
-
-    def control_columns
-      return [] if controls.empty?
-
-      [ Column.new(key: "control+", label: "MIT licence", sublabel: "must fire", kind: :control),
-       Column.new(key: "control-", label: "Invented text", sublabel: "must not fire", kind: :control) ]
-    end
-
-    # Every model that produced a number anywhere on the grid. Taken from the union rather than from
-    # MODELS, so a run made without a Gemini key shows two rows instead of an empty third.
+    # Every model that produced a number, taken from the union of the matrix and the controls rather
+    # than from MODELS, so a run made without a Gemini key shows two rows instead of an empty third.
+    # The controls are still counted here: they are the reason a model with an all-zero row is
+    # listed at all, which is the difference between "it answered and found nothing" and "it never
+    # ran".
     def models
-      seen = matrix.map { |m| m[:model] } +
-             references.flat_map { |r| Array(r[:by_model]).map { |m| m[:model] } } +
-             controls.map { |c| c[:provider] }
+      seen = matrix.map { |m| m[:model] } + controls.map { |c| c[:provider] }
       Memorization::MODELS.values.map { |spec| spec[:label] }.select { |label| seen.include?(label) }
     end
 
-    def cell(model, column)
-      case column.kind
-      when :yours then own_cell(model, column.key)
-      when :reference then reference_cell(model, column.key)
-      else control_cell(model, column.key)
-      end
+    def model_id_for(label)
+      Memorization::MODELS.values.find { |spec| spec[:label] == label }&.dig(:model)
     end
 
     def own_cell(model, source)
@@ -117,26 +107,6 @@ module Analyzer
 
       Cell.new(run: data[:run].to_i, verdict: data[:verdict], state: :measured, matched: data[:matched])
     end
-
-    def reference_cell(model, key)
-      ref = references.find { |r| "ref:#{r[:repo]}" == key }
-      row = Array(ref&.dig(:by_model)).find { |m| m[:model] == model }
-      data = row && row[:cells][:docs]
-      return Cell.new(state: references_pending? ? :waiting : :missing) if data.nil?
-
-      Cell.new(run: data[:run].to_i, verdict: data[:verdict], state: :measured, matched: data[:matched])
-    end
-
-    def control_cell(model, kind)
-      c = controls.find { |x| x[:provider] == model && x[:kind] == kind }
-      return Cell.new(state: :waiting) if c.nil?
-
-      Cell.new(run: c[:run].to_i, verdict: c[:verdict], state: :measured, matched: c[:matched])
-    end
-
-    def references_pending? = result("references").nil?
-
-    def references = Array(result("references")&.dig(:items)).compact.reject { |r| r[:error].present? }
 
     def controls = Array(memorization&.dig(:controls))
 

@@ -35,7 +35,15 @@
         <tbody>
           <% grid.rows.each do |row| %>
             <tr>
-              <th scope="row" class="recall__model"><%= row.model %></th>
+              <%# The exact model id, not just the family name. "Claude Opus" will point at
+                  different weights in six months, and a recall number that cannot name the snapshot
+                  it came from is not reproducible. %>
+              <th scope="row" class="recall__model">
+                <span class="recall__modelname"><%= row.model %></span>
+                <% if row.model_id.present? %>
+                  <code class="recall__modelid"><%= row.model_id %></code>
+                <% end %>
+              </th>
               <% grid.columns.each do |col| %>
                 <% cell = row.cells[col.key] %>
                 <td class="recall__cell recall__cell--<%= col.kind %> recall__cell--<%= cell.state %>">
@@ -63,18 +71,15 @@
       Words, not a score. <strong><%= grid.threshold %> or more</strong> consecutive words is the
       bar we call recall: you cannot reproduce text you have never seen.
     </p>
-    <p class="recall__keys">
-      <span class="recall__key"><span class="swatch swatch--yours"></span> your text</span>
-      <span class="recall__key"><span class="swatch swatch--reference"></span> verified as being in
-      the corpus, on a pinned passage</span>
-      <span class="recall__key"><span class="swatch swatch--control"></span> controls</span>
-    </p>
-
+    <%# The controls are still probed on every run; they just no longer take two columns. This
+        sentence IS the guarantee: without it a zero could mean "not memorized" or "the probe broke
+        today" and there would be no way to tell them apart. %>
     <% case grid.controls_ok?
        when true %>
       <p class="recall__controls recall__controls--ok">
-        Controls behaved: the MIT licence text fired on every model and the invented passage fired
-        on none. That is what makes the middle columns readable.
+        Controls behaved on this run: the MIT licence text fired on every model and an invented
+        passage fired on none. That is what makes a zero above readable as an answer rather than as
+        a broken probe.
       </p>
     <% when false %>
       <p class="recall__controls recall__controls--bad">
@@ -126,8 +131,8 @@
 
     <p class="recall__caveat">
       A null result is weak evidence. Models memorize a fraction of what they read, so an empty row
-      does not prove your text is absent from any corpus. The reference columns are there so an
-      empty row can be read against what a positive looks like under the identical probe.
+      does not prove your text is absent from any corpus. A long run is the strong direction: text
+      cannot be reproduced unless it was seen.
       <a href="/learn#memorization">What this can and cannot prove &rarr;</a>
     </p>
 

@@ -29,23 +29,6 @@ namespace :analyzer do
     puts "On stage, run the SAME pairs: cached checks are instant and labelled 'cached'."
   end
 
-  desc "Measure the reference pages the recall chart is scaled against (cached 30 days)"
-  task references: :environment do
-    models = Analyzer::Memorization.available_models
-    abort "no model API keys configured" if models.empty?
-
-    Analyzer::ReferencePage.all.each do |config|
-      result = Analyzer::References.one(config, models: models, refresh: true)
-      if result.nil? || result[:error]
-        warn format("  %-24s ERROR: %s", config[:label], result&.dig(:error) || "no result")
-        next
-      end
-
-      puts format("  %-24s %2d words, fired for %s", result[:label], result[:best_run],
-                  Array(result[:models_fired]).to_sentence.presence || "nobody")
-    end
-  end
-
   desc "Show which checks are already cached for a pair"
   task :status, %i[docs repo] => :environment do |_t, args|
     target = Analyzer::Target.new(docs_url: args[:docs], repo: args[:repo])

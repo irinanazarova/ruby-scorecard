@@ -162,6 +162,41 @@ class SlidesTest < ActiveSupport::TestCase
     assert_equal 30, row.cells["repo"].run
   end
 
+  # The grid is your text and nothing else. Reference pages and the control pair were five columns
+  # of numbers that were not about the visitor, sitting between their result and the edge of the
+  # table.
+  test "the grid carries only your own columns" do
+    grid = Analyzer::RecallGrid.new(target.merge("memorization" => memorization))
+
+    assert_equal [ :yours ], grid.columns.map(&:kind).uniq
+    assert_empty grid.columns.select { |c| c.label.match?(/MIT|Invented|Tailwind|Rails guides|Supabase/) },
+                 "references and controls must not be columns"
+  end
+
+  # The controls STILL RUN; only their columns are gone. Without this verdict a zero could mean "not
+  # memorized" or "the probe broke today" and there would be nothing to tell them apart.
+  test "removing the control columns keeps the control verdict" do
+    ok = Analyzer::RecallGrid.new(target.merge("memorization" => memorization))
+    assert_equal true, ok.controls_ok?
+
+    broken = [ { provider: "Claude Opus", kind: "control+", run: 1, verdict: "none" },
+              { provider: "Claude Opus", kind: "control-", run: 3, verdict: "none" } ]
+    p = probes(docs_run: 2, repo_run: 30)
+    payload = step(summary: Analyzer::Memorization.summarize(p),
+                   matrix: Analyzer::Memorization.matrix(p), controls: broken)
+    assert_equal false, Analyzer::RecallGrid.new(target.merge("memorization" => payload)).controls_ok?
+  end
+
+  # "Claude Opus" will point at different weights in six months, so a row that cannot name the
+  # snapshot it came from is not reproducible.
+  test "every row names the exact model it probed" do
+    row = Analyzer::RecallGrid.new(target.merge("memorization" => memorization)).rows.first
+
+    assert_equal "claude-opus-4-8", row.model_id
+    assert_equal Analyzer::Memorization::MODELS["claude"][:model], row.model_id,
+                 "the id shown must be the string actually sent to the provider"
+  end
+
   # A source that was never probed is not a zero. Drawing it as one turns "not asked" into "not
   # memorized", which is the overclaim this whole tool exists to avoid.
   test "a source that was never probed reads as not asked, not as zero" do

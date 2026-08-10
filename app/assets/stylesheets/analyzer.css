@@ -405,9 +405,15 @@
 .recall__collabel { display: block; font-size: .85rem; font-weight: 650; }
 .recall__colsub { display: block; font-size: .72rem; color: var(--text-soft); font-weight: 400; }
 .recall__col--yours { border-bottom: 2px solid var(--accent); }
-.recall__col--reference { border-bottom: 2px solid var(--ok); }
-.recall__col--control { border-bottom: 2px solid var(--line-strong); }
-.recall__model { text-align: left; font-size: .9rem; font-weight: 650; white-space: nowrap; }
+/* Family name over the exact model id. The id is what makes a number reproducible: "Claude Opus"
+   will point at different weights in six months. */
+.recall__model { text-align: left; white-space: nowrap; padding-right: .9rem; }
+.recall__modelname { display: block; font-size: .9rem; font-weight: 650; }
+/* border: 0 is load-bearing. The design system gives every <code> a 1px border, which on a block
+   element stretched a box the full width of the column and read as an empty input. */
+.recall__modelid { display: block; font-family: var(--font-mono, monospace); font-size: .68rem;
+  font-weight: 400; color: var(--text-soft); background: none; border: 0; padding: 0;
+  border-radius: 0; }
 
 /* Bar and number on ONE line, with the bar in a fixed-width track. Stacked, the number sat under
    its own bar and every cell read as two separate facts. The track is what lets the bar keep a
@@ -418,26 +424,14 @@
 .bar { display: block; height: .5rem; border-radius: 3px; width: var(--bar, 0%); min-width: 2px;
   background: var(--line-strong); }
 .recall__cell--yours .bar { background: var(--accent); }
-.recall__cell--reference .bar { background: var(--ok); }
-.recall__cell--control .bar { background: var(--text-soft); }
 .bar--none { opacity: .35; }
 .bar__value { font-family: var(--font-mono, monospace); font-size: .8rem;
   font-variant-numeric: tabular-nums; }
 .bar__value--muted { color: var(--text-soft); font-size: .72rem; }
 
-/* The sentence and the swatches are separate paragraphs. Sharing one flex row put "your text" at
-   the end of the sentence line and wrapped the other two underneath, so the key read as part of
-   the prose. */
 .recall__legend { font-size: .85rem; color: var(--text-soft); margin: 0;
   max-width: var(--measure, 68ch); }
 .recall__legend strong { color: var(--text); }
-.recall__keys { font-size: .82rem; color: var(--text-soft); display: flex; gap: 1.1rem;
-  flex-wrap: wrap; align-items: center; margin: .4rem 0 0; }
-.recall__key { display: inline-flex; align-items: center; gap: .3rem; }
-.swatch { width: .7rem; height: .45rem; border-radius: 2px; display: inline-block; }
-.swatch--yours { background: var(--accent); }
-.swatch--reference { background: var(--ok); }
-.swatch--control { background: var(--text-soft); }
 
 .recall__controls { font-size: .85rem; margin: .6rem 0 0; padding: .5rem .8rem;
   border-radius: var(--radius, 10px); background: var(--code-bg); }
