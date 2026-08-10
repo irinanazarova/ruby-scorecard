@@ -167,6 +167,14 @@
       <a href="/learn#memorization">What this can and cannot prove &rarr;</a>
     </p>
 
+    <%# The evidence for the numbers above: the exact prefix each model was shown, what actually
+        followed, and what it wrote. Collapsed, because most visitors want the answer and the ones
+        who want to disbelieve it should not have to go hunting for the working. Sits here, directly
+        under the claim and above the box that invites another go. %>
+    <% if grid.evidence.present? %>
+      <%= render "analyses/probe_evidence", result: grid.evidence, open: false %>
+    <% end %>
+
     <%# Checking a second paragraph is the obvious next move from a result, and until now it meant
         navigating back to the form. Paragraph only: this runs the probe and nothing else, so it
         costs one model call per model rather than a full analysis, and it does not carry the docs

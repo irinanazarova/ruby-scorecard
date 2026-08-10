@@ -1,0 +1,50 @@
+<%# Exactly what was sent and exactly what came back, per passage and per model.
+    Locals: result (the memorization payload), open (whether to expand it).
+
+    Extracted so the recall slide and the working-appendix tile cannot drift apart. It renders in
+    two places on one page, which is why the controls block carries NO id: it had one, and a second
+    copy would have put a duplicate id in the document.
+
+    This is the part that makes the number checkable. A grid of bar lengths is a claim; the prefix,
+    the true continuation and the matched span are the evidence for it, and anyone who wants to
+    disbelieve a result should be able to read what produced it. %>
+<details class="probe-evidence" <%= "open" if open %>>
+  <summary>Show exactly what we tested</summary>
+
+  <%# Grouped by SOURCE as well as offset. Both halves of the input are probed, and their word
+      offsets collide constantly: two unrelated passages were being merged into one box and shown
+      under a single prefix. %>
+  <% Array(result[:probes]).group_by { |p| [ p[:source].to_s, p[:offset] ] }.each do |(source, offset), probes| %>
+    <div class="probe">
+      <p class="probe__label">
+        <span class="tag tag--source"><%= { "repo" => "your repo", "docs" => "your docs" }.fetch(source, "your paragraph") %></span>
+        <%= probes.first[:source_label] %>, from word <%= offset %>
+      </p>
+      <p class="probe__prefix"><em>We showed the model:</em> &ldquo;&hellip;<%= probes.first[:prefix] %>&rdquo;</p>
+      <p class="probe__truth"><em>What actually follows:</em> &ldquo;<%= probes.first[:truth] %>&hellip;&rdquo;</p>
+      <table class="probe__models">
+        <% probes.each do |p| %>
+          <tr class="probe__row probe__row--<%= p[:verdict] %>">
+            <th><%= p[:provider] %></th>
+            <td><%= p[:run] %> words</td>
+            <td><%= p[:verdict] %></td>
+            <td class="probe__matched">
+              <%= p[:matched].present? ? "“#{p[:matched]}”" : "—" %>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    </div>
+  <% end %>
+
+  <p class="probe__controls">
+    <strong>Controls:</strong>
+    <% Array(result[:controls]).each do |c| %>
+      <span class="tag tag--<%= c[:verdict] == "strong" ? "ok" : "muted" %>">
+        <%= c[:provider] %> <%= c[:kind] == "control+" ? "MIT" : "fabricated" %>: <%= c[:verdict] %>
+      </span>
+    <% end %>
+    <small>The MIT licence must fire and the invented passage must not. If they misbehave, nothing
+    above is interpretable.</small>
+  </p>
+</details>

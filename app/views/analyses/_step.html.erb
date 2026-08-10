@@ -47,45 +47,7 @@
         <% end %>
       </p>
 
-      <details class="step__detail" <%= "open" if summary[:verdict] != "none" %>>
-        <summary>Show exactly what we tested</summary>
-        <%# Grouped by SOURCE as well as offset. Both halves of the input are probed now, and their
-            word offsets collide constantly: two unrelated passages were being merged into one box
-            and shown under a single prefix. %>
-        <% Array(result[:probes]).group_by { |p| [p[:source].to_s, p[:offset]] }.each do |(source, offset), probes| %>
-          <div class="probe">
-            <p class="probe__label">
-              <span class="tag tag--source"><%= source == "repo" ? "your repo" : "your docs" %></span>
-              <%= probes.first[:source_label] %>, from word <%= offset %>
-            </p>
-            <p class="probe__prefix"><em>We showed the model:</em> &ldquo;&hellip;<%= probes.first[:prefix] %>&rdquo;</p>
-            <p class="probe__truth"><em>What actually follows:</em> &ldquo;<%= probes.first[:truth] %>&hellip;&rdquo;</p>
-            <table class="probe__models">
-              <% probes.each do |p| %>
-                <tr class="probe__row probe__row--<%= p[:verdict] %>">
-                  <th><%= p[:provider] %></th>
-                  <td><%= p[:run] %> words</td>
-                  <td><%= p[:verdict] %></td>
-                  <td class="probe__matched">
-                    <%= p[:matched].present? ? "“#{p[:matched]}”" : "—" %>
-                  </td>
-                </tr>
-              <% end %>
-            </table>
-          </div>
-        <% end %>
-
-        <p class="probe__controls" id="controls">
-          <strong>Controls:</strong>
-          <% Array(result[:controls]).each do |c| %>
-            <span class="tag tag--<%= c[:verdict] == "strong" ? "ok" : "muted" %>">
-              <%= c[:provider] %> <%= c[:kind] == "control+" ? "MIT" : "fabricated" %>: <%= c[:verdict] %>
-            </span>
-          <% end %>
-          <small>The MIT license must fire and the invented passage must not. If they misbehave,
-          nothing above is interpretable.</small>
-        </p>
-      </details>
+      <%= render "analyses/probe_evidence", result: result, open: summary[:verdict] != "none" %>
     <% end %>
 
   <% elsif step.to_sym == :code_channel && result[:present] == false %>

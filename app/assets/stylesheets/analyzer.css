@@ -523,8 +523,17 @@
 .verdict--partial { border-left: 3px solid var(--warn); }
 .verdict--strong { border: 1px solid var(--ok); }
 
-.step__detail { margin-top: .5rem; font-size: .9rem; }
-.step__detail > summary { cursor: pointer; font-weight: 600; }
+/* The "show exactly what we tested" panel. Renders in two places, so it is styled by its own class
+   rather than by the step tile it used to live inside. On the recall slide it is a standalone
+   panel; inside the working appendix it sits within a tile that already has a border, hence the
+   border only in the first case. */
+.probe-evidence { margin-top: .5rem; font-size: .9rem; }
+.probe-evidence > summary { cursor: pointer; font-weight: 600; }
+.recall .probe-evidence { margin-top: 1.5rem; border: 1px solid var(--line);
+  border-radius: var(--radius, 10px); padding: .75rem 1rem; background: var(--surface); }
+.recall .probe-evidence > summary { color: var(--text-soft); font-weight: 650; }
+.recall .probe-evidence[open] > summary { margin-bottom: .6rem;
+  border-bottom: 1px solid var(--line); padding-bottom: .5rem; }
 .probe { border-top: 1px solid var(--line); padding: .8rem 0; }
 .probe__label { font-weight: 600; font-size: .85rem; margin: 0 0 .4rem; }
 .probe__prefix, .probe__truth { font-family: var(--font-mono, monospace); font-size: .78rem;

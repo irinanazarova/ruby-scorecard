@@ -50,6 +50,11 @@ module Analyzer
 
     def threshold = Memorization::STRONG_RUN
 
+    # The raw probe payload, for the "show exactly what we tested" panel. Exposed here rather than
+    # letting the view dig through payloads, so the one place that knows the stored shape stays the
+    # one place. Returns nil until the probe answers.
+    def evidence = memorization
+
     def columns
       @columns ||= own_columns
     end
