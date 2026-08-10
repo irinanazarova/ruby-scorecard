@@ -73,7 +73,7 @@
         <% when "funnel" %>
           <%= render "analyses/funnel", payloads: stored %>
         <% when "recall" %>
-          <%= render "analyses/recall", payloads: stored %>
+          <%= render "analyses/recall", payloads: stored, analysis: @analysis %>
         <% when "actions" %>
           <%= render "analyses/actions", payloads: stored %>
         <% end %>

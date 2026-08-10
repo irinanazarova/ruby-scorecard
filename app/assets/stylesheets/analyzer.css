@@ -394,7 +394,52 @@
  * Models down the side, your text and the reference pages across the top. One shared scale across
  * the whole grid, because per-row scaling would make a 2-word run and a 31-word run look alike.
  */
-.recall__waiting { font-size: .92rem; color: var(--text-soft); }
+/* --- waiting on the probe ----------------------------------------------------------------------
+ *
+ * The one wait on this page long enough to look like a hangup: 9 to 12 real model calls, 60 to 140
+ * seconds. It gets a spinner, a running clock and a bar, because a static sentence for that long is
+ * indistinguishable from a page that has died.
+ *
+ * Sized to roughly the height the grid will occupy, so the answer landing does not shove the rest of
+ * the page down.
+ */
+.recall__waiting { font-size: .92rem; color: var(--text-soft); border: 1px solid var(--line);
+  border-radius: var(--radius, 10px); padding: 1rem 1.1rem; background: var(--surface); }
+.recall__waithead { display: flex; align-items: center; gap: .6rem; }
+.recall__waittitle { font-weight: 650; color: var(--text); }
+/* Tabular figures, or the whole line jitters sideways once a second as the digits change. */
+.recall__clock { margin-left: auto; font-family: var(--font-mono, monospace); font-size: .85rem;
+  font-variant-numeric: tabular-nums; color: var(--text); }
+
+.recall__progress { height: .35rem; border-radius: 999px; background: var(--code-bg);
+  margin: .8rem 0 .6rem; overflow: hidden; }
+.recall__progress::after { content: ""; display: block; height: 100%; width: var(--progress, 0%);
+  background: var(--accent); border-radius: 999px; transition: width 1s linear; }
+/* Amber past the expected time: still running, no longer typical. */
+.recall__progress--over::after { background: var(--warn); }
+
+.recall__waitnote { font-size: .85rem; margin: 0; }
+.recall__waitmodels { list-style: none; padding: 0; margin: .7rem 0 0; display: flex;
+  flex-wrap: wrap; gap: .4rem .9rem; font-size: .8rem; }
+.recall__waitmodels li { display: inline-flex; align-items: center; gap: .35rem; }
+.recall__waitmodels code { font-size: .72rem; background: var(--code-bg); border: 0;
+  border-radius: 4px; padding: .05rem .35rem; color: var(--text-soft); }
+.recall__waitdot { width: .4rem; height: .4rem; border-radius: 50%; background: var(--accent);
+  opacity: .5; animation: recall-pulse 1.4s ease-in-out infinite; }
+
+.spinner { width: 1rem; height: 1rem; border-radius: 50%; flex: none;
+  border: 2px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  border-top-color: var(--accent); animation: spin .8s linear infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes recall-pulse { 0%, 100% { opacity: .25; } 50% { opacity: .9; } }
+
+/* Motion here is decoration, and a spinner is the classic trigger. The clock still counts, so
+   nothing that carries information is lost. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner, .recall__waitdot { animation: none; }
+  .recall__progress::after { transition: none; }
+}
 .recall__scroll { overflow-x: auto; margin: 0 0 .8rem; }
 .recall__grid { border-collapse: collapse; width: 100%; min-width: 40rem; }
 .recall__grid th, .recall__grid td { padding: .5rem .6rem; border-bottom: 1px solid var(--line);

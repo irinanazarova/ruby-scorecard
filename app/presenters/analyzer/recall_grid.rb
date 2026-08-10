@@ -33,6 +33,19 @@ module Analyzer
     # bar and read as a hit.
     MIN_SCALE = Memorization::STRONG_RUN * 2
 
+    # What a healthy run takes, for the progress bar shown while waiting. Measured rather than
+    # guessed: 9 to 12 model calls land in 60 to 140 seconds, so this is the middle of that. It is
+    # deliberately NOT the deadline (AnalyzerConfig.memorization_deadline, 180s): filling a bar
+    # against the give-up time would show a normal run as a third complete and read as slow.
+    EXPECTED_SECONDS = 90
+
+    # Which models this run WILL probe, for the waiting state. Read from the configured models
+    # rather than from results, because while waiting there are no results to read: the point is to
+    # say what is being waited on.
+    def expected_models
+      Memorization::MODELS.values_at(*Memorization.available_models).compact
+    end
+
     def ready? = memorization.present?
 
     def threshold = Memorization::STRONG_RUN

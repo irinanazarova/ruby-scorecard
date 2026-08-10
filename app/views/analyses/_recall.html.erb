@@ -7,8 +7,39 @@
   <%= render "analyses/answer", answer: Analyzer::Verdict.new(payloads).training_answer %>
 
   <% if !grid.ready? %>
-    <p class="recall__waiting">Probing each passage against every model. This is the slow part:
-    9 to 12 calls, about a minute and a half.</p>
+    <%# The one wait on this page long enough to look like a hangup: 9 to 12 real model calls, 60 to
+        140 seconds. A single static sentence for that long is indistinguishable from a broken page,
+        so this states what is running, which models it is running against, and how far through the
+        expected time it is. Elapsed counts from the run's created_at, so a reload shows the true
+        wait rather than restarting at zero. %>
+    <div class="recall__waiting"
+         data-controller="elapsed"
+         data-elapsed-started-at-value="<%= (analysis&.created_at || Time.current).to_i %>"
+         data-elapsed-expected-value="<%= Analyzer::RecallGrid::EXPECTED_SECONDS %>"
+         data-elapsed-deadline-value="<%= AnalyzerConfig.memorization_deadline %>">
+      <div class="recall__waithead">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="recall__waittitle">Probing each passage against every model</span>
+        <span class="recall__clock" data-elapsed-target="clock" aria-live="off">0s</span>
+      </div>
+
+      <div class="recall__progress" data-elapsed-target="bar"
+           role="progressbar" aria-label="Probe progress"></div>
+
+      <p class="recall__waitnote" data-elapsed-target="note">
+        The slow part: <%= Analyzer::RecallGrid::EXPECTED_SECONDS %> seconds is normal, because every
+        number here is a real model call rather than a lookup.
+      </p>
+
+      <% if grid.expected_models.any? %>
+        <ul class="recall__waitmodels">
+          <% grid.expected_models.each do |model| %>
+            <li><span class="recall__waitdot"></span><%= model[:label] %>
+              <code><%= model[:model] %></code></li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
   <% else %>
     <% scale = grid.scale %>
     <div class="recall__scroll">

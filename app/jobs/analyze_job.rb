@@ -97,7 +97,8 @@ class AnalyzeJob < ApplicationJob
     payloads = results.stringify_keys
     LIVE_REGIONS.each do |target, partial|
       Turbo::StreamsChannel.broadcast_replace_to(
-        analysis, target: target, partial: partial, locals: { payloads: payloads }
+        analysis, target: target, partial: partial,
+        locals: { payloads: payloads, analysis: analysis }
       )
     end
   end
