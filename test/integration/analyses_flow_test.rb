@@ -54,9 +54,13 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
     assert_match "free checks left", response.body
   end
 
+  # Re-rendered, not redirected. A redirect throws the request away, so someone who pasted six
+  # paragraphs and mistyped a URL lost all of it. 422 is what makes Turbo Drive replace the page at
+  # all: on a 2xx it discards the body and the visitor sees an unchanged form with no errors.
   test "rejects input that is neither a URL nor a repo" do
-    post "/analyses", params: { input: "not a url at all" }
-    assert_redirected_to test_path
+    post "/analyses", params: { docs_url: "not a url at all" }
+    assert_response :unprocessable_entity
+    assert_match "not a url at all", response.body, "the rejected value must survive the round trip"
     assert_equal 0, Analysis.count
   end
 
@@ -290,11 +294,27 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
     refute_match "Ship a sitemap.xml", response.body
   end
 
+  # The server refuses it whatever the browser did. The word counter disables the button, but that
+  # is enhancement: with JavaScript off, or against a scripted post, this is the check that holds.
   test "a paragraph too short to split is refused before anything is created" do
     post "/analyses", params: { passage: "far too short to probe" }
-    assert_redirected_to test_path
-    assert_match(/at least/, flash[:alert])
+    assert_response :unprocessable_entity
+    assert_match(/at least #{Analyzer::Passage::MIN_PASTED_WORDS}/, response.body)
+    assert_match "far too short to probe", response.body, "the paragraph must survive the round trip"
     assert_equal 0, Analysis.count
+  end
+
+  # An error has to say WHICH box is wrong. A single flash at the top of a three-field form makes
+  # the visitor guess, and the guess is often the field they got right.
+  test "an error lands on the field that caused it" do
+    post "/analyses", params: { docs_url: "https://example.com/docs", repo: "not a slug" }
+    assert_response :unprocessable_entity
+
+    assert_equal [], AnalysisForm.new(repo: "not a slug").errors[:docs_url]
+    form = AnalysisForm.new(docs_url: "https://example.com/docs", repo: "not a slug")
+    form.valid?
+    assert_empty form.errors[:docs_url], "the good field must not be blamed"
+    assert_not_empty form.errors[:repo]
   end
 
   # The listed examples are the tour: clicking all four must never cost a visitor their allowance

@@ -88,6 +88,14 @@
   font-variant-numeric: tabular-nums; color: var(--text-soft); white-space: nowrap; }
 .wordcount--short { color: var(--warn); }
 .wordcount--ok { color: var(--ok); }
+
+/* Why the button is dead, next to the button. A disabled control with its reason somewhere else on
+   the page is the same as a broken one. */
+.probe-form__reason { font-size: .82rem; color: var(--warn); font-weight: 600; }
+
+/* Disabled says "read the counter", so it stays visible and obviously inert rather than hidden. */
+.probe-form input[type="submit"]:disabled { background: var(--line-strong);
+  border-color: var(--line-strong); color: var(--bg); cursor: not-allowed; }
 .probe-form__submit { grid-column: 1 / -1; display: flex; align-items: center; gap: .8rem;
   flex-wrap: wrap; }
 
@@ -810,3 +818,16 @@
    than being hidden until the paragraph is long enough. */
 .recheck__go input[type="submit"]:disabled { background: var(--line-strong);
   border-color: var(--line-strong); color: var(--bg); cursor: not-allowed; }
+
+/* --- form validation ---------------------------------------------------------------------------
+ *
+ * Server-rendered, next to the field that caused them. The Stimulus counter is enhancement on top;
+ * these are what a visitor sees with JavaScript off, and what they see when the client and the
+ * server ever disagree.
+ */
+.form-errors { border: 1px solid var(--bad); border-left-width: 3px;
+  border-radius: var(--radius, 10px); background: color-mix(in srgb, var(--bad) 8%, var(--surface));
+  padding: .7rem 1rem; margin: 1.25rem 0 0; }
+.form-errors p { margin: 0; font-size: .9rem; color: var(--text); }
+.field-error { display: block; font-size: .82rem; color: var(--bad); font-weight: 600;
+  margin-top: .1rem; }

@@ -1,0 +1,5 @@
+<%# Errors for one field, under that field. Locals: messages.
+    Silent when there are none, so every field can render it unconditionally. %>
+<% if messages.any? %>
+  <span class="field-error" role="alert"><%= messages.to_sentence %></span>
+<% end %>

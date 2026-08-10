@@ -30,19 +30,30 @@ class AnalysesController < ApplicationController
              with: -> { too_many_requests("Daily limit reached for this network.") }
 
   def new
+    @form ||= AnalysisForm.new(docs_url: params[:docs_url], repo: params[:repo],
+                               passage: params[:passage])
     @recent = Analysis.where(session_token: session_token).recent.limit(5)
     @examples = Analyzer::Example.all
   end
 
   def create
-    target = build_target
-    return redirect_to(test_path, alert: target.error) unless target.valid?
+    @form = form
 
+    # Re-render rather than redirect, so nothing the visitor typed is thrown away, and the errors
+    # land next to the fields that caused them.
+    #
+    # :unprocessable_entity is load-bearing. Turbo Drive only replaces the page from a form
+    # submission on a non-2xx response; return 200 here and it discards this body, leaving an
+    # unchanged form with no errors on it and no clue why nothing happened.
+    return render_form_errors unless @form.valid?
+
+    # A quota refusal is not a field being wrong, so it stays a flash rather than becoming an error
+    # on a box the visitor filled in correctly.
     if (denial = policy.run(free: free_run?))
       return redirect_to(test_path, alert: denial_message(denial))
     end
 
-    analysis = Analyses::StartRun.call(target: target, free: free_run?, user: current_user,
+    analysis = Analyses::StartRun.call(target: @form.target, free: free_run?, user: current_user,
                                        session_token: session_token, ip_hash: ip_hash)
     redirect_to analysis
   end
@@ -75,21 +86,31 @@ class AnalysesController < ApplicationController
   def free_run?
     return @free_run if defined?(@free_run)
 
-    @free_run = Analyzer::RunCost.free?(build_target)
+    @free_run = Analyzer::RunCost.free?(form.target)
   end
 
   # Two named fields now, and the form still accepts a single `input` so an old bookmark or a linked
-  # example keeps working. Memoized because both the rate-limit guard and #create ask for it, and
-  # parsing twice let them disagree about what was being run.
-  def build_target
-    @build_target ||=
+  # example keeps working. Params stay FLAT (docs_url, not analysis_form[docs_url]) because linked
+  # examples, old bookmarks and the tests all post them that way; the form object is here for
+  # validation and error placement, not to rename the interface.
+  #
+  # Memoized because the rate-limit guard and #create both ask, and building it twice let them
+  # disagree about what was being run.
+  def form
+    @form ||=
       if params[:input].present? && params[:docs_url].blank? && params[:repo].blank? &&
          params[:passage].blank?
-        Analyzer::Target.from_input(params[:input])
+        legacy = Analyzer::Target.from_input(params[:input])
+        AnalysisForm.new(docs_url: legacy.url, repo: legacy.repo, passage: legacy.passage)
       else
-        Analyzer::Target.new(docs_url: params[:docs_url], repo: params[:repo],
-                             passage: params[:passage])
+        AnalysisForm.new(docs_url: params[:docs_url], repo: params[:repo],
+                         passage: params[:passage])
       end
+  end
+
+  def render_form_errors
+    new
+    render :new, status: :unprocessable_entity
   end
 
   def too_many_requests(message)
