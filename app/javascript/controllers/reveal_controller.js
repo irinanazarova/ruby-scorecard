@@ -37,10 +37,20 @@ export default class extends Controller {
     this.next()
   }
 
+  // render() is called explicitly before scrolling, and that is the whole trick.
+  //
+  // Assigning to a Stimulus value writes a data attribute, and revealedValueChanged fires from the
+  // MutationObserver that watches it — on a microtask, AFTER this method finishes. So the scroll ran
+  // while the slide it was scrolling to was still display:none, and scrolling to a hidden element
+  // does nothing at all. The reveal worked, the page just never moved.
+  //
+  // Calling render() here un-hides the slide first. The second call from the value callback is
+  // idempotent and costs nothing.
   next() {
     if (this.revealedValue >= this.stageTargets.length) return
 
     this.revealedValue += 1
+    this.render()
     this.scrollTo(this.stageTargets[this.revealedValue - 1])
   }
 
@@ -48,6 +58,7 @@ export default class extends Controller {
     if (this.revealedValue <= 1) return
 
     this.revealedValue -= 1
+    this.render()
     this.scrollTo(this.stageTargets[this.revealedValue - 1])
   }
 
@@ -60,6 +71,11 @@ export default class extends Controller {
 
     const tag = document.activeElement?.tagName
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return
+
+    // Enter and Space on a focused button already fire a click, which advances on its own. Without
+    // this, pressing Enter right after clicking Next skipped two slides at once.
+    const onButton = document.activeElement?.tagName === "BUTTON"
+    if (onButton && ["Enter", " "].includes(event.key)) return
 
     if (["ArrowRight", "PageDown", "Enter", " "].includes(event.key)) {
       event.preventDefault()
@@ -97,16 +113,28 @@ export default class extends Controller {
     if (this.hasAllTarget) this.allTarget.hidden = done
   }
 
-  // render() has already removed the hidden class by the time this runs, and reading the element's
-  // box forces the layout that makes the new position real, so the scroll needs no deferral.
+  // Getting the page to actually move took three goes, so the reasons are worth keeping:
   //
-  // It used to sit inside requestAnimationFrame, which does not fire while a tab is in the
-  // background: reveal one slide, switch tabs, come back, and the deck had advanced without ever
-  // moving.
+  //   1. It sat inside requestAnimationFrame, which does not fire in a background tab: reveal a
+  //      slide, switch away, come back, and the deck had advanced without ever scrolling.
+  //   2. Without that accidental delay, the scroll ran BEFORE Stimulus's mutation observer had
+  //      called render(), so it was scrolling to an element that was still display:none. Callers
+  //      now render() first.
+  //   3. `behavior: "smooth"` is silently dropped in some browsers and settings: measured here,
+  //      an instant scroll moved to 1642 and the identical smooth scroll moved nothing at all.
+  //
+  // So the smooth scroll is attempted and then CHECKED, and if the page has not moved it is set
+  // outright. An animation is a nicety; arriving at the slide is the feature.
   scrollTo(stage) {
     if (!stage) return
 
-    stage.getBoundingClientRect()
-    stage.scrollIntoView({ behavior: "smooth", block: "start" })
+    const from = window.scrollY
+    // scroll-margin-top on .stage does not apply to a computed window scroll, so leave the gap here.
+    const top = Math.max(0, from + stage.getBoundingClientRect().top - 16)
+
+    window.scrollTo({ top, behavior: "smooth" })
+    setTimeout(() => {
+      if (Math.abs(window.scrollY - from) < 4) window.scrollTo({ top, behavior: "auto" })
+    }, 250)
   }
 }
