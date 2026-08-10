@@ -73,6 +73,11 @@
         <a href="#copies">Data &rarr;</a></span>
       </li>
       <li>
+        <strong>Close issues with fix PRs that carry a regression test.</strong>
+        <span class="learn__why">That exact linkage is what SWE-bench-style pipelines mine into
+        RL training tasks. <a href="#harvest-filters">The five filters &rarr;</a></span>
+      </li>
+      <li>
         <strong>Open posts with what the reader will learn.</strong>
         <span class="learn__why">Only the first ~512 tokens are scored.
         <a href="#quality-filter">What scores &rarr;</a></span>
@@ -498,6 +503,39 @@
       under MIT, copied into roughly 1,840 repositories. Supabase's Row Level Security guide sits
       in the same repo with no recall. Snippets get copied; prose gets paraphrased.
     </p>
+
+    <h3 id="harvest-filters">Five filters decide whether a repo becomes RL training tasks</h3>
+    <p class="learn__note">
+      Agentic RL trains on verifiable tasks mined from repos: an issue, the PR that fixed it, and
+      a test that fails before the fix and passes after
+      (<a href="https://arxiv.org/abs/2310.06770" rel="noopener">SWE-bench</a>). The mining is
+      mechanical, so each step is a filter a repo passes or fails:
+    </p>
+    <ol class="learn__steps">
+      <li><strong>Enough stars to get scanned.</strong>
+        <a href="https://www.swebench.com/multilingual.html" rel="noopener">SWE-bench
+        Multilingual</a> starts from the top-100 most-starred repos per language.</li>
+      <li><strong>A test command a script can derive.</strong> Build and test commands are read
+        from the contribution docs and the CI workflow files. A suite that only a maintainer knows
+        how to run yields nothing.</li>
+      <li><strong>Tests that build and finish.</strong> About 30% of candidate repos are discarded
+        because they will not build locally, build too slowly, or run their tests too long.</li>
+      <li><strong>A container-reproducible environment.</strong> Each task is rebuilt in layered
+        Docker images (base, environment, instance).</li>
+      <li><strong>Merged PRs that close an issue and modify tests.</strong> Each such PR is the raw
+        material of one task. A repo whose fixes never reference an issue yields zero tasks,
+        whatever the quality of its code.</li>
+    </ol>
+    <p class="learn__note">
+      We <a href="/#products">measured the top-starred open-source Rails products</a> against these
+      filters. The last one is where they fail: 6 of 17 merged even one issue-closing,
+      test-touching PR in their last 50, and 5 of 17 have GitHub issues disabled (Discourse and
+      OpenProject triage on their own forums; GitLab and Redmine are mirrors of development that
+      happens elsewhere). The runtime filter bites too: Zammad's suite runs a 93-minute median.
+      Ruby is one of SWE-bench Multilingual's 9 languages, and it is absent from
+      <a href="https://arxiv.org/abs/2504.02605" rel="noopener">Multi-SWE-bench</a> and its
+      Multi-SWE-RL training community, whose task pipeline is open to contributions.
+    </p>
   </section>
 
   <%# --- 3. retrieval ------------------------------------------------------------------------ %>
@@ -783,6 +821,13 @@
         crawls GitHub directly, using the SWH graph as one seed list). Archival runs through
         listers and explicit save requests, so a popular permissive repo can simply be absent.</dd>
 
+      <dt id="swe-bench-family">SWE-bench family</dt>
+      <dd>Agentic coding benchmarks and RL training sets mined from GitHub: an issue, the PR that
+        fixed it, and a test that fails before the fix and passes after make one verifiable task.
+        SWE-bench is Python-only; SWE-bench Multilingual spans 9 languages including Ruby;
+        Multi-SWE-bench covers 7 languages without Ruby, and its Multi-SWE-RL community collects
+        RL training instances through an open pipeline.</dd>
+
       <dt id="ccbot">CCBot</dt>
       <dd>Common Crawl's crawler, operated by no AI lab. Blocking it in <code>robots.txt</code>
         removes you from future crawls and from the corpora built on them.</dd>
@@ -842,6 +887,10 @@
           <a href="https://developers.openai.com/api/docs/bots" rel="noopener">OpenAI</a> ·
           <a href="https://developers.google.com/search/docs/crawling-indexing/google-common-crawlers" rel="noopener">Google</a> ·
           <a href="https://www.seroundtable.com/google-does-not-endorse-llms-txt-40789.html" rel="noopener">Google on llms.txt</a></li>
+        <li><strong>RL harvest:</strong>
+          <a href="https://arxiv.org/abs/2310.06770" rel="noopener">SWE-bench</a> ·
+          <a href="https://www.swebench.com/multilingual.html" rel="noopener">SWE-bench Multilingual</a> ·
+          <a href="https://arxiv.org/abs/2504.02605" rel="noopener">Multi-SWE-bench / Multi-SWE-RL</a></li>
         <li><strong>Licences:</strong>
           <a href="https://choosealicense.com/no-permission/" rel="noopener">No permission</a> ·
           <a href="https://docs.github.com/en/search-github/searching-on-github/searching-for-repositories" rel="noopener">GitHub repo search</a></li>

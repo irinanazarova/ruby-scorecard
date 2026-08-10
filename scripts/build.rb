@@ -501,7 +501,7 @@ else
   end.join("\n")
 
   <<PROD
-<section>
+<section id="products">
 <h2><span class="num">02</span>Rails products, tested against the harvest filters</h2>
 <p class="note">The table above tracks documentation. Models also learn Rails from complete
 applications, and agentic RL pipelines mine them mechanically. The
