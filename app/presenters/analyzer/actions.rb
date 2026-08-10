@@ -207,14 +207,28 @@ module Analyzer
                anchor: "clean-text", anchor_label: "content negotiation and markdown twins")
     end
 
+    # Low, not medium, and the demotion is the honest part.
+    #
+    # This item used to promise that "crawlers reach deep pages far less often" without a sitemap,
+    # which is a causal claim we had no source for. Checking it against our own 93 resources found
+    # no effect worth acting on: the 57 with a sitemap have a median of 27 pages in Common Crawl
+    # against 6 for the 36 without, but the distributions overlap so heavily that a random
+    # with-sitemap site beats a random without only 60% of the time (p ~ 0.12), and the share with
+    # no coverage at all is the same either way. Common Crawl's own prioritisation is by harmonic
+    # centrality, which predicts exactly that.
+    #
+    # So it stays on the list, because CCBot genuinely reads sitemaps and shipping one is an hour's
+    # work, and it ranks below anything with a measured effect.
     def sitemap_item
       return nil unless pass?("retrieval", "Sitemap") == false
 
-      Item.new(key: :sitemap, impact: :medium,
+      Item.new(key: :sitemap, impact: :low,
                title: "Ship a sitemap.xml",
-               why: "Without one, crawlers reach deep pages far less often, and the pages they " \
-                    "miss are the new ones you most want read.",
-               anchor: "sitemap", anchor_label: "crawl budget")
+               why: "CCBot reads the sitemap declared in robots.txt, so a listed URL can be found " \
+                    "without an inbound link. Worth the hour, but not a lever: across our own 93 " \
+                    "resources, having one made no measurable difference to Common Crawl coverage. " \
+                    "Click depth and inbound links are what centrality reads.",
+               anchor: "sitemap", anchor_label: "what a sitemap does and does not do")
     end
 
     # --- the repo as an agent reads it -----------------------------------------------------------

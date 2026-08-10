@@ -595,9 +595,28 @@
         parses your theme.</li>
     </ul>
 
-    <h3 id="sitemap">Crawl budget decides which pages exist to be found</h3>
+    <h3 id="sitemap">A sitemap gets URLs discovered; centrality decides what gets crawled</h3>
     <ul class="learn__facts">
-      <li>Without <code>sitemap.xml</code>, crawlers reach deep pages far less often.</li>
+      <li>CCBot reads sitemaps.
+        <a href="https://commoncrawl.org/ccbot" rel="noopener">Common Crawl documents</a> that its
+        crawler supports the Sitemap Protocol and uses any sitemap announced in
+        <code>robots.txt</code>. So the mechanism is real: a listed URL can be found without an
+        inbound link.</li>
+      <li>It does not decide what gets fetched. Common Crawl prioritises by
+        <strong>harmonic centrality</strong>, a measure of how close a page sits to the structural
+        core of the web. Being listed is not being chosen.</li>
+      <li><strong>We measured the effect and could not find one.</strong> Across the 93 resources on
+        the scorecard, the 57 with a sitemap have a median of 27 pages in Common Crawl and the 36
+        without have 6, but the distributions overlap heavily: a randomly chosen site with a sitemap
+        beats one without only 60% of the time (Mann-Whitney, p&nbsp;&asymp;&nbsp;0.12), and the
+        share with no coverage at all is the same either way (19% against 22%).</li>
+      <li>Google's guidance is conditional too.
+        <a href="https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview" rel="noopener">Its
+        documentation</a> says a sitemap helps a large site, a site with poorly linked pages, or a
+        new site with few external links, and that you may not need one for a site of "about 500
+        pages or fewer" whose pages are properly linked. That is about Search, not about corpora.</li>
+      <li>So: cheap, documented, worth shipping, and not a lever. Click depth and inbound links are
+        what centrality actually reads.</li>
       <li>Redirect moved URLs with <code>301</code>, cut click depth, earn links to what matters.</li>
     </ul>
 

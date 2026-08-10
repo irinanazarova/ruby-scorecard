@@ -66,8 +66,10 @@ module Analyzer
 
         item("Listed in sitemap.xml", pass?("retrieval", "Sitemap"),
              detail: detail("retrieval", "Sitemap"),
-             action: "Ship a sitemap.xml. Without one, crawlers reach deep pages far less often, " \
-                     "and the pages they miss are the new ones you most want read.",
+             action: "Ship a sitemap.xml. CCBot reads the one declared in robots.txt, so a listed " \
+                     "URL can be found without an inbound link. Cheap and worth doing, but not a " \
+                     "lever: across our own 93 resources it made no measurable difference to " \
+                     "Common Crawl coverage.",
              anchor: "sitemap", anchor_label: "crawl budget"),
 
         # Deliberately not a failure. It is widely adopted and currently used by no major AI system,

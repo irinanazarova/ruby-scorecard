@@ -31,7 +31,9 @@ module Analyzer
                      why: "A WAF or bot rule can block crawlers even when robots.txt allows them."),
           bool_check("Sitemap", sitemap?(root),
                      detail: sitemap?(root) ? "sitemap.xml found" : "no sitemap.xml",
-                     why: "Crawlers reach deep pages far less often without one."),
+                     why: "CCBot reads sitemaps declared in robots.txt, so a listed URL can be found without an " \
+                          "inbound link. It does not decide what gets fetched: Common Crawl prioritises by " \
+                          "harmonic centrality."),
           bool_check("Markdown content negotiation", md_negotiation,
                      detail: md_negotiation ? "serves text/markdown on Accept" : "returns HTML only",
                      why: "The durable way to hand agents clean text instead of rendered HTML."),
