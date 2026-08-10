@@ -179,6 +179,12 @@ GEM
       googleapis-common-protos-types (~> 1.0)
     hashie (5.1.0)
       logger
+    herb (0.10.3-aarch64-linux-gnu)
+    herb (0.10.3-aarch64-linux-musl)
+    herb (0.10.3-arm64-darwin)
+    herb (0.10.3-x86_64-darwin)
+    herb (0.10.3-x86_64-linux-gnu)
+    herb (0.10.3-x86_64-linux-musl)
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
     importmap-rails (2.2.3)
@@ -476,6 +482,7 @@ DEPENDENCIES
   bootsnap
   brakeman
   debug
+  herb
   importmap-rails
   nokogiri
   omniauth-github
@@ -562,6 +569,12 @@ CHECKSUMS
   grpc (1.83.0-x86_64-linux-gnu) sha256=25d66bfa3cb1b05258b3f9632478c7e7ceb52cb16ccc0b4b26d7df36be7158b1
   grpc (1.83.0-x86_64-linux-musl) sha256=a5023264dbb8038c23b147bbf80adb06932ef11b5ab493412e9e37a43114fa8c
   hashie (5.1.0) sha256=c266471896f323c446ea8207f8ffac985d2718df0a0ba98651a3057096ca3870
+  herb (0.10.3-aarch64-linux-gnu) sha256=1eaea87e6577557492a1b0ddaae989fba8a8ddd382e888ee5f939ce6ded06eb8
+  herb (0.10.3-aarch64-linux-musl) sha256=4ac7ccd194f8f284ffc7bf093676f5194cf0f44ea4a7d3888eac095e81c43e1f
+  herb (0.10.3-arm64-darwin) sha256=1a5bef57d925d775496328e7a01a9c1260e1d83bed8038b60a4f8c81b12c15a3
+  herb (0.10.3-x86_64-darwin) sha256=e02e43b3bb1977f4fd08f3330b5f2aa3292ca2d572a8bd59688eca8b79725f46
+  herb (0.10.3-x86_64-linux-gnu) sha256=cbb49b66f2bdc92d17109d1ea9452e88ba6a8ae52e9ddd5279deff83dcc4c66d
+  herb (0.10.3-x86_64-linux-musl) sha256=c84482d6b57f13c2e1a0fa029649efb0e5fdc876a3fd564bae09cf42bd4d5ae1
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
   importmap-rails (2.2.3) sha256=7101be2a4dc97cf1558fb8f573a718404c5f6bcfe94f304bf1f39e444feeb16a
   io-console (0.8.2) sha256=d6e3ae7a7cc7574f4b8893b4fca2162e57a825b223a177b7afa236c5ef9814cc

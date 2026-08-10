@@ -105,8 +105,8 @@
     <%# The controls are still probed on every run; they just no longer take two columns. This
         sentence IS the guarantee: without it a zero could mean "not memorized" or "the probe broke
         today" and there would be no way to tell them apart. %>
-    <% case grid.controls_ok?
-       when true %>
+    <% case grid.controls_ok? %>
+    <% when true %>
       <p class="recall__controls recall__controls--ok">
         Controls behaved on this run: the MIT licence text fired on every model and an invented
         passage fired on none. That is what makes a zero above readable as an answer rather than as

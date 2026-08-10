@@ -1,14 +1,23 @@
-<%# Overall progress. Kept separate so a step landing does not re-render the whole page. %>
+<%# Overall progress. Kept separate so a step landing does not re-render the whole page.
+
+    `case` gets its own ERB tag and each `when` gets another. Squeezed into a single tag with inline
+    `then` continuations it was unreadable, and Herb reports it as a parse error: a case with its
+    conditions inside one tag cannot be reliably parsed, compiled or formatted.
+
+    Careful in here: ERB comment delimiters do not nest, so writing a closing tag inside this text
+    ends the comment early and the rest becomes markup. That is what broke this file once already. %>
 <p class="status status--<%= analysis.status %>" id="analysis_status">
-  <% case analysis.status
-     when "pending" then %>Queued…<%
-     when "running" then %>Running. Fast checks appear first; Common Crawl and the model probes take longer.<%
-     when "done" then %>
-       Done<% if analysis.replayed? %>, replayed from cache<% end %>.
-       <% if analysis.cost_millicents.positive? %>
-         <small>Model spend: <%= (analysis.cost_millicents / 1000.0).round(3) %> dollars</small>
-       <% end %>
-     <%
-     when "failed" then %>Something failed. Partial results are shown below.<%
-     end %>
+  <% case analysis.status %>
+  <% when "pending" %>
+    Queued…
+  <% when "running" %>
+    Running. Fast checks appear first; Common Crawl and the model probes take longer.
+  <% when "done" %>
+    Done<% if analysis.replayed? %>, replayed from cache<% end %>.
+    <% if analysis.cost_millicents.positive? %>
+      <small>Model spend: <%= (analysis.cost_millicents / 1000.0).round(3) %> dollars</small>
+    <% end %>
+  <% when "failed" %>
+    Something failed. Partial results are shown below.
+  <% end %>
 </p>

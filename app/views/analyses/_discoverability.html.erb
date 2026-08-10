@@ -18,17 +18,15 @@
           <% end %>
         </header>
 
-        <% case col.state
-           when :missing %>
+        <% case col.state %>
+        <% when :missing %>
           <p class="axcol__empty">You left this box empty, so none of it was measured.
             <%= link_to "Run it again with both →", test_path %></p>
-
         <% when :waiting %>
           <ul class="checks checks--ghost">
             <% 5.times do %><li class="check check--waiting"><span class="check__mark">…</span>
               <span class="check__body"><span class="ghostbar"></span></span></li><% end %>
           </ul>
-
         <% when :error %>
           <p class="axcol__empty"><%= col.note %></p>
 

@@ -62,6 +62,9 @@ group :development, :test do
   gem "debug", platforms: %i[mri windows], require: "debug/prelude"
   gem "brakeman", require: false
   gem "rubocop-rails-omakase", require: false
+  # HTML-aware ERB parser, linter and formatter. Rubocop does not read .html.erb at all, so until
+  # now nothing checked the half of this app that is views, and it is a lot of views.
+  gem "herb", require: false
 end
 
 group :development do

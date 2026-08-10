@@ -67,8 +67,8 @@
         <h2 class="stage__title"><%= title %></h2>
         <p class="stage__lead"><%= lead %></p>
 
-        <% case key
-           when "agent" %>
+        <% case key %>
+        <% when "agent" %>
           <%= render "analyses/discoverability", payloads: stored %>
         <% when "funnel" %>
           <%= render "analyses/funnel", payloads: stored %>
