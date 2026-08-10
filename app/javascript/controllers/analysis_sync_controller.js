@@ -36,6 +36,11 @@ export default class extends Controller {
   ]
 
   connect() {
+    // The scroll guard runs even for a finished analysis, because a Turbo broadcast can still
+    // arrive after the page reads as done.
+    this.holdScroll = this.holdScroll.bind(this)
+    document.addEventListener("turbo:before-stream-render", this.holdScroll)
+
     if (this.statusValue === "done" || this.statusValue === "failed") return
 
     this.startedAt = Date.now()
@@ -44,6 +49,24 @@ export default class extends Controller {
 
   disconnect() {
     clearInterval(this.timer)
+    document.removeEventListener("turbo:before-stream-render", this.holdScroll)
+  }
+
+  // Keeps the page still while a region is swapped underneath the reader.
+  //
+  // The deck fills in as checks land, and a region that grows ABOVE the viewport pushes everything
+  // below it down: the page appears to scroll on its own while you are reading. It is not a scroll,
+  // it is a reflow, but it is indistinguishable from one and far more annoying, because it happens
+  // at a moment the reader did not choose.
+  //
+  // The only scrolling on this page should be the reveal controller's, on an explicit advance.
+  holdScroll() {
+    const y = window.scrollY
+    // Turbo swaps the element after this event, so the position is restored on the next task once
+    // the new markup has been laid out.
+    setTimeout(() => {
+      if (Math.abs(window.scrollY - y) > 1) window.scrollTo({ top: y, behavior: "auto" })
+    }, 0)
   }
 
   async poll() {
@@ -71,7 +94,11 @@ export default class extends Controller {
     const current = this.element.querySelector(selector)
     if (!next || !current || next.innerHTML === current.innerHTML) return
 
+    // Same reason as holdScroll, on the polling path: replacing a region that changes height moves
+    // everything below it. Captured and restored around the swap so the reader stays where they are.
+    const y = window.scrollY
     current.replaceWith(next)
+    if (Math.abs(window.scrollY - y) > 1) window.scrollTo({ top: y, behavior: "auto" })
   }
 
   stop() {
