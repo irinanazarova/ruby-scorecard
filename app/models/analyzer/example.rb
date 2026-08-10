@@ -28,15 +28,9 @@ module Analyzer
   # For a demonstration of recall that fires every time, use the paragraph field with text that is
   # duplicated across many repos.
   #
-  # Ordered so the two flat outcomes come first and the two surprises come last.
+  # Ordered so the flat outcome comes first and the surprises come last.
   class Example
     ALL = [
-      { docs: "https://workos.com/docs/authkit/sessions",
-        repo: "workos/authkit-nextjs",
-        label: "WorkOS AuthKit",
-        note: "MIT and archived, so the code path is open. Common Crawl still never fetched the docs " \
-              "page, and no model reproduces either half." },
-
       { docs: "https://docs.anycable.io/anycable-go/reliable_streams",
         repo: "anycable/docs.anycable.io",
         label: "AnyCable docs",
