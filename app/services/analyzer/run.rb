@@ -27,6 +27,10 @@ module Analyzer
     # is: dropping to one span per source would turn a real hit into a coin flip.
     SPANS_PER_SOURCE = 2
 
+    # How many OTHER pages to try when the URL given yields nothing testable. Three plain HTTP
+    # fetches, a few seconds against a probe that already takes 60 to 140.
+    FALLBACK_PAGES = 3
+
     attr_reader :target, :results
 
     def initialize(target, refresh: false, models: Memorization::MODELS.keys)
@@ -151,13 +155,62 @@ module Analyzer
     # chart then shows an empty repo column that looks like a negative result rather than an
     # unfinished one. Round-robin means whatever budget exists is spent evenly across both.
     def build_passages
-      docs = @target.url ? tag(Passage.candidates_from_url(@target.url, count: SPANS_PER_SOURCE), :docs) : []
+      docs = @target.url ? tag(docs_passages, :docs) : []
       repo = @target.repo ? tag(repo_passages, :repo) : []
       # The pasted paragraph goes FIRST and is never interleaved away. It is the one thing the
       # visitor typed out by hand, so it must not be the source the call budget runs out on.
       pasted = @target.passage ? tag(Passage.candidates_from_text(@target.passage, count: SPANS_PER_SOURCE), :passage) : []
 
       pasted + interleave(docs, repo)
+    end
+
+    # The page asked about, or another page on the same site if that one cannot be tested.
+    #
+    # A docs URL yields nothing probeable more often than you would guess: hub pages are mostly
+    # links, reference pages are mostly tables, and React docs sites ship almost no text in the
+    # source. Answering "no prose found" to someone asking whether their documentation is in a
+    # corpus is refusing the actual question, when the site next door has fifty pages that would
+    # answer it.
+    #
+    # Selected by TESTABLE PROSE, deliberately not by quality score. Our own measurement says the
+    # two are independent: the Supabase Auth guide scores 1.43 and is reproduced for 23 words, and
+    # the Resend quickstart scores 1.68 and fires too. Picking the best-scoring page would be
+    # selecting on a variable this project publishes as non-predictive, and would make a null result
+    # harder to read rather than easier.
+    #
+    # The substitution is never silent: source_label carries the page actually probed, and the grid
+    # says so.
+    def docs_passages
+      asked = Passage.candidates_from_url(@target.url, count: SPANS_PER_SOURCE)
+      return asked if asked.any?(&:ok)
+
+      fallback_pages.each do |url|
+        found = Passage.candidates_from_url(url, count: SPANS_PER_SOURCE)
+        return found if found.any?(&:ok)
+      end
+
+      asked   # nothing worked: keep the original page's error, which explains the actual URL given
+    end
+
+    # Sitemap pages, nearest first. "Nearest" means sharing the longest path prefix with the URL
+    # asked about, so a run about /docs/auth/sessions tries other /docs/auth pages before the blog:
+    # a visitor asking about their documentation should not be answered with a press release.
+    def fallback_pages
+      root = "#{URI(@target.url).scheme}://#{URI(@target.url).host}"
+      robots = Http.probe("#{root}/robots.txt", timeout: 8)[:body]
+      here = @target.url.chomp("/")
+
+      Sitemap.page_urls(root, robots)
+             .reject { |u| u.chomp("/") == here }
+             .sort_by { |u| -shared_prefix(u, here) }
+             .first(FALLBACK_PAGES)
+    rescue StandardError => e
+      Rails.logger.warn("[run] no fallback pages for #{@target.url}: #{e.class}: #{e.message}")
+      []
+    end
+
+    def shared_prefix(a, b)
+      a.chars.zip(b.chars).take_while { |x, y| x == y }.length
     end
 
     def tag(passages, source)

@@ -187,6 +187,41 @@ class SlidesTest < ActiveSupport::TestCase
     assert_equal false, Analyzer::RecallGrid.new(target.merge("memorization" => payload)).controls_ok?
   end
 
+  # --- falling back to another page --------------------------------------------------------------
+  #
+  # A docs URL with no testable prose is probed against another page on the same site. That must
+  # never be silent: a grid headed with the URL you typed but built from a different page is a wrong
+  # answer dressed as a helpful one.
+
+  def probed_from(label, docs_url: "https://acme.dev/docs")
+    probes = [ { provider: "Claude Opus", source: "docs", run: 4, verdict: "none", offset: 1,
+                source_label: label } ]
+    payloads = { "target" => step(docs_url: docs_url, repo: nil, passage: nil),
+                "memorization" => step(summary: Analyzer::Memorization.summarize(probes),
+                                       matrix: Analyzer::Memorization.matrix(probes),
+                                       controls: control_probes) }
+    Analyzer::RecallGrid.new(payloads)
+  end
+
+  test "probing the page that was asked for is not a substitution" do
+    assert_nil probed_from("https://acme.dev/docs").substituted_page
+  end
+
+  test "a different page on the same site is reported as a substitution" do
+    grid = probed_from("https://acme.dev/docs/guides/auth")
+
+    assert_equal "https://acme.dev/docs/guides/auth", grid.substituted_page
+    docs = grid.columns.find { |c| c.key == "docs" }
+    assert_equal "https://acme.dev/docs/guides/auth", docs.href,
+                 "the column must link to what was actually probed"
+  end
+
+  # The markdown twin of the SAME page is not a different page, and flagging it as one would put a
+  # "we tested something else" warning on a run that tested exactly what was asked.
+  test "a markdown twin of the same page is not a substitution" do
+    assert_nil probed_from("https://acme.dev/docs (markdown twin)").substituted_page
+  end
+
   # "Claude Opus" will point at different weights in six months, so a row that cannot name the
   # snapshot it came from is not reproducible.
   test "every row names the exact model it probed" do

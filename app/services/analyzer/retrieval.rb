@@ -100,31 +100,11 @@ module Analyzer
     #
     # The declared URL is FETCHED rather than trusted. A line pointing at a 404 is worse than no
     # line, because it reads as done to anyone auditing the file by eye.
-    MAX_DECLARED = 3
-
-    # [kind, url] for whatever we could actually retrieve, declared ones first.
+    # Discovery moved to Analyzer::Sitemap, because the recall probe needs the same rule to read
+    # page URLs out of the file when a docs page yields no testable prose. Memoized here: this check
+    # asks twice, once for the verdict and once for the detail line.
     def sitemap(root, robots_body)
-      return @sitemap if defined?(@sitemap)
-
-      declared = declared_sitemaps(robots_body).first(MAX_DECLARED)
-                                               .select { |u| Http.probe(u, timeout: 8)[:ok] }
-                                               .map { |u| [ :declared, u ] }
-      return @sitemap = declared if declared.any?
-
-      conventional = %w[sitemap.xml sitemap_index.xml]
-                     .map { |name| "#{root}/#{name}" }
-                     .select { |u| Http.probe(u, timeout: 8)[:ok] }
-                     .map { |u| [ :conventional, u ] }
-      @sitemap = conventional
-    end
-
-    # Global directive: it applies to the whole file regardless of which User-agent block it sits in,
-    # so this is parsed independently of the Disallow rules rather than alongside them.
-    def declared_sitemaps(robots_body)
-      robots_body.to_s.each_line.filter_map do |line|
-        m = line.sub(/#.*/, "").strip.match(/\Asitemap:\s*(\S+)\z/i)
-        m && m[1]
-      end.uniq
+      @sitemap ||= Sitemap.locate(root, robots_body)
     end
 
     def sitemap_detail(root, robots_body)
@@ -133,7 +113,7 @@ module Analyzer
       return "declared in robots.txt: #{url}" if kind == :declared
       return "#{url.split('/').last} found" if kind == :conventional
 
-      declared = declared_sitemaps(robots_body)
+      declared = Sitemap.declared_in(robots_body)
       return "robots.txt declares #{declared.first}, which does not fetch" if declared.any?
 
       "no sitemap.xml, and robots.txt declares none"

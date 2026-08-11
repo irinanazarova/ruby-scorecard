@@ -102,6 +102,17 @@
       Words, not a score. <strong><%= grid.threshold %> or more</strong> consecutive words is the
       bar we call recall: you cannot reproduce text you have never seen.
     </p>
+
+    <%# Said out loud, never inferred from a column heading. A grid labelled with the URL you typed
+        but built from a different page is a wrong answer dressed as a helpful one. %>
+    <% if grid.substituted_page.present? %>
+      <p class="recall__substituted">
+        The page you gave had no testable prose, so this row is a different page on the same site:
+        <a href="<%= grid.substituted_page %>" rel="noopener"><%= grid.substituted_page %></a>.
+        Chosen because it has readable prose, not because it scores well: quality and recall are
+        independent in our own measurements. <a href="/learn#quality-filter">Why &rarr;</a>
+      </p>
+    <% end %>
     <%# The controls are still probed on every run; they just no longer take two columns. This
         sentence IS the guarantee: without it a zero could mean "not memorized" or "the probe broke
         today" and there would be no way to tell them apart. %>

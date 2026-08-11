@@ -55,6 +55,25 @@ module Analyzer
     # one place. Returns nil until the probe answers.
     def evidence = memorization
 
+    # The page actually probed, when it is not the one asked about.
+    #
+    # A docs URL that yields no testable prose falls back to another page on the same site, and that
+    # substitution must never be silent: a grid headed with the URL you typed, showing numbers from
+    # a different page, is a wrong answer rather than a helpful one. nil when we probed what was
+    # asked for.
+    # Compared for EXACT equality after normalising, not with start_with?. A prefix test looks right
+    # and is wrong in the common case: /docs/guides/auth starts with /docs, so probing a deeper page
+    # on the same site would have been reported as no substitution at all. The only thing that
+    # counts as the same page is the same URL, or its markdown twin, which is the same text served
+    # at a parallel address.
+    def substituted_page
+      probed = probed_docs_label.sub(/\s*\(markdown twin\)\z/, "").chomp("/")
+      asked = target[:docs_url].to_s.chomp("/")
+      return nil if probed.blank? || asked.blank? || probed == asked
+
+      probed
+    end
+
     def columns
       @columns ||= own_columns
     end
@@ -91,8 +110,8 @@ module Analyzer
         (target[:passage].present? ? Column.new(key: "passage", label: "Your paragraph", kind: :yours,
                                                 sublabel: "#{target[:passage].split.size} words") : nil),
         (target[:docs_url].present? ? Column.new(key: "docs", label: "Your docs", kind: :yours,
-                                                 sublabel: host_of(target[:docs_url]),
-                                                 href: target[:docs_url]) : nil),
+                                                 sublabel: substituted_page.presence || host_of(target[:docs_url]),
+                                                 href: substituted_page.presence || target[:docs_url]) : nil),
         (target[:repo].present? ? Column.new(key: "repo", label: "Your repo", kind: :yours,
                                              sublabel: target[:repo],
                                              href: "https://github.com/#{target[:repo]}") : nil)
@@ -107,6 +126,11 @@ module Analyzer
     def models
       seen = matrix.map { |m| m[:model] } + controls.map { |c| c[:provider] }
       Memorization::MODELS.values.map { |spec| spec[:label] }.select { |label| seen.include?(label) }
+    end
+
+    # Whatever page the docs cells were actually built from, as recorded by the probe.
+    def probed_docs_label
+      matrix.filter_map { |m| m.dig(:cells, :docs, :source_label) }.first.to_s
     end
 
     def model_id_for(label)

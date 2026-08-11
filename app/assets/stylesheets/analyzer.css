@@ -831,3 +831,10 @@
 .form-errors p { margin: 0; font-size: .9rem; color: var(--text); }
 .field-error { display: block; font-size: .82rem; color: var(--bad); font-weight: 600;
   margin-top: .1rem; }
+
+/* The probe fell back to another page on the same site. Amber rather than red: it is a caveat about
+   which page the number came from, not a failure. */
+.recall__substituted { font-size: .85rem; margin: .5rem 0 0; padding: .5rem .8rem;
+  border-left: 3px solid var(--warn); border-radius: var(--radius, 10px);
+  background: color-mix(in srgb, var(--warn) 7%, var(--surface)); color: var(--text-soft); }
+.recall__substituted a { word-break: break-all; }

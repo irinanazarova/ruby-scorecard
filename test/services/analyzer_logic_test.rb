@@ -145,9 +145,11 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
   # sit at /sitemap.xml. Probing only the conventional paths reported "no sitemap.xml" about
   # evilmartians.com, which declares its index at /sitemap/sitemap-index.xml, and about expressjs.com.
 
-  def declared(robots)
-    Analyzer::Retrieval.new("https://example.com/docs").send(:declared_sitemaps, robots)
-  end
+  # The parser moved to Analyzer::Sitemap, which now owns discovery for both callers: the retrieval
+  # check that asks whether a sitemap exists, and the recall probe that reads page URLs out of it
+  # when a docs page yields no testable prose. Public rather than reached through `send`, because
+  # two objects depend on it.
+  def declared(robots) = Analyzer::Sitemap.declared_in(robots)
 
   test "a sitemap declared anywhere in robots.txt is found" do
     robots = <<~ROBOTS
