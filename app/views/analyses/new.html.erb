@@ -1,6 +1,6 @@
 <% content_for :title, "Can agents find, read and recall your product?" %>
 
-<section class="probe-hero" data-controller="prefill">
+<section class="probe-hero">
   <%# Shown for the demo: the room needs the address to type, and reading it off a slide is easier
       than reading it out of a browser chrome that is cropped or zoomed on the projector. %>
   <p class="probe-hero__url">ruby.evilmartians.com/test</p>
@@ -30,8 +30,7 @@
       <%= f.label :docs_url, "Your documentation website" %>
       <%= f.text_field :docs_url, value: @form.docs_url,
             placeholder: "https://yourcompany.com/docs/getting-started",
-            autofocus: true, autocomplete: "off", spellcheck: "false",
-            data: { prefill_target: "docs" } %>
+            autofocus: true, autocomplete: "off", spellcheck: "false" %>
       <span class="probe-form__hint">One content page, not the docs landing page. Landing pages are
       mostly links and there is nothing in them to test.</span>
       <%= render "analyses/field_error", messages: @form.errors[:docs_url] %>
@@ -40,8 +39,7 @@
     <div class="probe-form__field">
       <%= f.label :repo, "Your open source repo" %>
       <%= f.text_field :repo, value: @form.repo,
-            placeholder: "owner/repo", autocomplete: "off", spellcheck: "false",
-            data: { prefill_target: "repo" } %>
+            placeholder: "owner/repo", autocomplete: "off", spellcheck: "false" %>
       <span class="probe-form__hint">Docs, SDK or the product itself, whichever is public.</span>
       <%= render "analyses/field_error", messages: @form.errors[:repo] %>
     </div>
@@ -101,10 +99,6 @@
 
   <section class="examples">
     <h2>Or start with one of these</h2>
-    <p class="note">
-      <%= @examples.size %> real products, each one a docs site next to the repo its team would
-      name. They are free to run and never use up a check.
-    </p>
     <ul class="examples__list">
       <% @examples.each do |example| %>
         <li class="example">
@@ -116,11 +110,6 @@
           <div class="example__go">
             <%= button_to "Run it", analyses_path,
                   params: { docs_url: example[:docs], repo: example[:repo] }, class: "examples__btn" %>
-            <button type="button" class="examples__fill"
-                    data-action="prefill#fill"
-                    data-docs="<%= example[:docs] %>" data-repo="<%= example[:repo] %>">
-              Put it in the form
-            </button>
           </div>
         </li>
       <% end %>

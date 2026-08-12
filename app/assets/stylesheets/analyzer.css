@@ -135,14 +135,13 @@
 .probe-form__quota .analyzer__linkbtn { margin-left: .4rem; vertical-align: baseline; }
 
 .examples { margin-top: 2.5rem; }
-.examples h2 { font-size: 1.1rem; margin-bottom: .25rem; }
-.examples .note { color: var(--text-soft); font-size: .9rem; margin-top: 0; }
+.examples h2 { font-size: 1.1rem; margin-bottom: .6rem; }
 .examples__list { list-style: none; padding: 0; display: grid; gap: .5rem; }
 
-/* One row per example since the notes came off: pair on the left, the two controls on the right.
-   Grid rather than flex-wrap, which gave every row a different height depending on how long its
-   URLs happened to be. The pair column wraps INSIDE itself (hence min-width: 0, or a long URL
-   refuses to wrap and pushes the buttons off), so the controls stay in one place down the list. */
+/* One row per example since the notes came off: pair on the left, Run it on the right. Grid rather
+   than flex-wrap, which gave every row a different height depending on how long its URLs happened
+   to be. The pair column wraps INSIDE itself (hence min-width: 0, or a long URL refuses to wrap and
+   pushes the button off), so the control stays in one place down the list. */
 .examples__list li { display: grid; grid-template-columns: minmax(0, 1fr) auto;
   align-items: center; gap: .5rem 1rem;
   border: 1px solid var(--line); border-radius: var(--radius, 10px); padding: .7rem 1rem;
@@ -161,8 +160,6 @@
 .example__go form { display: inline; }
 .examples__btn { background: var(--accent); color: #fff; border: 0; border-radius: 999px;
   padding: .3rem .9rem; font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; }
-.examples__fill { background: none; border: 0; padding: 0; font: inherit; font-size: .85rem;
-  color: var(--link); cursor: pointer; text-decoration: underline; }
 
 /* --- the deck ----------------------------------------------------------------------------------
  *
