@@ -305,6 +305,24 @@
 .axcol__empty { font-size: .9rem; color: var(--text-soft); margin: 0; }
 .axcol--missing { border-style: dashed; }
 
+/* The packaged fix, folded under a column's checks. Separated by a dashed rule rather than a card
+   of its own: it belongs to the column above it, and a second bordered box inside a bordered box
+   reads as a different section. */
+.axskill { margin: .9rem 0 0; padding-top: .7rem; border-top: 1px dashed var(--line-strong); }
+.axskill > summary { cursor: pointer; font-size: .85rem; font-weight: 600; color: var(--accent); }
+.axskill > summary:hover { text-decoration: underline; }
+.axskill__covers { list-style: none; padding: 0; margin: .6rem 0 0; font-size: .82rem;
+  display: grid; gap: .15rem; color: var(--text-soft); }
+.axskill__covers li::before { content: "\2192\00a0"; color: var(--accent); }
+.axskill__what { font-size: .84rem; line-height: 1.55; color: var(--text-soft); margin: .6rem 0 0; }
+.axskill__what code { font-size: .95em; }
+/* The install line is a command someone copies, so it never wraps mid-flag: it scrolls instead. */
+.axskill__install { margin: .6rem 0 0; padding: .5rem .65rem; overflow-x: auto;
+  border-radius: 6px; background: var(--code-bg); }
+.axskill__install code { font-family: var(--font-mono, monospace); font-size: .75rem;
+  white-space: pre; color: var(--text); }
+.axskill__links { font-size: .82rem; margin: .55rem 0 0; }
+
 .ax__tally { margin: 1rem 0 0; font-size: .92rem; }
 .ax__tally strong { color: var(--bad); font-size: 1.1rem; }
 .ax__tally--clear { color: var(--ok); }

@@ -12,14 +12,14 @@ class SlidesTest < ActiveSupport::TestCase
     { "target" => step(docs_url: docs, repo: repo) }
   end
 
-  def retrieval(allowed: true, reachable: true, md: true, sitemap: true)
+  def retrieval(allowed: true, reachable: true, md: true, sitemap: true, llms: false)
     step(checks: [
            { name: "Crawlers allowed", pass: allowed, detail: "robots.txt permits AI crawlers" },
            { name: "Reachable by a crawler", pass: reachable, detail: "fetches cleanly as CCBot" },
            { name: "Sitemap", pass: sitemap, detail: "sitemap.xml found" },
            { name: "Markdown content negotiation", pass: false, detail: "returns HTML only" },
            { name: "Markdown twin (.md)", pass: md, detail: ".md serves markdown" },
-           { name: "llms.txt", pass: false, informational: true, detail: "absent" }
+           { name: "llms.txt", pass: llms, informational: true, detail: llms ? "present" : "absent" }
          ])
   end
 
@@ -73,6 +73,52 @@ class SlidesTest < ActiveSupport::TestCase
     assert_equal :info, item.status
     assert_nil item.action
     refute_includes d.open_items, item
+  end
+
+  # --- the packaged fix -------------------------------------------------------------------------
+
+  # The block offers a skill, so it may only claim the boxes that skill ships. A WAF rule is beyond
+  # any skill and the sitemap is outside this one's stated scope, so listing either would send
+  # someone to a tool that cannot help.
+  test "the skill block claims only the boxes it can fix" do
+    d = Analyzer::Discoverability.new(
+      target.merge("retrieval" => retrieval(allowed: false, reachable: false, md: false, sitemap: false))
+    )
+    skill = d.columns.first.skill
+
+    assert_includes skill.covers, "AI crawlers allowed"
+    assert_includes skill.covers, "Source text an agent can read"
+    refute_includes skill.covers, "Fetches as a crawler"
+    refute_includes skill.covers, "Sitemap a crawler can find"
+  end
+
+  # The skill ships an llms.txt and this page scores that box as information. Counting it as a fix
+  # would put a number in this block that disagrees with the tally under the same column.
+  test "llms.txt rides along as a note and never enters the fix count" do
+    d = Analyzer::Discoverability.new(target.merge("retrieval" => retrieval(md: false)))
+    skill = d.columns.first.skill
+
+    assert_equal [ "Source text an agent can read" ], skill.covers
+    assert skill.llms_txt, "the note is what carries llms.txt, so it has to be set"
+    assert_equal skill.covers.size, d.columns.first.items.count { |i| i.status == :fail },
+                 "the block's count and the column's own fix count must agree"
+  end
+
+  # A tool advertised under a column of ticks is an ad. The fixture has no llms.txt, which is the
+  # sharp end of this: an absent llms.txt is not a fix, so on its own it never summons the block.
+  test "no skill block when there is nothing here for it to fix" do
+    d = Analyzer::Discoverability.new(target.merge("retrieval" => retrieval(llms: false)))
+
+    assert_nil d.columns.first.skill
+  end
+
+  # It belongs to the docs column. The repo column is a different set of problems.
+  test "the repo column carries no skill block" do
+    d = Analyzer::Discoverability.new(
+      target.merge("retrieval" => retrieval, "repo_signals" => signals, "code_channel" => code)
+    )
+
+    assert_nil d.columns.last.skill
   end
 
   # --- the licence, read twice ------------------------------------------------------------------

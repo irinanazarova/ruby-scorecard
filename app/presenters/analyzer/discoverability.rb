@@ -15,7 +15,10 @@ module Analyzer
     # status: :pass | :fail | :info | :unknown | :waiting
     Item = Struct.new(:label, :status, :detail, :action, :anchor, :anchor_label, keyword_init: true)
     # state: :ready | :waiting | :missing | :error
-    Column = Struct.new(:key, :title, :subject, :state, :note, :items, keyword_init: true)
+    Column = Struct.new(:key, :title, :subject, :state, :note, :items, :skill, keyword_init: true)
+    # A packaged fix for the boxes in a column: the install line, the labels it covers, and whether
+    # it would also ship an llms.txt, which this page scores as information rather than as a fix.
+    Skill = Struct.new(:name, :url, :repo, :install, :covers, :llms_txt, keyword_init: true)
 
     # The one sentence that stops the ticks from being read as a bigger claim than they are.
     SCOPE = "Discover, evaluate and suggest. Whether an agent can then install, configure, deploy " \
@@ -40,7 +43,40 @@ module Analyzer
       return column(:docs, "Your documentation site", subject, :waiting) if r.nil?
       return column(:docs, "Your documentation site", subject, :error, note: r[:error]) if r[:error].present?
 
-      column(:docs, "Your documentation site", subject, :ready, items: docs_items)
+      items = docs_items
+      column(:docs, "Your documentation site", subject, :ready, items: items, skill: docs_skill(items))
+    end
+
+    SKILL_NAME = "llms-visibility"
+    SKILL_URL = "https://evilmartians.com/agent-skills"
+    SKILL_REPO = "https://github.com/evilmartians/agent-skills"
+    SKILL_INSTALL = "npx skills add https://evilmartians.com/agent-skills " \
+                    "--skill llms-visibility -a claude-code -g"
+
+    # Which boxes in this column the skill ships: the robots.txt crawler rules, and the markdown
+    # route plus Accept negotiation.
+    #
+    # Three boxes are deliberately absent, and each for its own reason.
+    #
+    # "Fetches as a crawler" is an edge or WAF rule that no skill can reach. The sitemap line is
+    # outside the skill's stated scope, which names sitemap.xml as a thing it is not for, and this
+    # page agrees with it: cheap, worth doing, and not a lever.
+    #
+    # llms.txt is the one worth spelling out, because the skill ships it and this page refuses to
+    # score it. Both sides hold the same fact (no major AI system reads one yet) and draw a
+    # different conclusion from it: near-zero cost, so ship it, against not a fix, so do not put it
+    # in a fix count. Counting it here would have this column's own tally disagree with itself,
+    # so it rides along as a note rather than as one of the boxes.
+    SKILL_COVERS = [ "AI crawlers allowed", "Source text an agent can read" ].freeze
+
+    # nil when there is nothing here for it to fix. A tool advertised under a column of ticks is an
+    # ad; under a column with open boxes it is the next step.
+    def docs_skill(items)
+      covers = items.select { |i| SKILL_COVERS.include?(i.label) && i.status == :fail }.map(&:label)
+      return nil if covers.empty?
+
+      Skill.new(name: SKILL_NAME, url: SKILL_URL, repo: SKILL_REPO, install: SKILL_INSTALL,
+                covers: covers, llms_txt: pass?("retrieval", "llms.txt") == false)
     end
 
     def docs_items
@@ -171,8 +207,9 @@ module Analyzer
 
     # --- shared ----------------------------------------------------------------------------------
 
-    def column(key, title, subject, state, items: [], note: nil)
-      Column.new(key: key, title: title, subject: subject, state: state, note: note, items: items)
+    def column(key, title, subject, state, items: [], note: nil, skill: nil)
+      Column.new(key: key, title: title, subject: subject, state: state, note: note, items: items,
+                 skill: skill)
     end
 
     def item(label, pass, detail:, action:, anchor:, anchor_label:)
