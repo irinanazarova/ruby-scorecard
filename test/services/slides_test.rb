@@ -12,8 +12,10 @@ class SlidesTest < ActiveSupport::TestCase
     { "target" => step(docs_url: docs, repo: repo) }
   end
 
-  def retrieval(allowed: true, reachable: true, md: true, sitemap: true, llms: false)
-    step(checks: [
+  def retrieval(allowed: true, reachable: true, md: true, sitemap: true, llms: false,
+                declined: [], granted: [])
+    step(content_signal: { declined: declined, granted: granted },
+         checks: [
            { name: "Crawlers allowed", pass: allowed, detail: "robots.txt permits AI crawlers" },
            { name: "Reachable by a crawler", pass: reachable, detail: "fetches cleanly as CCBot" },
            { name: "Sitemap", pass: sitemap, detail: "sitemap.xml found" },
@@ -75,6 +77,51 @@ class SlidesTest < ActiveSupport::TestCase
     refute_includes d.open_items, item
   end
 
+  # --- fetching and using are two permissions -----------------------------------------------------
+
+  # The case that used to come back as a plain green tick. robots.txt lets the crawler in and
+  # Content-Signal declines training, and reporting only the first tells someone their setting is
+  # not there.
+  test "a declined content signal warns instead of ticking" do
+    d = Analyzer::Discoverability.new(
+      target.merge("retrieval" => retrieval(declined: [ "ai-train" ], granted: [ "search" ]))
+    )
+    crawlers = d.columns.first.items.find { |i| i.label == "AI crawlers allowed" }
+
+    assert_equal :warn, crawlers.status
+    assert_match(/2019\/790/, crawlers.action, "the reservation is the whole meaning of the line")
+    assert_equal "content-signal", crawlers.anchor
+  end
+
+  # A setting is not a defect, so it must not appear in the count of things to repair, and it must
+  # not be handed the "allow crawlers by name" fix, which is advice for the opposite situation.
+  test "a declined content signal is neither a fix nor a misconfiguration" do
+    d = Analyzer::Discoverability.new(target.merge("retrieval" => retrieval(declined: [ "ai-train" ])))
+
+    assert_empty d.open_items.select { |i| i.label == "AI crawlers allowed" }
+    refute_match(/allow those by name/,
+                 d.columns.first.items.find { |i| i.label == "AI crawlers allowed" }.action)
+  end
+
+  # A blocked crawler is still a real failure, whatever the signals say.
+  test "a Disallow outranks a granted content signal" do
+    d = Analyzer::Discoverability.new(
+      target.merge("retrieval" => retrieval(allowed: false, granted: [ "ai-train" ]))
+    )
+    crawlers = d.columns.first.items.find { |i| i.label == "AI crawlers allowed" }
+
+    assert_equal :fail, crawlers.status
+    assert_match(/allow those by name/, crawlers.action)
+  end
+
+  test "no content signal leaves the box exactly as it was" do
+    d = Analyzer::Discoverability.new(target.merge("retrieval" => retrieval))
+    crawlers = d.columns.first.items.find { |i| i.label == "AI crawlers allowed" }
+
+    assert_equal :pass, crawlers.status
+    assert_nil crawlers.action
+  end
+
   # --- the packaged fix -------------------------------------------------------------------------
 
   # The block offers a skill, so it may only claim the boxes that skill ships. A WAF rule is beyond
@@ -84,7 +131,7 @@ class SlidesTest < ActiveSupport::TestCase
     d = Analyzer::Discoverability.new(
       target.merge("retrieval" => retrieval(allowed: false, reachable: false, md: false, sitemap: false))
     )
-    skill = d.columns.first.skill
+    skill = d.skill
 
     assert_includes skill.covers, "AI crawlers allowed"
     assert_includes skill.covers, "Source text an agent can read"
@@ -94,13 +141,11 @@ class SlidesTest < ActiveSupport::TestCase
 
   # The skill ships an llms.txt and this page scores that box as information. Counting it as a fix
   # would put a number in this block that disagrees with the tally under the same column.
-  test "llms.txt rides along as a note and never enters the fix count" do
-    d = Analyzer::Discoverability.new(target.merge("retrieval" => retrieval(md: false)))
-    skill = d.columns.first.skill
+  test "an absent llms.txt never enters the fix count" do
+    d = Analyzer::Discoverability.new(target.merge("retrieval" => retrieval(md: false, llms: false)))
 
-    assert_equal [ "Source text an agent can read" ], skill.covers
-    assert skill.llms_txt, "the note is what carries llms.txt, so it has to be set"
-    assert_equal skill.covers.size, d.columns.first.items.count { |i| i.status == :fail },
+    assert_equal [ "Source text an agent can read" ], d.skill.covers
+    assert_equal d.skill.covers.size, d.columns.first.items.count { |i| i.status == :fail },
                  "the block's count and the column's own fix count must agree"
   end
 
@@ -109,7 +154,7 @@ class SlidesTest < ActiveSupport::TestCase
   test "no skill block when there is nothing here for it to fix" do
     d = Analyzer::Discoverability.new(target.merge("retrieval" => retrieval(llms: false)))
 
-    assert_nil d.columns.first.skill
+    assert_nil d.skill
   end
 
   # It belongs to the docs column. The repo column is a different set of problems.

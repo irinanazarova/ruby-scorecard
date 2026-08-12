@@ -56,45 +56,6 @@
               </li>
             <% end %>
           </ul>
-
-          <%# The packaged fix for the boxes above, folded away. Collapsed by default because the
-              finding is the point and the tool is the follow-up, and it only renders when this
-              column has boxes the skill actually ships. %>
-          <% if col.skill.present? %>
-            <details class="axskill">
-              <summary>Fix <%= col.skill.covers.size %> of these with a coding agent</summary>
-
-              <ul class="axskill__covers">
-                <% col.skill.covers.each do |label| %><li><%= label %></li><% end %>
-              </ul>
-
-              <p class="axskill__what">
-                <a href="<%= col.skill.url %>" rel="noopener"><code><%= col.skill.name %></code></a>
-                is our agent skill for markdown routes, <code>Accept</code> content negotiation and
-                crawler rules in robots.txt. It also names the AI-SEO advice we tested and found
-                worthless, so an agent running it spends the change on what is read.
-              </p>
-
-              <%# The one place this page and the skill reach different conclusions from the same
-                  fact, said out loud rather than smoothed over. It is left out of the count above
-                  because the box above it is scored as information, and a fix count that includes
-                  an unscored box disagrees with the tally under this column. %>
-              <% if col.skill.llms_txt %>
-                <p class="axskill__what">
-                  It will also write you an <code>llms.txt</code>. We report that box as information
-                  and leave it out of the count: no major AI system reads one yet, and the skill
-                  ships it anyway on the grounds that it costs near enough nothing.
-                  <a class="check__why-link" href="/learn#llms-txt">Our reading &rarr;</a>
-                </p>
-              <% end %>
-
-              <pre class="axskill__install"><code><%= col.skill.install %></code></pre>
-
-              <p class="axskill__links">
-                <a href="<%= col.skill.repo %>" rel="noopener">Read it before you run it &rarr;</a>
-              </p>
-            </details>
-          <% end %>
         <% end %>
       </section>
     <% end %>
@@ -107,5 +68,31 @@
   <% elsif d.ready? %>
     <p class="ax__tally ax__tally--clear">Every box we check is ticked. An agent can find this,
     read it, and has grounds to suggest it.</p>
+  <% end %>
+
+  <%# The packaged fix, under the tally rather than inside the column it belongs to. Full width
+      because an open panel nested in one card stretched that card to twice the height of its
+      neighbour and left a column of white space beside it. Collapsed by default: the finding is
+      the point and the tool is the follow-up. Renders only when a box it can actually fix is open,
+      since under a column of ticks it would be an ad. %>
+  <% if d.skill.present? %>
+    <details class="axskill">
+      <summary>Fix <%= d.skill.covers.size %> of these with a coding agent</summary>
+
+      <ul class="axskill__covers">
+        <% d.skill.covers.each do |label| %><li><%= label %></li><% end %>
+      </ul>
+
+      <%# Scoped to the boxes listed directly above rather than to the whole site. The list is
+          right there, and a sentence promising more than the list beside it contradicts itself on
+          the same screen. %>
+      <p class="axskill__what">
+        Use the <a href="<%= d.skill.source %>" rel="noopener"><code><%= d.skill.name %></code></a>
+        skill to fix these.
+        <a class="check__why-link" href="<%= d.skill.url %>" rel="noopener">Read about it &rarr;</a>
+      </p>
+
+      <pre class="axskill__install"><code><%= d.skill.install %></code></pre>
+    </details>
   <% end %>
 </div>

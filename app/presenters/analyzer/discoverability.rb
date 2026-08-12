@@ -16,18 +16,22 @@ module Analyzer
     Item = Struct.new(:label, :status, :detail, :action, :anchor, :anchor_label, keyword_init: true)
     # state: :ready | :waiting | :missing | :error
     Column = Struct.new(:key, :title, :subject, :state, :note, :items, :skill, keyword_init: true)
-    # A packaged fix for the boxes in a column: the install line, the labels it covers, and whether
-    # it would also ship an llms.txt, which this page scores as information rather than as a fix.
-    Skill = Struct.new(:name, :url, :repo, :install, :covers, :llms_txt, keyword_init: true)
+    # A packaged fix for the boxes in a column: where to read it, how to install it, what it covers.
+    Skill = Struct.new(:name, :url, :source, :install, :covers, keyword_init: true)
 
     # The one sentence that stops the ticks from being read as a bigger claim than they are.
     SCOPE = "Discover, evaluate and suggest. Whether an agent can then install, configure, deploy " \
             "or buy your product is a separate question, and nothing here measures it."
 
-    def columns = [ docs_column, repo_column ]
+    def columns = @columns ||= [ docs_column, repo_column ]
 
     # Every unticked box across both columns, so the deck can show a count before the detail.
     def open_items = columns.flat_map(&:items).select { |i| i.status == :fail }
+
+    # The packaged fix, offered under BOTH columns rather than inside one of them. It is docs-side
+    # work, and the boxes it names say so; putting the panel in that column made an open block
+    # stretch one card to twice the height of its neighbour.
+    def skill = columns.first.skill
 
     def ready? = columns.any? { |c| c.state == :ready }
 
@@ -48,8 +52,8 @@ module Analyzer
     end
 
     SKILL_NAME = "llms-visibility"
-    SKILL_URL = "https://evilmartians.com/agent-skills"
-    SKILL_REPO = "https://github.com/evilmartians/agent-skills"
+    SKILL_URL = "https://evilmartians.com/chronicles/how-to-make-your-website-visible-to-llms"
+    SKILL_SOURCE = "https://github.com/evilmartians/agent-skills/tree/main/skills/llms-visibility"
     SKILL_INSTALL = "npx skills add https://evilmartians.com/agent-skills " \
                     "--skill llms-visibility -a claude-code -g"
 
@@ -65,8 +69,8 @@ module Analyzer
     # llms.txt is the one worth spelling out, because the skill ships it and this page refuses to
     # score it. Both sides hold the same fact (no major AI system reads one yet) and draw a
     # different conclusion from it: near-zero cost, so ship it, against not a fix, so do not put it
-    # in a fix count. Counting it here would have this column's own tally disagree with itself,
-    # so it rides along as a note rather than as one of the boxes.
+    # in a fix count. Counting it here would have this column's own tally disagree with itself.
+    # The stance itself lives on /learn#llms-txt rather than in this panel.
     SKILL_COVERS = [ "AI crawlers allowed", "Source text an agent can read" ].freeze
 
     # nil when there is nothing here for it to fix. A tool advertised under a column of ticks is an
@@ -75,18 +79,13 @@ module Analyzer
       covers = items.select { |i| SKILL_COVERS.include?(i.label) && i.status == :fail }.map(&:label)
       return nil if covers.empty?
 
-      Skill.new(name: SKILL_NAME, url: SKILL_URL, repo: SKILL_REPO, install: SKILL_INSTALL,
-                covers: covers, llms_txt: pass?("retrieval", "llms.txt") == false)
+      Skill.new(name: SKILL_NAME, url: SKILL_URL, source: SKILL_SOURCE, install: SKILL_INSTALL,
+                covers: covers)
     end
 
     def docs_items
       [
-        item("AI crawlers allowed", pass?("retrieval", "Crawlers allowed"),
-             detail: detail("retrieval", "Crawlers allowed"),
-             action: "Decide which crawlers you want, then allow those by name in robots.txt. Each " \
-                     "lab runs separate agents for training, for search and for a user asking it to " \
-                     "open your page.",
-             anchor: "crawlers", anchor_label: "the crawlers and what each one feeds"),
+        crawlers_item,
 
         item("Fetches as a crawler", pass?("retrieval", "Reachable by a crawler"),
              detail: detail("retrieval", "Reachable by a crawler"),
@@ -114,6 +113,38 @@ module Analyzer
                  detail: detail("retrieval", "llms.txt"),
                  anchor: "llms-txt", anchor_label: "what llms.txt is currently worth")
       ]
+    end
+
+    CRAWLER_FIX = "Decide which crawlers you want, then allow those by name in robots.txt. Each " \
+                  "lab runs separate agents for training, for search and for a user asking it to " \
+                  "open your page."
+
+    # Fetching and using are two permissions, and robots.txt now carries both: a `Content-Signal:`
+    # line states what may be DONE with the page (search, ai-input, ai-train) while the Disallow
+    # rules state who may request it.
+    #
+    # A site that permits the crawl and declines training gets a WARN rather than a tick or a cross.
+    # A tick would report a policy back to the person who set it as though they had not set it. A
+    # cross would call a deliberate choice a defect and hand them a fix for it. Warn also keeps it
+    # out of open_items, so the count under these columns stays a count of things to repair.
+    def crawlers_item
+      allowed = pass?("retrieval", "Crawlers allowed")
+      declined = Array(result("retrieval")&.dig(:content_signal, :declined))
+
+      if allowed && declined.any?
+        return Item.new(label: "AI crawlers allowed", status: :warn,
+                        detail: detail("retrieval", "Crawlers allowed"),
+                        action: "The crawl is allowed and the use is declined, which is a setting " \
+                                "rather than a defect. Nothing enforces it over HTTP: the line is " \
+                                "an express reservation of rights under Article 4 of EU Directive " \
+                                "2019/790, and it is read by people and courts rather than by a " \
+                                "crawler's fetch logic.",
+                        anchor: "content-signal", anchor_label: "what a Content-Signal line does")
+      end
+
+      item("AI crawlers allowed", allowed, detail: detail("retrieval", "Crawlers allowed"),
+           action: CRAWLER_FIX, anchor: "crawlers",
+           anchor_label: "the crawlers and what each one feeds")
     end
 
     def clean_text?

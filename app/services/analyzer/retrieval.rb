@@ -19,12 +19,16 @@ module Analyzer
 
       md_negotiation = negotiates_markdown?
       md_route = markdown_route?
+      signal = ContentSignal.parse(robots[:body])
 
       {
+        # Two lists of plain strings rather than the parsed hash. Payloads make a round trip through
+        # as_json and come back deep-symbolized, which would turn "ai-train" into :"ai-train" and
+        # leave every reader quoting a symbol. Array values survive that trip unchanged.
+        content_signal: { declined: signal.declined, granted: signal.granted },
         checks: [
           bool_check("Crawlers allowed", allows_ai?(rules),
-                     detail: blocked_list(rules).empty? ? "robots.txt permits AI crawlers" :
-                             "robots.txt blocks #{blocked_list(rules).join(', ')}",
+                     detail: crawlers_detail(rules, signal),
                      why: "A Disallow for CCBot or ClaudeBot removes you from future crawls entirely."),
           bool_check("Reachable by a crawler", crawlable?,
                      detail: crawlable? ? "fetches cleanly as CCBot" : "blocked or unreachable as CCBot",
@@ -85,6 +89,19 @@ module Analyzer
     end
 
     def allows_ai?(rules) = blocked_list(rules).empty?
+
+    # Permission to FETCH and permission to USE, in one line, because robots.txt now carries both
+    # and a site can grant the first while declining the second. The `pass` above stays keyed to the
+    # fetch: a Content-Signal line blocks no request, so calling it a failed check would be wrong.
+    def crawlers_detail(rules, signal)
+      blocked = blocked_list(rules)
+      return "robots.txt blocks #{blocked.join(', ')}" if blocked.any?
+      return "robots.txt permits AI crawlers" unless signal.present?
+      return "robots.txt permits the fetch, Content-Signal declines #{signal.declined.join(', ')}" if
+        signal.declined.any?
+
+      "robots.txt permits AI crawlers, Content-Signal grants #{signal.granted.join(', ')}"
+    end
 
     def crawlable?
       @crawlable ||= Http.probe(@url, headers: { "User-Agent" => Http::CCBOT }, timeout: 12)[:ok]

@@ -579,6 +579,34 @@
       crawlers, because that gate is the permanent one.
     </p>
 
+    <h3 id="content-signal">Content-Signal states the use, Disallow states the access</h3>
+    <ul class="learn__facts">
+      <li>One line, three signals, <code>yes</code> or <code>no</code> each:
+        <code>Content-Signal: search=yes, ai-input=yes, ai-train=no</code></li>
+      <li><code>search</code>: a search index, links and short excerpts. Excludes AI summaries.</li>
+      <li><code>ai-input</code>: the page fed to a model at answer time (RAG, grounding).</li>
+      <li><code>ai-train</code>: training or fine-tuning.</li>
+      <li>A signal you leave out grants nothing and restricts nothing. Omission is not a
+        <code>no</code>.</li>
+      <li>It blocks no request. A page with <code>ai-train=no</code> still fetches, so we report
+        the crawl as allowed and flag the declined use beside it.</li>
+      <li>A <code>no</code> is an express reservation of rights under Article 4 of EU Directive
+        2019/790. It is aimed at people and courts rather than at fetch logic.</li>
+      <li>Cloudflare published it in October 2025 and applies it to managed
+        <code>robots.txt</code> across its network, so a site can be carrying one it never
+        typed.</li>
+      <li>No lab has published a policy of honouring it. We report it, and score it as neither a
+        win nor a failure.</li>
+    </ul>
+    <p class="learn__note">
+      Sources:
+      <a href="https://contentsignals.org/" rel="noopener">contentsignals.org</a>,
+      the IETF draft
+      <a href="https://datatracker.ietf.org/doc/draft-romm-aipref-contentsignals/" rel="noopener">draft-romm-aipref-contentsignals</a>,
+      and the policy text served in
+      <a href="https://developers.cloudflare.com/robots.txt" rel="noopener">developers.cloudflare.com/robots.txt</a>.
+    </p>
+
     <h3 id="reachable">Allowed and reachable are different facts</h3>
     <ul class="learn__facts">
       <li><code>robots.txt</code> is a request. Your CDN, WAF or bot rule is the enforcement point.</li>

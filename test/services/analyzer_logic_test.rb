@@ -178,6 +178,73 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
     assert_empty declared("")
   end
 
+  # --- content signals ----------------------------------------------------------------------------
+  #
+  # `Content-Signal:` says what may be DONE with a page; Disallow says who may fetch it. The two
+  # answers can disagree, and a site that permits the crawl while declining training is the case
+  # that used to come back as a plain green tick.
+
+  def signal(robots) = Analyzer::ContentSignal.parse(robots)
+
+  # The real thing, byte for byte, from developers.cloudflare.com/robots.txt.
+  test "a Content-Signal line is read into its three signals" do
+    s = signal(<<~ROBOTS)
+      User-agent: *
+      Content-Signal: ai-train=yes, search=yes, ai-input=yes
+
+      Allow: /
+    ROBOTS
+
+    assert_predicate s, :present?
+    assert_equal %w[search ai-input ai-train], s.granted
+    assert_empty s.declined
+  end
+
+  # The whole point of the check: fetching is permitted and training is refused.
+  test "a declined signal is reported without touching the others" do
+    s = signal("User-agent: *\nContent-Signal: search=yes, ai-train=no\nAllow: /\n")
+
+    assert_equal [ "ai-train" ], s.declined
+    assert_equal [ "search" ], s.granted
+  end
+
+  # The policy text is explicit: a use the operator did not name is neither granted nor restricted.
+  # Reading an omission as a refusal would invent a restriction nobody wrote.
+  test "an omitted signal is neither granted nor declined" do
+    s = signal("User-agent: *\nContent-Signal: search=yes\n")
+
+    assert_equal [ "search" ], s.granted
+    assert_empty s.declined
+  end
+
+  # Cloudflare's own two deployments put the line in different places, so grouping is not resolved.
+  # Comments carry the policy text in these files and must not be parsed as declarations.
+  test "every Content-Signal line counts, and commented ones do not" do
+    s = signal(<<~ROBOTS)
+      # Content-Signal: ai-train=no  <- explanatory text, not a declaration
+      User-agent: CCBot
+      content-signal: ai-train=no
+      User-agent: *
+      Content-Signal: search=yes
+    ROBOTS
+
+    assert_equal [ "ai-train" ], s.declined
+    assert_equal [ "search" ], s.granted
+  end
+
+  test "a robots.txt with no Content-Signal line declares nothing" do
+    refute_predicate signal("User-agent: *\nDisallow: /private\n"), :present?
+    refute_predicate signal(""), :present?
+  end
+
+  # Junk in the line is dropped rather than reported as a signal we do not recognise.
+  test "unknown names and values are ignored" do
+    s = signal("Content-Signal: ai-train=maybe, ai-slurp=no, search=YES\n")
+
+    assert_equal [ "search" ], s.granted
+    assert_empty s.declined
+  end
+
   test "the searched phrase is always a literal substring of the passage" do
     [ "res.status = function status(code) { if (code < 100) { throw new RangeError(\'Status code must be an integer.\') } }",
       "class Array # An array is blank if it\'s empty: # # @return [true, false] alias_method :blank?, :empty?",
