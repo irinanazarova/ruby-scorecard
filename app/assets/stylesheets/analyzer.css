@@ -62,6 +62,12 @@
 
 /* --- input ------------------------------------------------------------------------------------ */
 .probe-hero { padding: 2.5rem 0 1rem; }
+
+/* The address, for a room that is going to type it. Monospace and letter-spaced so it survives a
+   projector, and muted so it reads as a caption above the headline rather than competing with it. */
+.probe-hero__url { font-family: var(--font-mono, monospace); font-size: .85rem;
+  letter-spacing: .04em; color: var(--text-soft); margin: 0 0 .5rem; }
+
 .probe-hero h1 { font-family: var(--font-grotesk); font-weight: 720;
   font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.1; margin: 0 0 .75rem; letter-spacing: -.02em; }
 .probe-hero__lead { max-width: var(--measure, 68ch); font-size: 1.05rem; color: var(--text-soft); }
@@ -131,10 +137,17 @@
 .examples { margin-top: 2.5rem; }
 .examples h2 { font-size: 1.1rem; margin-bottom: .25rem; }
 .examples .note { color: var(--text-soft); font-size: .9rem; margin-top: 0; }
-.examples__list { list-style: none; padding: 0; display: grid; gap: .75rem; }
-.examples__list li { display: flex; flex-direction: column; gap: .35rem;
-  border: 1px solid var(--line); border-radius: var(--radius, 10px); padding: .8rem 1rem;
+.examples__list { list-style: none; padding: 0; display: grid; gap: .5rem; }
+
+/* One row per example since the notes came off: pair on the left, the two controls on the right.
+   Grid rather than flex-wrap, which gave every row a different height depending on how long its
+   URLs happened to be. The pair column wraps INSIDE itself (hence min-width: 0, or a long URL
+   refuses to wrap and pushes the buttons off), so the controls stay in one place down the list. */
+.examples__list li { display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center; gap: .5rem 1rem;
+  border: 1px solid var(--line); border-radius: var(--radius, 10px); padding: .7rem 1rem;
   background: var(--surface); }
+@media (max-width: 46rem) { .examples__list li { grid-template-columns: 1fr; } }
 
 /* Both halves of the pair are shown before anything runs, which is the point of the redesign: the
    tool no longer works one out from the other, so the demo should never look like it did. */
@@ -144,8 +157,7 @@
   background: var(--code-bg); border-radius: 4px; padding: .1rem .4rem; color: var(--text-soft); }
 .example__docs::before { content: "docs "; opacity: .6; }
 .example__repo::before { content: "repo "; opacity: .6; }
-.example__note { font-size: .88rem; color: var(--text-soft); margin: 0; }
-.example__go { display: flex; gap: .8rem; align-items: center; flex-wrap: wrap; }
+.example__go { display: flex; gap: .8rem; align-items: center; justify-content: flex-end; }
 .example__go form { display: inline; }
 .examples__btn { background: var(--accent); color: #fff; border: 0; border-radius: 999px;
   padding: .3rem .9rem; font: inherit; font-size: .85rem; font-weight: 600; cursor: pointer; }

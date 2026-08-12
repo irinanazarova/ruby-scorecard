@@ -1,6 +1,9 @@
 <% content_for :title, "Can agents find, read and recall your product?" %>
 
 <section class="probe-hero" data-controller="prefill">
+  <%# Shown for the demo: the room needs the address to type, and reading it off a slide is easier
+      than reading it out of a browser chrome that is cropped or zoomed on the projector. %>
+  <p class="probe-hero__url">ruby.evilmartians.com/test</p>
   <h1>Can agents find, read and recall your product?</h1>
   <p class="probe-hero__lead">
     Two questions, measured separately. Can an agent discover your product, read it and suggest it
@@ -47,7 +50,14 @@
         Boilerplate copied across many repos is the case our own study found most likely to be
         memorized, so this is the field to reach for when you want to know whether a specific
         paragraph is already inside the models. %>
-    <details class="probe-form__paste" <%= "open" if @form.passage.present? || @form.errors[:passage].any? %>>
+    <%# tag.details rather than a literal details tag with the attribute interpolated: an ERB output
+        sitting in attribute position parses ambiguously. Quoting it instead would not work either,
+        since an empty open attribute is still a present boolean one and would open the box always.
+
+        No ERB delimiters in this text. They do not nest, so one here ends the comment early and the
+        rest becomes markup, which is the second time that has broken a file in this directory. %>
+    <%= tag.details class: "probe-form__paste",
+                    open: @form.passage.present? || @form.errors[:passage].any? do %>
       <summary>Or check a paragraph directly</summary>
       <div class="probe-form__field">
         <div class="probe-form__labelrow">
@@ -64,7 +74,7 @@
         case most likely to fire.</span>
         <%= render "analyses/field_error", messages: @form.errors[:passage] %>
       </div>
-    </details>
+    <% end %>
 
     <div class="probe-form__submit">
       <%= f.submit "Analyze", data: { word_count_target: "submit" } %>
@@ -92,9 +102,8 @@
   <section class="examples">
     <h2>Or start with one of these</h2>
     <p class="note">
-      <%= @examples.size %> real products with measured results, each one a docs site next to the
-      repo its team would name. Every note below states what these actually produced. They are free
-      to run and never use up a check.
+      <%= @examples.size %> real products, each one a docs site next to the repo its team would
+      name. They are free to run and never use up a check.
     </p>
     <ul class="examples__list">
       <% @examples.each do |example| %>
@@ -104,7 +113,6 @@
             <code class="example__docs"><%= example[:docs].sub(%r{\Ahttps?://}, "") %></code>
             <code class="example__repo"><%= example[:repo] %></code>
           </div>
-          <p class="example__note"><%= example[:note] %></p>
           <div class="example__go">
             <%= button_to "Run it", analyses_path,
                   params: { docs_url: example[:docs], repo: example[:repo] }, class: "examples__btn" %>

@@ -15,6 +15,10 @@ module Analyzer
   # yields 39 words even via its markdown twin, so the probe correctly refuses to test it. Pick
   # pages with real prose or the demo's best moment never runs.
   #
+  # The notes are no longer rendered on /test: the list is a demo control surface and the room reads
+  # the results off the run, not off the form. They stay here as the record of what each pair
+  # actually produced, and a test keeps them present.
+  #
   # Every note states a measured result that RE-MEASURES THE SAME. That rules out claims about
   # recall on a live page, which is the one thing here that does not reproduce. Measured on the same
   # passages, byte for byte, from a laptop and from the Fly machine an hour apart,
