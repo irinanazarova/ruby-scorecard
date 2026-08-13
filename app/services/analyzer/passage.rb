@@ -149,8 +149,11 @@ module Analyzer
       # rendered in the browser and is absent from the source. CCBot receives that same 25 KB, so
       # this is not a limit of our probe. It is the finding: a crawler cannot read the page either,
       # and text a crawler never sees cannot reach a web corpus.
+      # Measured against the PASTED floor, not against MIN_WORDS. A page carrying 150 words of real
+      # sentences inside 74 KB of HTML is a short page, and calling it client-rendered told
+      # lefthook.dev its text was absent from its own source when the text was right there.
       words = text.split.length
-      if words < MIN_WORDS && res[:body].to_s.bytesize >= CLIENT_RENDERED_BYTES
+      if words < MIN_PASTED_WORDS && res[:body].to_s.bytesize >= CLIENT_RENDERED_BYTES
         return [ Result.new(ok: false, source_label: url, total_words: words,
                            error: "This page returned #{(res[:body].to_s.bytesize / 1024.0).round} KB " \
                                   "of HTML but only #{words} words of prose: the text is rendered in " \
@@ -193,16 +196,50 @@ module Analyzer
                                  "read it.")
       end
 
-      if words.length < MIN_WORDS
-        return Result.new(ok: false, source_label: label, total_words: words.length,
-                          error: "Only #{words.length} words of prose here; the probe needs #{MIN_WORDS}. " \
-                                 "Short or code-heavy pages cannot be tested this way.")
-      end
+      return short_span(words, label, prose:) if words.length < MIN_WORDS
 
       offset = [ 200, words.length - SEED_WORDS - TRUTH_WORDS - 10 ].min
       Result.new(ok: true, source_label: label, total_words: words.length, offset: offset,
                  prefix: words[offset, SEED_WORDS].join(" "),
                  truth: words[offset + SEED_WORDS, TRUTH_WORDS].join(" "))
+    end
+
+    # A page too short for a full 55/60 window, sized to what is actually there.
+    #
+    # Refusing these was a cliff, and pages land on the wrong side of it by a hair:
+    # lefthook.dev/configuration/ carries 150 words of ordinary documentation prose against a
+    # threshold of 155, and the answer to "is my page in the models" came back as "not asked". Five
+    # words is not the difference between a testable page and an untestable one.
+    #
+    # The floor is the one the pasted-paragraph path already uses, 30 shown and 20 compared, and it
+    # is a real floor rather than a softer version of the same cliff: below it the longest possible
+    # run sits at the STRONG_RUN bar, so the probe could only ever answer "no".
+    #
+    # Centred rather than started at word 0, which is the short-page version of taking a
+    # mid-document span. There is no room to skip 200 words, but there is room not to open on the
+    # first line, which on a docs page is a heading that repeats the title.
+    def self.short_span(words, label, prose: true)
+      if words.length < MIN_PASTED_WORDS
+        return Result.new(ok: false, source_label: label, total_words: words.length,
+                          error: "Only #{words.length} words of prose here; the probe needs " \
+                                 "#{MIN_PASTED_WORDS}. Short or code-heavy pages cannot be tested " \
+                                 "this way.")
+      end
+
+      seed  = [ SEED_WORDS, words.length - MIN_TRUTH ].min
+      truth = [ words.length - seed, TRUTH_WORDS ].min
+      offset = [ (words.length - seed - truth) / 2, 0 ].max
+      span = words[offset, seed + truth]
+
+      if prose && !prose?(span)
+        return Result.new(ok: false, source_label: label, total_words: words.length,
+                          error: "No prose found to test. This source is mostly markup, code or " \
+                                 "data, and a span of that measures nothing about whether a model " \
+                                 "read it.")
+      end
+
+      Result.new(ok: true, source_label: label, total_words: words.length, offset: offset,
+                 prefix: span.first(seed).join(" "), truth: span[seed, truth].join(" "))
     end
 
     def self.extract_html(html)

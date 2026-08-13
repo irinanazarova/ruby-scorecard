@@ -82,6 +82,63 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
     assert_match(/needs \d+/, s.error)
   end
 
+  # --- pages shorter than a full window ----------------------------------------------------------
+  #
+  # lefthook.dev/configuration/ carries 150 words of ordinary documentation prose. The threshold was
+  # 155, so the answer to "is my page in the models" came back as "not asked", which reads as a
+  # measurement and is not one. Five words is not the difference between a testable page and an
+  # untestable one, so the window is sized to the page instead.
+
+  test "a page just under the full window is probed with a smaller one" do
+    text = prose_words(150)
+    s = Analyzer::Passage.candidates(text, "t", count: 1).first
+
+    assert s.ok, "150 words of prose should be testable: #{s.error}"
+    assert_equal 150, s.total_words
+    assert_equal Analyzer::Passage::SEED_WORDS, s.prefix.split.size
+    assert_equal Analyzer::Passage::TRUTH_WORDS, s.truth.split.size
+  end
+
+  # Not word 0. There is no room to skip 200 words, but there is room not to open on the heading
+  # that repeats the page title.
+  test "a short span is centred rather than started at the first word" do
+    s = Analyzer::Passage.candidates(prose_words(150), "t", count: 1).first
+
+    assert_operator s.offset, :>, 0
+    words = prose_words(150).split
+    assert_equal words[s.offset, Analyzer::Passage::SEED_WORDS].join(" "), s.prefix
+    assert_equal words[s.offset + Analyzer::Passage::SEED_WORDS, Analyzer::Passage::TRUTH_WORDS].join(" "),
+                 s.truth, "truth must start exactly where the prefix ends"
+  end
+
+  # The floor is a floor, not a softer cliff: below it the longest possible run sits at the
+  # STRONG_RUN bar, so the probe could only ever answer "no".
+  test "a page below the pasted floor is still refused" do
+    s = Analyzer::Passage.candidates(prose_words(40), "t", count: 1).first
+
+    refute s.ok
+    assert_match(/needs #{Analyzer::Passage::MIN_PASTED_WORDS}/, s.error)
+  end
+
+  # At the floor exactly, the window shrinks to the same 30/20 the pasted path uses.
+  test "a page at the floor is probed with the smallest useful window" do
+    s = Analyzer::Passage.candidates(prose_words(Analyzer::Passage::MIN_PASTED_WORDS), "t", count: 1).first
+
+    assert s.ok, s.error
+    assert_operator s.prefix.split.size, :>=, Analyzer::Passage::MIN_SEED
+    assert_equal Analyzer::Passage::MIN_TRUTH, s.truth.split.size
+  end
+
+  # A short page still has to be prose. Shrinking the window must not turn the prose gate off, or
+  # every 60-word nav column becomes a measurement.
+  test "a short span that is not prose is still refused" do
+    s = Analyzer::Passage.candidates(([ "Docs API Pricing Login Signup Blog Careers Status" ] * 8).join(" "),
+                                     "t", count: 1).first
+
+    refute s.ok
+    assert_match(/prose/i, s.error)
+  end
+
   # --- what counts as prose ---------------------------------------------------------------------
   #
   # These four are the spans that actually got through the old wordlike-ratio check and produced
@@ -554,4 +611,8 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
                "reaches a training corpus at all."
     ([ sentence ] * 60).join(" ")
   end
+
+  # Real sentences cut to an exact length, for the short-page cases. Sliced from prose_text rather
+  # than built from word1..wordN so it passes the prose gate for the same reason a docs page does.
+  def prose_words(count) = prose_text.split.first(count).join(" ")
 end
