@@ -116,7 +116,8 @@ end.map { |r| "<section class=\"entry\">#{r}" }.join
 html = <<~HTML
   <!doctype html><html lang="en"><head><meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Blog opening rewrites &mdash; editorial review</title><style>#{css}#{SITE_NAV_CSS}</style></head>
+  <title>Blog opening rewrites &mdash; editorial review</title><style>#{css}#{SITE_NAV_CSS}</style>
+  #{SITE_ANALYTICS}</head>
   <body>
   #{site_nav}
   <main class="wrap">

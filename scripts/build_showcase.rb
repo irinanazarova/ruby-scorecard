@@ -162,7 +162,8 @@ html = <<~HTML
   <!doctype html><html lang="en"><head><meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Rewriting real posts to pass the training-data filter</title>
-  <style>#{css}#{SITE_NAV_CSS}</style></head><body>
+  <style>#{css}#{SITE_NAV_CSS}</style>
+  #{SITE_ANALYTICS}</head><body>
   #{site_nav}
   <main class="wrap">
   #{intro}

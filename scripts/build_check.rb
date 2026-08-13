@@ -27,6 +27,7 @@ page = <<~HTML
     <link rel="icon" sizes="32x32" href="favicon.ico">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <link rel="stylesheet" href="assets/styles.css#{asset_q('assets/styles.css')}">
+    #{SITE_ANALYTICS}
     <style>
       .check-wrap { max-width: 46rem; margin: 0 auto; padding: clamp(2rem, 6vw, 4rem) var(--pad) 5rem; }
       .check-wrap .kicker { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .14em;

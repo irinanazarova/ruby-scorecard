@@ -31,6 +31,26 @@
       <meta name="anycable-token" content="<%= anycable_token %>">
     <% end %>
     <%= javascript_importmap_tags %>
+
+    <%# Analytics, last in the head so nothing above it waits: the loader is async and the shim it
+        needs is two lines. scripts/site_nav.rb carries the same snippet for the generated pages;
+        keep the two in step.
+
+        Production only. The static pages rely on Plausible ignoring localhost, which is fine for
+        a file that is built once and shipped as-is, but this layout renders on every dev reload and
+        in every integration test, and neither should reach out to a third party at all.
+
+        No cookies and no personal data, so there is nothing here to put behind a consent banner.
+        Analyses are POSTed rather than linked, so no URL anyone types reaches these stats: the
+        recorded paths are /test and /analyses/<id>, never a docs URL. %>
+    <% if Rails.env.production? %>
+      <!-- Privacy-friendly analytics by Plausible -->
+      <script async src="https://plausible.io/js/pa-E8DFByDC1ezF67slDapJk.js"></script>
+      <script>
+        window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+        plausible.init()
+      </script>
+    <% end %>
   </head>
 
   <body class="analyzer">

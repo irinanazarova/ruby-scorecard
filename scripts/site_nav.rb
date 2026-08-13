@@ -11,6 +11,27 @@
 # does not shift or restyle as a visitor crosses between the generated pages and the app. Keep the
 # two in step: app/views/layouts/application.html.erb carries the other copy.
 #
+# Analytics, on every generated page.
+#
+# Goes in the <head> of each generator's template rather than into the pages themselves, so a page
+# added later gets it by writing one interpolation instead of by remembering. The Rails layout
+# carries the same snippet for /test, /learn and the results pages; keep the two in step.
+#
+# Both tags are needed and the order matters: the async loader may arrive at any time, so the queue
+# shim below has to exist before anything calls plausible(). The shim is what makes a call made
+# while the script is still in flight replay rather than throw.
+#
+# No cookies and no personal data, which is the whole reason for choosing this one. It is also why
+# there is no consent banner to go with it: there is nothing here to consent to.
+SITE_ANALYTICS = <<~HTML
+  <!-- Privacy-friendly analytics by Plausible -->
+  <script async src="https://plausible.io/js/pa-E8DFByDC1ezF67slDapJk.js"></script>
+  <script>
+    window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+    plausible.init()
+  </script>
+HTML
+
 # The brand is the home link, which is why "/" is not repeated in LINKS.
 SITE_NAV_LINKS = [
   [ "/learn", "Learn" ],

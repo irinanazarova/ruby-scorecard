@@ -138,6 +138,7 @@ html = <<~HTML
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>#{title}</title>
     <style>#{css}#{SITE_NAV_CSS}</style>
+    #{SITE_ANALYTICS}
   </head>
   <body>
     #{site_nav}

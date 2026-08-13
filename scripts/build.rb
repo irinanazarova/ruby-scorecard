@@ -565,7 +565,7 @@ PAGE = <<HTML
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="assets/styles.css#{asset_q("assets/styles.css")}">
 <script type="module" src="assets/app.js#{asset_q("assets/app.js")}"></script>
-</head>
+#{SITE_ANALYTICS}</head>
 <body>
 #{site_nav(toggle: true)}
 <header class="hero">

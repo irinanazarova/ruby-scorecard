@@ -238,7 +238,7 @@ PAGE = <<HTML
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="assets/styles.css#{asset_q("assets/styles.css")}">
 <script type="module" src="assets/app.js#{asset_q("assets/app.js")}"></script>
-<style>
+#{SITE_ANALYTICS}<style>
   td.lft, th.lft { text-align: left; }
   td.rank, th.rank { text-align: right; font-family: var(--font-mono); color: var(--text-soft); font-size: .82em; width: 1%; white-space: nowrap; }
   td.commits, th.commits { text-align: right; font-family: var(--font-mono); font-weight: 700; white-space: nowrap; }
