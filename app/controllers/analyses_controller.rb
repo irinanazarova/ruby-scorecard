@@ -54,7 +54,8 @@ class AnalysesController < ApplicationController
     end
 
     analysis = Analyses::StartRun.call(target: @form.target, free: free_run?, user: current_user,
-                                       session_token: session_token, ip_hash: ip_hash)
+                                       session_token: session_token, ip_hash: ip_hash,
+                                       refresh: refresh?)
     redirect_to analysis
   end
 
@@ -86,8 +87,14 @@ class AnalysesController < ApplicationController
   def free_run?
     return @free_run if defined?(@free_run)
 
-    @free_run = Analyzer::RunCost.free?(form.target)
+    @free_run = Analyzer::RunCost.free?(form.target, refresh: refresh?)
   end
+
+  # "Measure it again, ignoring what is cached." A cached result is the right default (it is free and
+  # instant) and the wrong answer when the cache is older than a fix, which is exactly what a stale
+  # "not asked" looks like from the outside. This makes the paid path reachable without inventing a
+  # different URL, and every guard above treats it as paid, because it is.
+  def refresh? = ActiveModel::Type::Boolean.new.cast(params[:refresh]).present?
 
   # Two named fields now, and the form still accepts a single `input` so an old bookmark or a linked
   # example keeps working. Params stay FLAT (docs_url, not analysis_form[docs_url]) because linked

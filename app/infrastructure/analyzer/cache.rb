@@ -55,6 +55,15 @@ module Analyzer
         Rails.cache.exist?(key_for(kind, target))
       end
 
+      # Store a value whose TTL depends on what the value turned out to be, which `fetch` cannot do:
+      # it commits to an expiry before the block has run. The control probes need it, because a set
+      # that passed is good for a day and a set that failed must not be.
+      def write(kind, target, value, ttl: DEFAULT_TTL)
+        payload = { result: value, cached_at: Time.current, took_ms: nil }
+        Rails.cache.write(key_for(kind, target), payload, expires_in: ttl)
+        payload.merge(cache_hit: false, key: key_for(kind, target))
+      end
+
       # What is already warm for a target, so the UI can show "this will be instant" before you run.
       def status(kinds, target)
         kinds.index_with { |k| warm?(k, target) }

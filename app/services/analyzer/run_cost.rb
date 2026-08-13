@@ -15,8 +15,13 @@ module Analyzer
   # caches under the REPO, so it never once returned true and cached re-runs kept consuming the
   # allowance they were meant to be exempt from. Keyed here the way Run keys it, in one place.
   class RunCost
-    def self.free?(target)
+    # `refresh` is the "discard the cache and measure it again" button, and it is never free, however
+    # warm the target is and whether or not it is a listed example. The exemptions above exist
+    # because a replayed run makes no model calls and an example is the tour; a refresh makes every
+    # call for real. Left free, the examples would be an unmetered button for spending our money.
+    def self.free?(target, refresh: false)
       return false unless target&.valid?
+      return false if refresh
       return true if Analyzer::Example.match?(target.url, target.repo)
 
       Cache.warm?(:memorization, target.cache_key)

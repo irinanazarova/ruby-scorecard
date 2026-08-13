@@ -21,3 +21,23 @@
     Something failed. Partial results are shown below.
   <% end %>
 </p>
+
+<%# Measure it again from scratch.
+    A cached result is the right default and the wrong answer whenever the cache is older than a fix
+    to the probe: what you see then is a stale refusal wearing the clothes of a measurement, and no
+    amount of reloading changes it, because the row stores what it stored.
+    Offered only on a finished run, and only for a target we can rebuild. It spends real money every
+    time, so it says so on the button rather than in a tooltip.
+
+    A div, never a p. button_to renders a form, a form is not phrasing content, and the browser
+    closes an open p when it meets one: the button and its explanation were hoisted out as siblings
+    and the paragraph rendered empty. Same trap as the quota line above the examples. %>
+<% if analysis.status.in?(%w[done failed]) %>
+  <div class="status__again">
+    <%= button_to "Re-run without cache", analyses_path, class: "analyzer__linkbtn",
+          params: { docs_url: analysis.docs_url, repo: analysis.repo,
+                    passage: analysis.passage, refresh: "1" } %>
+    <small>Discards every cached check for this pair and measures it again. Costs
+    <%= signed_in? ? "your budget" : "one of your free checks" %>, cached or not.</small>
+  </div>
+<% end %>

@@ -82,6 +82,63 @@ class AnalyzerLogicTest < ActiveSupport::TestCase
     assert_match(/needs \d+/, s.error)
   end
 
+  # --- the control verdict -----------------------------------------------------------------------
+  #
+  # One predicate, asked by two callers for different reasons: the view draws a warning and the run
+  # decides whether to measure the controls again. Two copies of this drifting apart would show a
+  # grid a warning it had already decided to fix, or fix one it was not warning about.
+
+  test "controls pass when the MIT text fires on every model and the invented text on none" do
+    assert_equal true, Analyzer::Memorization.controls_ok?(
+      [ { kind: "control+", run: 28 }, { kind: "control-", run: 1 },
+       { kind: "control+", run: 31 }, { kind: "control-", run: 4 } ]
+    )
+  end
+
+  # The exact shape of the 12 Aug failure: two models fine, one returning three words for MIT.
+  test "one model failing the positive control fails the set" do
+    assert_equal false, Analyzer::Memorization.controls_ok?(
+      [ { kind: "control+", run: 28 }, { kind: "control-", run: 1 },
+       { kind: "control+", run: 3 }, { kind: "control-", run: 1 } ]
+    )
+  end
+
+  test "a model reproducing the invented text fails the set" do
+    assert_equal false, Analyzer::Memorization.controls_ok?(
+      [ { kind: "control+", run: 28 }, { kind: "control-", run: 20 } ]
+    )
+  end
+
+  # Nothing to judge is not a failure. An empty set means the controls have not answered yet, and
+  # drawing "nothing here is interpretable" over a grid still filling in would be a lie about it.
+  test "an empty control set is unknown rather than failed" do
+    assert_nil Analyzer::Memorization.controls_ok?([])
+    assert_nil Analyzer::Memorization.controls_ok?(nil)
+  end
+
+  # Read back from the cache as JSON, which is how the stored payload actually arrives.
+  test "the control verdict reads string keys too" do
+    assert_equal true, Analyzer::Memorization.controls_ok?(
+      [ { "kind" => "control+", "run" => 28 }, { "kind" => "control-", "run" => 1 } ]
+    )
+  end
+
+  # A set that failed must not be held for a day: one bad minute stamped every grid drawn that day
+  # "nothing here is interpretable", including runs whose own numbers were fine.
+  test "a failed control set is cached for minutes and a passing one for a day" do
+    assert_operator Analyzer::Run::CONTROL_RETRY_TTL, :<, Analyzer::Run::CONTROL_TTL
+    assert_operator Analyzer::Run::CONTROL_RETRY_TTL, :<=, 1.hour
+  end
+
+  # Cache.write exists because fetch commits to an expiry before the block has run, and the control
+  # TTL depends on what the block returned.
+  test "cache write stores a value with the ttl it was given" do
+    Analyzer::Cache.write(:controls, "ttl-probe", [ { kind: "control+", run: 28 } ], ttl: 10.minutes)
+
+    assert Analyzer::Cache.warm?(:controls, "ttl-probe")
+    assert_equal 28, Analyzer::Cache.fetch(:controls, "ttl-probe") { [] }[:result].first[:run]
+  end
+
   # --- pages shorter than a full window ----------------------------------------------------------
   #
   # lefthook.dev/configuration/ carries 150 words of ordinary documentation prose. The threshold was

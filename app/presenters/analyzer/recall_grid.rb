@@ -93,14 +93,7 @@ module Analyzer
 
     # Did the controls do what they must? Reported rather than assumed, because a provider change
     # that breaks the prompt shows up here first and silently zeroes the whole grid.
-    def controls_ok?
-      positives = controls.select { |c| c[:kind] == "control+" }
-      negatives = controls.select { |c| c[:kind] == "control-" }
-      return nil if positives.empty?
-
-      positives.all? { |c| c[:run].to_i >= Memorization::STRONG_RUN } &&
-        negatives.none? { |c| c[:run].to_i >= Memorization::STRONG_RUN }
-    end
+    def controls_ok? = Memorization.controls_ok?(controls)
 
     private
 

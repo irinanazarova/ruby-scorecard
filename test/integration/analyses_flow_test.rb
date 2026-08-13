@@ -332,6 +332,57 @@ class AnalysesFlowTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # --- re-run without cache ----------------------------------------------------------------------
+  #
+  # The escape hatch for a cache that is older than a fix to the probe. Every exemption above has to
+  # stop applying to it, or the examples become an unmetered button for spending our money: they are
+  # free BECAUSE they replay, and a refresh is the one thing that does not.
+
+  test "a refresh of a warm pair is refused once the allowance is spent" do
+    docs = "https://example.com/docs/warm-refresh"
+    warm_every_check(docs, "acme/warm-refresh")
+    AnalyzerConfig.free_analyses_per_session.times do |i|
+      post "/analyses", params: { input: "https://example.com/docs/burn-refresh-#{i}" }
+    end
+
+    post "/analyses", params: { docs_url: docs, repo: "acme/warm-refresh" }
+    assert_redirected_to analysis_path(Analysis.last), "the cached run is still free"
+
+    post "/analyses", params: { docs_url: docs, repo: "acme/warm-refresh", refresh: "1" }
+    assert_redirected_to test_path, "a refresh spends money, so it needs an allowance"
+    assert_match(/free checks/i, flash[:alert])
+  end
+
+  test "a refresh of a listed example is not free either" do
+    example = Analyzer::Example.all.first
+    AnalyzerConfig.free_analyses_per_session.times do |i|
+      post "/analyses", params: { input: "https://example.com/docs/burn-example-#{i}" }
+    end
+
+    post "/analyses", params: { docs_url: example[:docs], repo: example[:repo] }
+    assert_redirected_to analysis_path(Analysis.last), "the tour stays free"
+
+    post "/analyses", params: { docs_url: example[:docs], repo: example[:repo], refresh: "1" }
+    assert_redirected_to test_path, "a refreshed example makes every model call for real"
+  end
+
+  # The flag has to reach the run, or the button is a lie: it would spend an allowance and then
+  # replay the same cached answer it was clicked to get rid of.
+  test "a refresh is recorded as a paid run and reaches the job" do
+    docs = "https://example.com/docs/refresh-reaches"
+    warm_every_check(docs, "acme/refresh-reaches")
+
+    post "/analyses", params: { docs_url: docs, repo: "acme/refresh-reaches", refresh: "1" }
+    refute Analysis.last.from_cache, "a refresh is never recorded as a cached run"
+
+    # Read off the adapter rather than through assert_enqueued_with: what matters is the keyword
+    # ARRIVING, and a matcher that passes on the job class alone would pass without it.
+    job = ActiveJob::Base.queue_adapter.enqueued_jobs.last
+    assert_equal "AnalyzeJob", job["job_class"]
+    assert_equal true, job["arguments"].last.except("_aj_ruby2_keywords")["refresh"],
+                 "the job must be told to discard the cache"
+  end
+
   test "a pair whose probe is already cached does not consume the allowance" do
     docs = "https://example.com/docs/already-probed"
     pair = Analyzer::Target.new(docs_url: docs, repo: "acme/probed")

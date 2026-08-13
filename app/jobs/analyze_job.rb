@@ -21,12 +21,15 @@ class AnalyzeJob < ApplicationJob
     "analysis_actions" => "analyses/actions"
   }.freeze
 
-  def perform(analysis_id)
+  # refresh: discard whatever is cached for this target and measure it again. Always a paid run, and
+  # the controller charges for it before we get here.
+  def perform(analysis_id, refresh: false)
     analysis = Analysis.find(analysis_id)
     analysis.update!(status: "running")
     broadcast_status(analysis)
 
-    run = Analyzer::Run.new(target_for(analysis), models: Analyzer::Memorization.available_models)
+    run = Analyzer::Run.new(target_for(analysis), refresh: refresh,
+                            models: Analyzer::Memorization.available_models)
     results = {}
     spent = 0
 

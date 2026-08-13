@@ -14,12 +14,13 @@ module Analyses
   class StartRun
     def self.call(...) = new(...).call
 
-    def initialize(target:, free:, session_token:, user: nil, ip_hash: nil)
+    def initialize(target:, free:, session_token:, user: nil, ip_hash: nil, refresh: false)
       @target = target
       @free = free
       @session_token = session_token
       @user = user
       @ip_hash = ip_hash
+      @refresh = refresh
     end
 
     def call
@@ -28,12 +29,12 @@ module Analyses
         input: target.label, docs_url: target.url, repo: target.repo, passage: target.passage,
         kind: target.kind.to_s, status: "pending", ip_hash: ip_hash, from_cache: free
       )
-      AnalyzeJob.perform_later(analysis.id)
+      AnalyzeJob.perform_later(analysis.id, refresh: refresh)
       analysis
     end
 
     private
 
-    attr_reader :target, :free, :session_token, :user, :ip_hash
+    attr_reader :target, :free, :session_token, :user, :ip_hash, :refresh
   end
 end

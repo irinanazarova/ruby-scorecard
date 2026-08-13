@@ -162,6 +162,22 @@ module Analyzer
       out
     end
 
+    # Did the probe do what it must? The MIT text has to fire on every model and the invented
+    # passage on none. When this is false nothing measured alongside it can be read, so it is the
+    # first thing anyone should ask about a grid.
+    #
+    # Lives here rather than in the presenter because two callers need the same answer for different
+    # reasons: the view draws a warning, and the run decides whether to measure them again.
+    # nil when there is nothing to judge, which is not the same as a failure.
+    def self.controls_ok?(controls)
+      positives = Array(controls).select { |c| (c[:kind] || c["kind"]) == "control+" }
+      negatives = Array(controls).select { |c| (c[:kind] || c["kind"]) == "control-" }
+      return nil if positives.empty?
+
+      positives.all? { |c| (c[:run] || c["run"]).to_i >= STRONG_RUN } &&
+        negatives.none? { |c| (c[:run] || c["run"]).to_i >= STRONG_RUN }
+    end
+
     private
 
     def split(text)

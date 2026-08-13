@@ -31,6 +31,12 @@ module Analyzer
     # fetches, a few seconds against a probe that already takes 60 to 140.
     FALLBACK_PAGES = 3
 
+    # Controls are byte-identical on every run, so a day of reuse costs nothing and saves the 35% of
+    # the bill they used to be. A FAILED set gets minutes instead: it is the one answer that must not
+    # be held, since it blanks the meaning of every grid drawn beside it.
+    CONTROL_TTL = 1.day
+    CONTROL_RETRY_TTL = 10.minutes
+
     attr_reader :target, :results
 
     def initialize(target, refresh: false, models: Memorization::MODELS.keys)
@@ -139,14 +145,32 @@ module Analyzer
       found.merge(source: best[:source], source_label: best[:source_label], run: best[:run])
     end
 
-    # Controls are byte-identical on every run, so paying for them per analysis is pure waste: they
-    # were 2.01c of a 5.77c analysis, 35% of the bill, to re-learn that MIT still fires. Cached
-    # globally per model set and refreshed daily, which is often enough to catch a provider change.
+    # The MIT text that must fire and the invented text that must not, cached globally per model set
+    # rather than paid for per analysis: they were 2.01c of a 5.77c run, 35% of the bill, to re-learn
+    # that MIT still fires.
     def controls
-      Cache.fetch(:controls, @models.sort.join("+"), ttl: 1.day) do
-        Memorization.new([], models: @models).controls
-      end[:result]
+      key = @models.sort.join("+")
+      set = Cache.fetch(:controls, key, ttl: CONTROL_TTL) { probe_controls }[:result]
+      return set if Memorization.controls_ok?(set) != false
+
+      # Measure them again, once, live.
+      #
+      # A failed control set says our probe misbehaved, not anything about the page being analysed,
+      # and a day-long TTL turns one bad minute into a day of grids stamped "nothing here is
+      # interpretable". That is what happened on 12 Aug: Gemini returned 3 words for the MIT text at
+      # 01:12 and 28 words for it the next morning, with every run in between carrying the warning.
+      #
+      # Once, not until it passes. A model that has genuinely stopped reproducing the MIT licence is
+      # a real finding and the warning is the correct output; retrying forever would spend money to
+      # keep asking a question already answered. A set that fails twice is cached briefly rather than
+      # for a day, so the next visitor re-tests rather than inheriting it.
+      fresh = probe_controls
+      Cache.write(:controls, key, fresh,
+                  ttl: Memorization.controls_ok?(fresh) == false ? CONTROL_RETRY_TTL : CONTROL_TTL)
+      fresh
     end
+
+    def probe_controls = Memorization.new([], models: @models).controls
 
     # Test both halves of what the visitor gave us, INTERLEAVED by span index.
     #
